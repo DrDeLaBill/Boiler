@@ -1,0 +1,18 @@
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+
+Boiler	KEYWORD1
+CommandsManager KEYWORD1
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+
+check_commands	KEYWORD2
+
+#######################################
+# Constants (LITERAL1)
+#######################################
+
+ID_MAX_SIZE	LITERAL1
