@@ -17,9 +17,10 @@ BoilerProfile::BoilerProfile() {
 
   this->user_target_temp_int = this->target_temp_int;
   this->user_boiler_mode = this->boiler_mode;
-  //##################################
-  if (this->user_boiler_mode == MODE_AIR || this->user_boiler_mode == MODE_PROFILE) {
-    set_ext_sensor();
+  
+  //TODO: extern
+  if (this->is_mode_air() || this->is_mode_profile()) {
+    this->temperature_sensor.set_ext_sensor();
   }
 }
 
@@ -72,25 +73,23 @@ void BoilerProfile::set_default_settings(){
   // Настройка текущей сессии
   this->user_target_temp_int = BoilerCfg.target_temp_int;
   this->user_boiler_mode = BoilerCfg.boiler_mode;
-  current_ssid = String(BoilerCfg.ssid);
-  current_password = String(BoilerCfg.password);
 
   // Сохранение настроек в EEPROM
   this->save_configuration();
 }
 
 void BoilerProfile::save_configuration() {
-  uint8_t *ptr = (uint8_t *)&BoilerCfg;
+  uint8_t *ptr = (uint8_t *)this->&boiler_configuration;
   bool all_correct = true;
-  for (uint8_t i = 0; i < sizeof(BoilerConfig) && all_correct; i++) {
+  for (uint8_t i = 0; i < sizeof(this->boiler_configuration) && all_correct; i++) {
     if (ptr[i] != EEPROM.read(i)) {
       all_correct = false;
     }
   }
 
   if (all_correct == false) {
-    ptr = (uint8_t *)&BoilerCfg;
-    for (uint8_t i = 0; i < sizeof(BoilerConfig); i++) {
+    ptr = (uint8_t *)this->&boiler_configuration;
+    for (uint8_t i = 0; i < sizeof(this->boiler_configuration); i++) {
       EEPROM.write(i, ptr[i]);
     }
     EEPROM.commit();
@@ -137,10 +136,10 @@ void BoilerProfile::set_boiler_mode(uint8_t target_mode){
   // установка режима работы
   this->boiler_configuration.boiler_mode = target_mode;
   this->user_boiler_mode = target_mode;
-  //##################################
-  if (this->user_boiler_mode == MODE_AIR || this->user_boiler_mode == MODE_PROFILE){
-    set_ext_sensor();
-  }
+  //TODO: extern
+//  if (this->user_boiler_mode == MODE_AIR || this->user_boiler_mode == MODE_PROFILE){
+//    radio_init(); //(set_ext_sensor)
+//  }
   this->save_configuration();
 }
 
@@ -160,7 +159,7 @@ void BoilerProfile::_start_eeprom() {
 
 void BoilerProfile::_serial_print_boiler_configuration() {
   // Read configuration from EEPROM
-  uint8_t *ptr = (uint8_t *)&this->boiler_configuration;
+  uint8_t *ptr = (uint8_t *)this->&boiler_configuration;
   for (uint8_t i = 0; i < sizeof(this->boiler_configuration); i++) {
     ptr[i] = EEPROM.read(i);
     Serial.print(ptr[i]);
@@ -191,6 +190,46 @@ String BoilerProfile::get_pass() {
 void BoilerProfile::set_wifi_settings(String ssid, String pass) {
   ssid.toCharArray(this->boiler_configuration.ssid, MAX_SIZE_SSID);
   pass.toCharArray(this->boiler_configuration.password, MAX_SIZE_PASS);
+}
+
+bool is_mode_air() {
+    return this->user_boiler_mode == MODE_AIR;
+}
+
+bool is_mode_water() {
+    return this->user_boiler_mode == MODE_WATER;
+}
+
+bool is_mode_profile() {
+    return this->user_boiler_mode == MODE_PROFILE;
+}
+
+void temperature_pid_regulating() {
+  this->temperature_sensor.pid_regulating();
+}
+
+void temperature_pid_off() {
+  this->temperature_sensor.pid_off();
+}
+
+bool is_radio_connected() {
+  return this->temperature_sensor.is_radio_connected();
+}
+
+uint8_t get_current_temperature() {
+  return this->temperature_sensor.get_current_temperature();
+}
+
+char *get_current_day(const char* fmt) {
+  return this->clock_get_time(fmt);
+}
+
+char *get_current_time(const char* fmt){
+  return this->clock_get_time(fmt);
+}
+
+void check_temperature() {
+  this->temperature_sensor.check_temp();
 }
 /*
    что здесь будет хранииться? Нам нужно понимать, если датчик температуры отваливается,

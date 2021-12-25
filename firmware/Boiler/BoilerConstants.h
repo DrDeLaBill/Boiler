@@ -1,7 +1,8 @@
 /*
  * Константы для всего проекта
  */
-
+#ifndef _BOILER_CONSTANTS_H
+#define _BOILER_CONSTANTS_H
 
 // Ошибки
 #define ERRORS_COUNT            7   // Изменить, если количество поменяется
@@ -43,3 +44,5 @@ const unsigned char heat[] = {
 const unsigned char inet[] = {
   0x28, 0x68, 0xe8, 0x28, 0x28, 0x28, 0x2e, 0x2c, 0x28
 };
+
+#endif

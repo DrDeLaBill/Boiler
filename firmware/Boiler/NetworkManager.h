@@ -53,6 +53,7 @@ class NetworkManager
     void set_wifi_settings(String ssid, String pass);
     String get_ssid();
     String get_pass();
+    bool is_wifi_connected();
 };
 
 #endif

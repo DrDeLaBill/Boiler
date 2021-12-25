@@ -10,5 +10,18 @@
 -Библиотека U8g2 модифицирована, необходимо закинуть её в libreries
 
 ##Пометки
+-network в BoilerProfile и Server (current_ssid)
+-display и pump в ErorService
+-BoilerProfile в CommandManager.h
+-set_ext_sensor в BoilerProfile
 -хранение ошибок в ОП
 -объяснение, как ользоваться командами
+-описание классов и докстринги для них:
+	-CommandsManager
+	
+	
+6
+9
+1.5
+2
+2

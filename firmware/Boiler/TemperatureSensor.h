@@ -103,6 +103,8 @@ class TemperatureSensor
     void pwm(uint32_t time_on);
     void pid_regulating();
     void set_ext_sensor();
+    bool is_radio_connected();
+    uint8_t get_current_temperature();
 };
 
 #endif

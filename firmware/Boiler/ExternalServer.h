@@ -25,6 +25,7 @@ class ExternalServer
     bool got_new_wifi_settings;
   public:
     ExternalServer();
-    send_settings_to_server(void);
-    check_new_settings(void);
+    void send_settings_to_server(void);
+    void check_new_settings(void);
+    bool is_connected_to_server();
 };

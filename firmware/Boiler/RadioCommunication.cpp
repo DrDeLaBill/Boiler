@@ -7,8 +7,10 @@ RadioCommunication::RadioCommunication() {
 
 void radio_init(){
   
-	if (!radio.begin()) Serial.println("radio init error"); // Инициализация модуля NRF24L01
-  else Serial.println("radio init ok");
+	if (!radio.begin()) 
+	  Serial.println("radio init error"); // Инициализация модуля NRF24L01
+  else 
+    Serial.println("radio init ok");
 	radio.setChannel(0x6f); 
 	radio.setDataRate(RF24_1MBPS); // Скорость обмена данными 1 Мбит/сек
 	radio.setPALevel(RF24_PA_HIGH);           //

@@ -303,3 +303,7 @@ void rotary_left() {
       break;
   }
 }
+
+bool is_button_holded(uint8_t work_mode) {
+  return check_encoder(work_mode) == BUTTON_HOLDED;
+}

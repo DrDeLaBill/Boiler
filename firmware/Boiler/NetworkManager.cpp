@@ -63,6 +63,10 @@ String NetworkManager::get_pass() {
   return this->current_pass;
 }
 
+bool is_wifi_connected() {
+  return WiFi.status() == WL_CONNECTED;
+}
+
 void NetworkManager::server_init(){}
 void NetworkManager::send_settings_to_server(void){}
 void NetworkManager::check_new_settings(void){}

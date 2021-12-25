@@ -42,6 +42,7 @@ class EncoderManager
     int32_t encoder_get_ticks();
     uint8_t check_encoder_button();
     uint8_t check_encoder(bool standby);
+    bool is_button_holded(uint8_t work_mode);
     void button_pressed();
     void rotary_right();
     void rotary_left();

@@ -10,7 +10,7 @@
 #include "stdint.h"
 #include "EEPROM.h"
 #include "ClockRTC.h"
-#include "temp.h"
+#include "TemperatureSensor.h"
 
 #define STANDBY                     false
 #define WORK                        true
@@ -58,6 +58,7 @@ class BoilerProfile
     uint8_t user_boiler_mode = 0;       // режим работы котла (в данной сессии)
     BoilerConfiguration boiler_configuration;
     ClockRTC clock_rtc;
+    TemperatureSensor temperature_sensor;
     
     void _start_eeprom();
     void _serial_print_boiler_configuration();
@@ -72,10 +73,20 @@ class BoilerProfile
     void set_default_settings();
     void set_settings_standby(bool state);
     void set_boiler_id(String boiler_id);
+    void temperature_pid_regulating();
+    void temperature_pid_off();
+    void check_temperature();
     String get_boiler_id();
     String get_ssid();
     String get_pass();
     void set_wifi_settings(String ssid, String pass);
+    bool is_mode_air();
+    bool is_mode_water();
+    bool is_mode_profile();
+    bool is_radio_connected();
+    uint8_t get_current_temperature();
+    char *get_current_day(const char* fmt);
+    char *get_current_time(const char* fmt);
 };
 
 #endif

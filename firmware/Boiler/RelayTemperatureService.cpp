@@ -69,3 +69,7 @@ uint8_t check_ssr_temp(){
     Serial.println("*C");
   }
 }
+
+bool is_heating_on() {
+  return digitalRead(SSR1_OUT_PIN);
+}

@@ -26,6 +26,7 @@ class RelayTemperature
     RelayTemperature();
     void ssr_temp_init();
     uint8_t check_ssr_temp();
+    bool is_heating_on();
 };
 
 #endif

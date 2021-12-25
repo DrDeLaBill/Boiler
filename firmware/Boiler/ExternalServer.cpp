@@ -336,3 +336,7 @@ void check_new_settings(void){
     }
   }
 }
+
+bool is_connected_to_server() {
+  return this->connected_to_server;
+}

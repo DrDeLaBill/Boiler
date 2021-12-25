@@ -29,9 +29,9 @@ extern uint8_t user_error;
 
 void temp_init() {
   ext_temp_init();
-  sensors.begin();
-  sensors.setWaitForConversion(false);
-  sensors.requestTemperatures();
+  this->sensors.begin();
+  this->sensors.setWaitForConversion(false);
+  this->sensors.requestTemperatures();
 }
 
 void set_ext_sensor(void){
@@ -227,4 +227,12 @@ uint8_t get_int_temp(float* pTemp) {
     }
   }
   return NO_TEMP;
+}
+
+bool is_radio_connected() {
+  return this->radio_connected();
+}
+
+uint8_t get_current_temperature() {
+  return this->current_temp;
 }
