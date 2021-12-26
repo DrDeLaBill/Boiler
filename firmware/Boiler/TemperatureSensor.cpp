@@ -1,13 +1,6 @@
 #include "TemperatureSensor.h"
 
 TemperatureSensor::TemperatureSensor() {
-//  this->kP_air = 7;
-//  this->kI_air = 0.5;
-//  this->kD_air = 0.3;
-//  this->kP_water = 7;
-//  this->kI_water = 0.5;
-//  this->kD_water = 0.3;
-//  this->dT = 1000;
   this->current_temp = 0;                      
   this->current_temp_water = 0;                   
   this->current_temp_air = 0;                    

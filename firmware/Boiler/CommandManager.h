@@ -6,7 +6,6 @@
 #define _COMMANDS_MANAGER_H_
 
 #include <Arduino.h>
-#include "BoilerProfile.h"
 
 class CommandsManager
 {
@@ -14,7 +13,6 @@ class CommandsManager
     String message_from_port;
     String command;
     String new_boiler_id;
-    BoilerProfile *boiler_profile;
     
     void _read_command();
     void _execute_command();

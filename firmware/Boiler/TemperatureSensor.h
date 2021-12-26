@@ -12,37 +12,37 @@
 #include <DallasTemperature.h>
 #include "GyverPID.h"
 //TODO: include
+#include "RadioSensor.h"
 #include "tprofile.h"
-#include "ext_temp.h"
 #include "errors.h"
 
-#define SSR1_OUT_PIN           4           // пин включения ТТ реле
-#define SSR2_OUT_PIN           16
-#define SSR3_OUT_PIN           17
+#define SSR1_OUT_PIN            4           // пин включения ТТ реле
+#define SSR2_OUT_PIN            16
+#define SSR3_OUT_PIN            17
 
-#define HEAT_LED_PIN           0
+#define HEAT_LED_PIN            0
 
-#define ONE_WIRE_BUS           27        // пин подключения датчика температуры ds18b20
+#define ONE_WIRE_BUS            27          // пин подключения датчика температуры ds18b20
 
-#define WATER_TEMP_MIN        10        // минимальная температура теплоносителя
-#define WATER_TEMP_MAX        60        // максимальная температура теплоносителя
-#define WATER_TEMP_LIM        85.0f        // аварийная температура теплоносителя - 85*
+#define WATER_TEMP_MIN          10          // минимальная температура теплоносителя
+#define WATER_TEMP_MAX          60          // максимальная температура теплоносителя
+#define WATER_TEMP_LIM          85.0f       // аварийная температура теплоносителя - 85*
 
-#define AIR_TEMP_MIN          10        // минимальная температура в комнате
-#define AIR_TEMP_MAX          40        // максимальная температура в комнате
+#define AIR_TEMP_MIN            10          // минимальная температура в комнате
+#define AIR_TEMP_MAX            40          // максимальная температура в комнате
 
-#define GOT_TEMP              1
-#define NO_TEMP               2
-#define TEMP_SENS_ERROR       3
+#define GOT_TEMP                1
+#define NO_TEMP                 2
+#define TEMP_SENS_ERROR         3
 
-#define RADIO_ON              1
-#define RADIO_LOST            2
-#define RADIO_WAIT            3
+#define RADIO_ON                1
+#define RADIO_LOST              2
+#define RADIO_WAIT              3
 
-#define DS18B20_MEAS_PERIOD    1000     // период измерения с датчика DS18B20 в мс
-#define HEATER_1DEGREE_TIMEOUT 900000
+#define DS18B20_MEAS_PERIOD     1000        // период измерения с датчика DS18B20 в мс
+#define HEATER_1DEGREE_TIMEOUT  900000
 
-#define SCATTER_TEMP           10       // Разброс температур между текущей температурой и температурой, к которой стремимся
+#define SCATTER_TEMP            10          // Разброс температур между текущей температурой и температурой, к которой стремимся
 
 #define HEATER_ON     HIGH
 #define HEATER_OFF    LOW

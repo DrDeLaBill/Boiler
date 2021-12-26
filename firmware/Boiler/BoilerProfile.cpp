@@ -18,7 +18,6 @@ BoilerProfile::BoilerProfile() {
   this->user_target_temp_int = this->target_temp_int;
   this->user_boiler_mode = this->boiler_mode;
   
-  //TODO: extern
   if (this->is_mode_air() || this->is_mode_profile()) {
     this->temperature_sensor.set_ext_sensor();
   }
@@ -136,10 +135,6 @@ void BoilerProfile::set_boiler_mode(uint8_t target_mode){
   // установка режима работы
   this->boiler_configuration.boiler_mode = target_mode;
   this->user_boiler_mode = target_mode;
-  //TODO: extern
-//  if (this->user_boiler_mode == MODE_AIR || this->user_boiler_mode == MODE_PROFILE){
-//    radio_init(); //(set_ext_sensor)
-//  }
   this->save_configuration();
 }
 
