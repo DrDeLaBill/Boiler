@@ -1,31 +1,40 @@
-//TODO: extern and include
-#include "network.h"
-extern const char* S_SETPOINT;
-extern const char* S_SETPOINTWATER;
-extern const char* S_PROFILE;
-extern const char* S_WEEKDAYS;
-extern const char* S_WEEKEND;
-extern const char* S_CUSTOM;
-extern const char* S_NOTFREEZE;
+#ifndef _EXTERNAL_SERVER_H_
+#define _EXTERNAL_SERVER_H_
+#include <Arduino.h>
+#include <HTTPClient.h>
+#include <ArduinoJson.h>
 
-extern const char* presets[];
-extern BoilerConfig BoilerCfg;
-extern uint8_t current_temp;
-extern uint8_t user_boiler_mode;
+#include "BoilerConstants.h"
 
 class ExternalServer
 {
   private:
-    HTTPClient http;
+    HTTPClient *http;
     const char* HEADER_TYPE = "Content-Type";
     const char* JSON_HEADER = "application/json";
     const char* WebServerAddr = "http://192.168.10.199";
     const char* boiler_id = "abcdabcd12";
-    bool connected_to_server;
-    bool got_new_wifi_settings;
   public:
+    static uint32_t last_time_http;
+    static bool got_new_wifi_settings;
+    static bool connected_to_server;
+    
     ExternalServer();
-    void send_settings_to_server(void);
-    void check_new_settings(void);
-    bool is_connected_to_server();
+    void send_settings_to_server(uint8_t session_boiler_mode,
+                                 uint8_t target_temp,
+                                 BoilerConfiguration boiler_configuration);
+    uint8_t get_connected_to_server();
+    bool is_new_wifi_settings();
+    void set_new_wifi_settings_flag(bool new_flag);
+    void set_connected_to_server(bool value);
+    void start_http(String url_to_serer);
+    String get_web_server_address();
+    void http_send_json(String json_string);
+    void close_http_session();
+    int http_get();
+    String http_get_string();
+    String get_http_error(int response_code);
+    uint8_t get_new_wifi_settings();
 };
+
+#endif

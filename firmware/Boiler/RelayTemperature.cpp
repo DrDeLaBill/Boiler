@@ -8,11 +8,10 @@ RelayTemperature::RelayTemperature() {
 }
 
 //TODO: extern
-extern uint8_t user_error;
-extern DisplayPages page;
-extern bool redraw_display;
+//extern uint8_t user_error;
+//extern DisplayPages page;
 
-void ssr_temp_init(){
+void RelayTemperature::ssr_temp_init(){
 	pinMode(SSR_TEMP_PIN, INPUT);
 
 	// загружаем "дефолтные" значения в массив
@@ -25,7 +24,7 @@ void ssr_temp_init(){
 }
 
 
-uint8_t check_ssr_temp(){
+uint8_t RelayTemperature::check_ssr_temp(){
 	// вычислим скользящее среднее по аналоговому значению напряжения.
 	ssr_temp_summ -= ssr_temp_buf[0];
 
@@ -55,7 +54,6 @@ uint8_t check_ssr_temp(){
       Serial.println("Error! SSR overheated!");
       ssr_broken_last_time == millis();
       page = pageError;
-      redraw_display = true;
       digitalWrite(CRASH_OUT_PIN, HIGH);
     }
   }
@@ -70,6 +68,6 @@ uint8_t check_ssr_temp(){
   }
 }
 
-bool is_heating_on() {
+bool RelayTemperature::is_heating_on() {
   return digitalRead(SSR1_OUT_PIN);
 }

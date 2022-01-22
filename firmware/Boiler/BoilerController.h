@@ -1,5 +1,5 @@
 /*
- * 
+ *
  * Класс, управляющий всей периферией
  * 
  */
@@ -17,26 +17,35 @@
 #include "NetworkManager.h"
 #include "DisplayManager.h"
 #include "EncoderManager.h"
+#include "ExternalServer.h"
+#include "InternalServer.h"
+#include "RelayTemperature.h"
+#include "PumpManager.h"
 
 class BoilerController 
 {
   private:
     bool work_mode;
     bool p_mode;         // режим работы: работа, режим ожидания
-    NetworkManager network_manager;
-    ExternalServer external_server;
-    InternalServer internal_server;
-    BoilerProfile boiler_profile;
-    CommandManager command_manager;
-    ErrorService error_servise;
-    EncoderManager encoder_manager;
-    RelayTemperature relay_manager;
-    PumpManager pump_manager;
-    DisplayManager display_manager;
+    ErrorService *error_service;
+    NetworkManager *network_manager;
+    ExternalServer *external_server;
+    InternalServer *internal_server;
+    BoilerProfile *boiler_profile;
+    CommandManager *command_manager;
+    EncoderManager *encoder_manager;
+    RelayTemperature *relay_manager;
+    PumpManager *pump_manager;
+    DisplayManager *display_manager;
 
     void _check_serial_port_commands();
     void _check_network_settings();
     void _fill_display_manager_configuration();
+    void _button_pressed_action();
+    bool _button_holded_action();
+    void _check_button_commands();
+    void _check_external_server_sttings();
+    void _external_profile_settings_init(String url);
   public:
     BoilerController();
     void controller_init();

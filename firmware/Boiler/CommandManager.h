@@ -7,7 +7,7 @@
 
 #include <Arduino.h>
 
-class CommandsManager
+class CommandManager
 {
   private:
     String message_from_port;
@@ -19,7 +19,7 @@ class CommandsManager
     void _clear_data();
     String _split_string(String data, char separator, int index);
   public:
-    CommandsManager();
+    CommandManager();
     void check_commands();
     String get_new_boiler_id();
     String get_command();

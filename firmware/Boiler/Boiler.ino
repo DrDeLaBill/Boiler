@@ -1,37 +1,15 @@
-#include "BoilerConstants.h"
+#include "BoilerController.h"
 
 #define DEBUG_ON    1
 
-//#include "clock_rtc.h"
-//#include "tprofile.h"
-//#include "display.h"
-//#include "encoder.h"
-//#include "temp.h"
-//#include "ssr_temp.h"
-//#include "network.h"
-//#include "errors.h"
-//#include "pump.h"
-//#include "SPIFFS.h"
-//#include "CommandManager.h"
-//
-//#define MODE_STANDBY          true
-//#define MODE_WORK             false
-//
-////TODO: external
-//extern BoilerConfig BoilerCfg;
-//extern bool redraw_display;        // флаг для перерисовки дисплея
-//extern uint8_t current_temp;      // текущая температура для ПИД и отображения
-//extern uint8_t user_boiler_settings;
-//extern uint8_t user_error;        // текущие ошибки, если есть
-//extern AsyncWebServer server;
-//bool p_mode = MODE_STANDBY;         // режим работы: работа, режим ожидания
-////CommandsManager command_manager;
+BoilerController *boiler_controller;
 
-void setup(void){
+void setup(){
   Serial.begin(115200);
   Serial.println(F("\n######################################################"));
   Serial.println(F("Initialization started."));
-
+  boiler_controller = new BoilerController();
+  
 //  // Инициализируем файловую систему SPIFFS:
 //  if(!SPIFFS.begin(true)){
 //    Serial.println(F("An Error has occurred while mounting SPIFFS"));

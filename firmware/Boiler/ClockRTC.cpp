@@ -1,21 +1,22 @@
-#include "clock_rtc.h"
+#include "ClockRTC.h"
 
 ClockRTC::ClockRTC() {
-  this->watch.begin();
+  ClockRTC::watch = new iarduino_RTC(RTC_DS1307);
+  ClockRTC::watch->begin();
 }
 
 uint8_t ClockRTC::clock_get_hours() {
-    return this->watch.Hours;
+  return ClockRTC::watch->Hours;
 }
 
 uint8_t ClockRTC::clock_get_day_of_week(){
-    return ((this->watch.gettimeUnix() / 86400) + 3) % 7;
+  return ((ClockRTC::watch->gettimeUnix() / 86400) + 3) % 7;
 }
 
 char* ClockRTC::clock_get_time(const char* fmt) {
-    return this->watch.gettime(fmt);
+  return ClockRTC::watch->gettime(fmt);
 }
 
 void ClockRTC::clock_set_time(uint64_t* datetime, uint8_t* timezone){
-  this->watch.settimeUnix(*datetime + (*timezone * 3600));
+  ClockRTC::watch->settimeUnix(*datetime + (*timezone * 3600));
 }

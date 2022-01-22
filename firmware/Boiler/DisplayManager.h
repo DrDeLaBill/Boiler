@@ -2,14 +2,16 @@
 #define _DISPLAY_H_
 
 #include <Arduino.h>
+//модифицированная версия для больших шрифтов
+#include <U8g2lib.h> 
 #include "BoilerConstants.h"
-#include <U8g2lib.h> //модифицированная версия
 
-#include "clock_rtc.h"
-#include "tprofile.h"
-#include "temp.h"
-#include "errors.h"
-#include "network.h"
+//TODO: include
+//#include "clock_rtc.h"
+//#include "tprofile.h"
+//#include "temp.h"
+//#include "errors.h"
+//#include "network.h"
 
 #define LED_PIN                     23      // пин подсветки дисплея
 
@@ -17,18 +19,6 @@
 #define SAVE_TIMEOUT                1300    // время показа экрана "сохранено", мс
 
 #define TIMEOUT_LIGHTNING           20000   // время до автоматического выключения подсветки
-
-#define REDRAW_TIMEOUT              5000    // максимальное время до обновления дисплея
-
-enum DisplayPages {
-  pageTemp,
-  pageTempSet,
-  pageSaveSettings,
-  pageSettings,
-  pageSetMode,
-  pageError,
-  pageResetSettings
-};
 
 struct DisplayDataConfig {
   bool is_wifi_connect;
@@ -46,27 +36,28 @@ struct DisplayDataConfig {
   uint8_t target_temperature;
   char* current_day;
   char* current_time;
-}
+};
 
 class DisplayManager
 {
   private:
     DisplayPages page_name;
     DisplayDataConfig display_data_config;
-    // флаг перерисовки дисплея
-    bool redraw_display;            
+    static uint8_t brightness;
     // позиция рамки в меню
     uint8_t menu_item;                  
     // отображать "Сохранено" на 1с
-    uint32_t t_page_save_settings;        
+    uint32_t t_page_save_settings;
     // если в течении 5с не было изменений, то отмена TODO: почему эта переменная ещё и extern
-    uint32_t t_newPage;                 
-    uint32_t last_time_redraw;          
+    uint32_t t_newPage;
     // настраиваемая температура
     uint8_t temporary_target_temp;          
     
     //U8G2_PCD8544_84X48_F_4W_SW_SPI u8g2(U8G2_R0, /* clock=*/ 14, /* data=*/ 27, /* cs=*/ 26, /* dc=*/ 25, /* reset=*/ 33);  // Nokia 5110 Display
-    U8G2_PCD8544_84X48_F_4W_HW_SPI u8g2(U8G2_R0, /* cs=*/ 25, /* dc=*/ 26, /* reset=*/ U8X8_PIN_NONE);  // Nokia 5110 Display
+    U8G2_PCD8544_84X48_F_4W_HW_SPI *u8g2;  // Nokia 5110 Display
+
+    void _rotary_right(uint8_t session_boiler_mode);
+    void _rotary_left(uint8_t session_boiler_mode);
   public:
     DisplayManager();
     void display_init();
@@ -75,6 +66,16 @@ class DisplayManager
     void display_on();
     void display_lightning();
     void set_display_data_config(DisplayDataConfig display_data_config);
+    void set_t_newPage(int value);
+    DisplayPages get_page_name();
+    void set_page_name(DisplayPages page_name);
+    uint8_t get_menu_item();
+    void set_menu_item(uint8_t menu_item);
+    void set_temporary_target_temp(uint8_t temporary_target_temp);
+    uint8_t get_temporary_target_temp();
+    void set_t_page_save_settings(int value);
+    void rotary_encoder_action(uint8_t rotary_state, uint8_t session_boiler_mode);
+    void check_page();
 };
 
 
@@ -88,5 +89,4 @@ class DisplayManager
   дата/время
 
   Ошибки
-
 */

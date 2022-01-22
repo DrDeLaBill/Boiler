@@ -1,11 +1,51 @@
 #include "InternalServer.h"
 
+class OneParamRewrite : public AsyncWebRewrite {
+  protected:
+    String _urlPrefix;
+    int _paramIndex;
+    String _paramsBackup;
+
+  public:
+  OneParamRewrite(const char* from, const char* to)
+    : AsyncWebRewrite(from, to) {
+
+      _paramIndex = _from.indexOf('{');
+
+      if( _paramIndex >=0 && _from.endsWith("}")) {
+        _urlPrefix = _from.substring(0, _paramIndex);
+        int index = _params.indexOf('{');
+        if(index >= 0) {
+          _params = _params.substring(0, index);
+        }
+      } else {
+        _urlPrefix = _from;
+      }
+      _paramsBackup = _params;
+  }
+
+  bool match(AsyncWebServerRequest *request) override {
+    if(request->url().startsWith(_urlPrefix)) {
+      if(_paramIndex >= 0) {
+        _params = _paramsBackup + request->url().substring(_paramIndex);
+      } else {
+        _params = _paramsBackup;
+      }
+    return true;
+
+    } else {
+      return false;
+    }
+  }
+};
+
 InternalServer::InternalServer() {
+  server = new AsyncWebServer(80);
   this->server_init();
 }
 
 // handle the upload of the firmware
-void handleUpload(AsyncWebServerRequest *request, String filename, size_t index, uint8_t *data, size_t len, bool final) {
+void InternalServer::handleUpload(AsyncWebServerRequest *request, String filename, size_t index, uint8_t *data, size_t len, bool final) {
     // handle upload and update
     if (!index) {
         Serial.printf("Update: %s\n", filename.c_str());
@@ -29,27 +69,27 @@ void handleUpload(AsyncWebServerRequest *request, String filename, size_t index,
     }
 }
 
-void server_init(void){
+void InternalServer::server_init(){
   // страница для загрузки новой прошивки
-  server.on("/firmware_upload", HTTP_GET, [](AsyncWebServerRequest *request) {
+  this->server->on("/firmware_upload", HTTP_GET, [](AsyncWebServerRequest *request) {
     request->send(SPIFFS, "/firmware_update.html", "text/html");
     Serial.println("[HTTP_GET] firmware_upload.html");
   });
 
   //подключение библиотеки jQuery
-  server.on("/jquery-3.6.0.min.js", HTTP_GET, [](AsyncWebServerRequest *request) {
+  this->server->on("/jquery-3.6.0.min.js", HTTP_GET, [](AsyncWebServerRequest *request) {
     request->send(SPIFFS, "/jquery-3.6.0.min.js", "text/javascript");
     Serial.println("[HTTP_GET] jquery-3.6.0.min.js");
   });
 
   //подключение библиотеки JS скрипта 
-  server.on("/ajax_firmware_upload.js", HTTP_GET, [](AsyncWebServerRequest *request) {
+  this->server->on("/ajax_firmware_upload.js", HTTP_GET, [](AsyncWebServerRequest *request) {
     request->send(SPIFFS, "/ajax_firmware_upload.js", "text/javascript");
     Serial.println("[HTTP_GET] ajax_firmware_upload.js");
   });
     
   /*handling uploading firmware file */
-  server.on("/update", HTTP_POST, [](AsyncWebServerRequest *request) {
+  this->server->on("/update", HTTP_POST, [](AsyncWebServerRequest *request) {
     if (!Update.hasError()) {
       AsyncWebServerResponse *response = request->beginResponse(200, "text/plain", "OK");
       response->addHeader("Connection", "close");
@@ -62,16 +102,16 @@ void server_init(void){
       request->send(response);
       Serial.println("[HTTP_POST] update firmware");
     } 
-  }, handleUpload);
+  }, InternalServer::handleUpload);
 
-//  server.on("/id", HTTP_POST, [](AsyncWebServerRequest *request){
+//  this->server->on("/id", HTTP_POST, [](AsyncWebServerRequest *request){
 //    String message;
 //    if (request->hasParam("ID", true)) {
 //        message = request->getParam("ID", true)->value();
-//        message.toCharArray(BoilerCfg.boiler_id, ID_MAX_SIZE);
-//        save_cfg();
+//        message.toCharArray(BoilerProfile::boiler_configuration.boiler_id, ID_MAX_SIZE);
+//        BoilerProfile::save_configuration();
 //        Serial.println("Got new ID: ");
-//        Serial.println(String(BoilerCfg.boiler_id));
+//        Serial.println(String(BoilerProfile::boiler_configuration.boiler_id));
 //    } else {
 //        message = "No message sent";
 //    }
@@ -79,7 +119,7 @@ void server_init(void){
 //    Serial.println("[HTTP_POST] get id");
 //  });
   
-  server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
+  this->server->on("/", HTTP_GET, [](AsyncWebServerRequest *request){
 //    if(!request->authenticate(http_login, http_pass))
 //        return request->requestAuthentication();
     request->send(200, "text/plain", "Boiler server");
@@ -100,16 +140,16 @@ void server_init(void){
     String message = "{\"\":\"\"}";
     for (uint8_t i = 0; i < array_size; i++) {
 //      Serial.println(json[i].as<String>());
-      if (json[i].as<String>() == String(BoilerCfg.boiler_id)) {
-        message = "{\"" + String(BoilerCfg.boiler_id) + "\":\"" + String(BoilerCfg.boiler_name) + "\"}";
+      if (json[i].as<String>() == String(BoilerProfile::boiler_configuration.boiler_id)) {
+        message = "{\"" + String(BoilerProfile::boiler_configuration.boiler_id) + "\":\"" + String(BoilerProfile::boiler_configuration.boiler_name) + "\"}";
       }
     }
 
     request->send(200, "text/plain", message);
   });
-  server.addHandler(handler);
+  this->server->addHandler(handler);
 
-  String url_path = "/client/" + String(BoilerCfg.boiler_id) + "/name";
+  String url_path = "/client/" + String(BoilerProfile::boiler_configuration.boiler_id) + "/name";
   handler = new AsyncCallbackJsonWebHandler(url_path.c_str(), [](AsyncWebServerRequest *request, JsonVariant &json){
     // сохранение нового имени котла
 
@@ -117,24 +157,24 @@ void server_init(void){
 //        return request->requestAuthentication();
 
     Serial.print("got new boiler name: ");
-    Serial.println(String(BoilerCfg.boiler_name));
+    Serial.println(String(BoilerProfile::boiler_configuration.boiler_name));
     
-    if (String(BoilerCfg.boiler_name) != json.as<String>()) {
-      json.as<String>().toCharArray(BoilerCfg.boiler_name, NAME_MAX_SIZE);
-      save_cfg();
+    if (String(BoilerProfile::boiler_configuration.boiler_name) != json.as<String>()) {
+      json.as<String>().toCharArray(BoilerProfile::boiler_configuration.boiler_name, NAME_MAX_SIZE);
+      BoilerProfile::save_configuration();
     }
 
     request->send(200, "text/plain", "");
   });
-  server.addHandler(handler);
+  this->server->addHandler(handler);
 
-  url_path = "/client/" + String(BoilerCfg.boiler_id) + "/router_connection";
-  server.on(url_path.c_str(), HTTP_GET, [] (AsyncWebServerRequest *request){
+  url_path = "/client/" + String(BoilerProfile::boiler_configuration.boiler_id) + "/router_connection";
+  this->server->on(url_path.c_str(), HTTP_GET, [] (AsyncWebServerRequest *request){
     // получение ssid и пароля для подключения к роутеру
     
 //    if(!request->authenticate(http_login, http_pass))
 //        return request->requestAuthentication();
-    request->send(200, "text/plain", "{\"ssid\": \"" + current_ssid + "\", \"password\": \"" + current_password + "\"}");
+    request->send(200, "text/plain", "{\"ssid\": \"" + NetworkManager::current_ssid + "\", \"password\": \"" + NetworkManager::current_pass + "\"}");
   });
 
   handler = new AsyncCallbackJsonWebHandler(url_path.c_str(), [](AsyncWebServerRequest *request, JsonVariant &json){
@@ -143,28 +183,28 @@ void server_init(void){
 //    if(!request->authenticate(http_login, http_pass))
 //        return request->requestAuthentication();
 
-    if (current_ssid != json["ssid"].as<String>() || current_password != json["password"].as<String>()){
-      current_ssid = json["ssid"].as<String>();
-      current_password = json["password"].as<String>();
+    if (NetworkManager::current_ssid != json["ssid"].as<String>() || NetworkManager::current_pass != json["password"].as<String>()){
+      NetworkManager::current_ssid = json["ssid"].as<String>();
+      NetworkManager::current_pass = json["password"].as<String>();
       Serial.println("got new settings: SSID & PSWD");
       Serial.print("ssid: ");
-      Serial.println(current_ssid);
+      Serial.println(NetworkManager::current_ssid);
       Serial.print("pswd: ");
-      Serial.println(current_password);
-      save_cfg();
-      got_new_wifi_settings = true;
+      Serial.println(NetworkManager::current_pass);
+      BoilerProfile::save_configuration();
+      ExternalServer::got_new_wifi_settings = true;
     }
 
     request->send(200, "text/plain", "");
   });
-  server.addHandler(handler);
+  this->server->addHandler(handler);
 
-  String url_path_from = "/client/" + String(BoilerCfg.boiler_id) + "/profile/{profile}";
-  String url_path_to = "/client/" + String(BoilerCfg.boiler_id) + "/profile?name={profile}";
-  server.addRewrite(new OneParamRewrite(url_path_from.c_str(), url_path_to.c_str()));
+  String url_path_from = "/client/" + String(BoilerProfile::boiler_configuration.boiler_id) + "/profile/{profile}";
+  String url_path_to = "/client/" + String(BoilerProfile::boiler_configuration.boiler_id) + "/profile?name={profile}";
+  this->server->addRewrite(new OneParamRewrite(url_path_from.c_str(), url_path_to.c_str()));
 
-  url_path = "/client/" + String(BoilerCfg.boiler_id) + "/profile";
-  server.on(url_path.c_str(), HTTP_GET, [] (AsyncWebServerRequest *request) {
+  url_path = "/client/" + String(BoilerProfile::boiler_configuration.boiler_id) + "/profile";
+  this->server->on(url_path.c_str(), HTTP_GET, [] (AsyncWebServerRequest *request) {
     // возвращаем пресет термопрофиля в зависимости от имени
     
 //    if(!request->authenticate(http_login, http_pass))
@@ -178,13 +218,13 @@ void server_init(void){
         message += "\"h" + String(i) + "\": ";
         
         if (preset_name == S_WEEKDAYS){
-           message += String(BoilerCfg.presets[PRESET_WEEKDAY][i]);
+           message += String(BoilerProfile::boiler_configuration.presets[PRESET_WEEKDAY][i]);
         } else if (preset_name == S_WEEKEND){
-          message += String(BoilerCfg.presets[PRESET_WEEKEND][i]);
+          message += String(BoilerProfile::boiler_configuration.presets[PRESET_WEEKEND][i]);
         } else if (preset_name == S_CUSTOM){
-          message += String(BoilerCfg.presets[PRESET_CUSTOM][i]);
+          message += String(BoilerProfile::boiler_configuration.presets[PRESET_CUSTOM][i]);
         } else if (preset_name == S_NOTFREEZE){
-          message += String(BoilerCfg.presets[PRESET_NOTFREEZE][i]);
+          message += String(BoilerProfile::boiler_configuration.presets[PRESET_NOTFREEZE][i]);
         } else {
           message = "Unknown profile";
           break;
@@ -215,24 +255,24 @@ void server_init(void){
         if (period_temp >= WATER_TEMP_MIN && period_temp <= WATER_TEMP_MAX);
         else period_temp = WATER_TEMP_MIN;
         if (preset_name == S_WEEKDAYS){
-          BoilerCfg.presets[PRESET_WEEKDAY][i] = period_temp;
+          BoilerProfile::boiler_configuration.presets[PRESET_WEEKDAY][i] = period_temp;
         } else if (preset_name == S_WEEKEND){
-          BoilerCfg.presets[PRESET_WEEKEND][i] = period_temp;
+          BoilerProfile::boiler_configuration.presets[PRESET_WEEKEND][i] = period_temp;
         } else if (preset_name == S_CUSTOM){
-          BoilerCfg.presets[PRESET_CUSTOM][i] = period_temp;
+          BoilerProfile::boiler_configuration.presets[PRESET_CUSTOM][i] = period_temp;
         } else if (preset_name == S_NOTFREEZE){
-          BoilerCfg.presets[PRESET_NOTFREEZE][i] = period_temp;
+          BoilerProfile::boiler_configuration.presets[PRESET_NOTFREEZE][i] = period_temp;
         } 
       }
       
-      save_cfg();
+      BoilerProfile::save_configuration();
     }
     request->send(200, "text/plain", "");
   });
-  server.addHandler(handler);
+  this->server->addHandler(handler);
 
-  url_path = "/client/" + String(BoilerCfg.boiler_id) + "/status";
-  server.on(url_path.c_str(), HTTP_GET, [] (AsyncWebServerRequest *request) {
+  url_path = "/client/" + String(BoilerProfile::boiler_configuration.boiler_id) + "/status";
+  this->server->on(url_path.c_str(), HTTP_GET, [] (AsyncWebServerRequest *request) {
     // возвращаем текущее состояние котла
     
 //    if(!request->authenticate(http_login, http_pass))
@@ -244,12 +284,15 @@ void server_init(void){
     if (WiFi.status() == WL_CONNECTED) message += "true";
     else message += "false";
     message += ",\n\"internet\": false,\n\"remote_server_connection\": ";
-    if (connected_to_server == DISCONNECTED) message += "false";
-    else message += "true";
+    if (ExternalServer::connected_to_server == DISCONNECTED) {
+      message += "false";
+    } else {
+      message += "true";
+    }
     message += ",\n\"temp\": " +
-    String(current_temp) + ",\n\"current_profile\": \"";
+    String(TemperatureSensor::current_temp) + ",\n\"current_profile\": \"";
 
-    switch(BoilerCfg.profile[clock_get_day_of_week()]){
+    switch(BoilerProfile::boiler_configuration.profile[ClockRTC::clock_get_day_of_week()]){
       case PRESET_WEEKDAY:
         message += String(S_WEEKDAYS);
         break;
@@ -273,7 +316,7 @@ void server_init(void){
 
     message += "\",\n\"errors\": [";
 
-    if (radio_connected == RADIO_LOST) {
+    if (TemperatureSensor::radio_connected == RADIO_LOST) {
       // внешний датчик отвалился
       message += "\"no_sensor\"";
     }
@@ -295,8 +338,8 @@ void server_init(void){
     
   });
 
-  url_path = "/client/" + String(BoilerCfg.boiler_id) + "/mode";
-  server.on(url_path.c_str(), HTTP_GET, [] (AsyncWebServerRequest *request){
+  url_path = "/client/" + String(BoilerProfile::boiler_configuration.boiler_id) + "/mode";
+  this->server->on(url_path.c_str(), HTTP_GET, [] (AsyncWebServerRequest *request){
     // запрос текущего режима работы - по воздуху, теплоносителю, или термопрофиль
     
 //    if(!request->authenticate(http_login, http_pass))
@@ -344,10 +387,10 @@ void server_init(void){
     }
     
   });
-  server.addHandler(handler);
+  this->server->addHandler(handler);
 
-  url_path = "/client/" + String(BoilerCfg.boiler_id) + "/target_temp";
-  server.on(url_path.c_str(), HTTP_GET, [] (AsyncWebServerRequest *request){
+  url_path = "/client/" + String(BoilerProfile::boiler_configuration.boiler_id) + "/target_temp";
+  this->server->on(url_path.c_str(), HTTP_GET, [] (AsyncWebServerRequest *request){
     // запрос текущей установленной температуры
     
 //    if(!request->authenticate(http_login, http_pass))
@@ -356,7 +399,7 @@ void server_init(void){
     request->send(200, "text/plain", String(get_target_temp()));
   });
 
-  server.on(url_path.c_str(), HTTP_PUT, 
+  this->server->on(url_path.c_str(), HTTP_PUT, 
       [] (AsyncWebServerRequest *request){},
       [] (AsyncWebServerRequest *request, const String& filename, size_t index, uint8_t *data, size_t len, bool final){},
       [] (AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total){
@@ -376,7 +419,7 @@ void server_init(void){
     request->send(200, "text/plain", "");
   });
 
-  url_path = "/client/" + String(BoilerCfg.boiler_id) + "/datetime";
+  url_path = "/client/" + String(BoilerProfile::boiler_configuration.boiler_id) + "/datetime";
   handler = new AsyncCallbackJsonWebHandler(url_path.c_str(), [](AsyncWebServerRequest *request, JsonVariant &json){
     // сохранение даты/времени и часового пояса
 
@@ -393,10 +436,10 @@ void server_init(void){
     clock_set_time(&datetime, &timezone);  
     request->send(200, "text/plain", "");
   });
-  server.addHandler(handler);
+  this->server->addHandler(handler);
 
-  url_path = "/client/" + String(BoilerCfg.boiler_id) + "/week";
-  server.on(url_path.c_str(), HTTP_GET, [] (AsyncWebServerRequest *request) {
+  url_path = "/client/" + String(BoilerProfile::boiler_configuration.boiler_id) + "/week";
+  this->server->on(url_path.c_str(), HTTP_GET, [] (AsyncWebServerRequest *request) {
     // возвращаем недельный набор пресетов
     
 //    if(!request->authenticate(http_login, http_pass))
@@ -409,7 +452,7 @@ void server_init(void){
     for (uint8_t i = 0; i < NUM_DAYS; i++){
       message += "\"d" + String(i) + "\": \"";
       
-      switch (BoilerCfg.profile[i]){
+      switch (BoilerProfile::boiler_configuration.profile[i]){
 
         case PRESET_WEEKDAY:
           message += String(S_WEEKDAYS);
@@ -453,19 +496,35 @@ void server_init(void){
       num_of_day += String(i);
       String day_preset = json[num_of_day].as<String>();
       if (day_preset == S_WEEKDAYS){
-        BoilerCfg.profile[i] = PRESET_WEEKDAY;
+        BoilerProfile::boiler_configuration.profile[i] = PRESET_WEEKDAY;
       } else if (day_preset == S_WEEKEND){
-        BoilerCfg.profile[i] = PRESET_WEEKEND;
+        BoilerProfile::boiler_configuration.profile[i] = PRESET_WEEKEND;
       } else if (day_preset == S_CUSTOM){
-        BoilerCfg.profile[i] = PRESET_CUSTOM;
+        BoilerProfile::boiler_configuration.profile[i] = PRESET_CUSTOM;
       } else if (day_preset == S_NOTFREEZE){
-        BoilerCfg.profile[i] = PRESET_NOTFREEZE;
+        BoilerProfile::boiler_configuration.profile[i] = PRESET_NOTFREEZE;
       }
     }
-    save_cfg();
+    BoilerProfile::save_configuration();
     request->send(200, "text/plain", "");
   });
-  server.addHandler(handler);
+  this->server->addHandler(handler);
    
-  server.begin();
+  this->server->begin();
+}
+
+char* get_preset(uint8_t preset_num) {
+  return presets[preset_num];
+}
+
+char* get_s_setpoint() {
+  return S_SETPOINT;
+}
+
+char* get_s_profile() {
+  return S_PROFILE;
+}
+
+char* get_s_setpointwater() {
+  return S_SETPOINTWATER;
 }

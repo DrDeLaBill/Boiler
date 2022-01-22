@@ -7,9 +7,7 @@
 
 #include <Arduino.h>
 
-
-#define PUMP_OUT_PIN          32        // пин на насос
-#define FLOW_IN_PIN           34        // вход с датчика протока
+#include "BoilerConstants.h"
 
 #define PUMP_OFF              0
 #define PUMP_ON               1

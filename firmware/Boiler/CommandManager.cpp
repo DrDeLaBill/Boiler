@@ -1,10 +1,10 @@
 #include "CommandManager.h"
 
-CommandsManager::CommandsManager() {
+CommandManager::CommandManager() {
   this->_clear_data();
 }
 
-void CommandsManager::check_commands(){
+void CommandManager::check_commands(){
   Serial.println(F("Check serial port commands"));
   if (Serial.available() > 0) {
     this->_read_command();
@@ -12,37 +12,37 @@ void CommandsManager::check_commands(){
   }
 }
 
-String get_new_boiler_id() {
+String CommandManager::get_new_boiler_id() {
   return this->new_boiler_id;
 }
 
-String get_command() {
+String CommandManager::get_command() {
   return this->command;
 }
 
-void CommandsManager::_read_command() {
+void CommandManager::_read_command() {
   this->_clear_data();
   while (Serial.available() > 0) {
     this->message_from_port += Serial.read();
   }
 }
 
-void CommandsManager::_execute_command() {
+void CommandManager::_execute_command() {
   this->command = this->_split_string(this->message_from_port, ' ', 0);
-  if (first_command_part == "set_boiler_id") {
+  if (this->command == "set_boiler_id") {
     this->new_boiler_id = this->_split_string(this->message_from_port, ' ', 1);
   } else if (this->command != "get_boiler_id") {
     Serial.println(F("Command syntax error"));
   }
 }
 
-void CommandsManager::_clear_data() {
+void CommandManager::_clear_data() {
   this->command = "";
   this->message_from_port = "";
   this->new_boiler_id = "";
 }
 
-String CommandsManager::_split_string(String data, char separator, int index)
+String CommandManager::_split_string(String data, char separator, int index)
 {
   int found = 0;
   int strIndex[] = {0, -1};

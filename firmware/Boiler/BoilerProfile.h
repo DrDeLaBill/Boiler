@@ -12,71 +12,39 @@
 
 #include "ClockRTC.h"
 #include "TemperatureSensor.h"
-
-#define STANDBY                     false
-#define WORK                        true
-
-#define TARGET_TEMP_EXT_DEFAULT     20      // установленная температура воздуха по умолчанию
-#define TARGET_TEMP_INT_DEFAULT     10      // установленная температура теплоносителя по умолчанию
-
-#define MAX_SIZE_SSID               20
-#define MAX_SIZE_PASS               20      // ограничение по длине
-#define NAME_MAX_SIZE               64    
-#define ID_MAX_SIZE                 11
-
-#define NUM_DAYS                    7       // термопрофиль на 7 дней
-#define NUM_PERIODS                 6       // 6 периодов в сутках
-#define NUM_PRESETS                 4       // общее количество возможных пресетов
-
-#define PRESET_WEEKDAY              0       // пресеты, по ним адресуются значения в массиве profile[]
-#define PRESET_WEEKEND              1
-#define PRESET_CUSTOM               2
-#define PRESET_NOTFREEZE            3
-
-struct BoilerConfiguration {
-  uint8_t boiler_mode;
-  uint8_t target_temp_int;
-  uint8_t target_temp_ext;
-  bool standby_flag;
-  char ssid[MAX_SIZE_SSID];
-  char password[MAX_SIZE_PASS];
-  uint8_t profile[NUM_DAYS];
-  uint8_t presets[NUM_PRESETS][NUM_PERIODS];
-  char boiler_id[ID_MAX_SIZE];
-  char boiler_name[NAME_MAX_SIZE];
-};
-
-enum {
-  MODE_WATER,
-  MODE_AIR,
-  MODE_PROFILE
-};
+#include "BoilerConstants.h"
 
 class BoilerProfile
 {
   private:
-    uint8_t user_target_temp_int = 0;   // требуемая температура теплоносителя (в данной сессии)
-    uint8_t user_boiler_mode = 0;       // режим работы котла (в данной сессии)
-    BoilerConfiguration boiler_configuration;
-    ClockRTC clock_rtc;
-    TemperatureSensor temperature_sensor;
+    ClockRTC *clock_rtc;
+    TemperatureSensor *temperature_sensor;
     
     void _start_eeprom();
     void _serial_print_boiler_configuration();
   public:
+    // требуемая температура теплоносителя (в данной сессии)
+    static uint8_t session_target_temp_int;
+    // режим работы котла (в данной сессии)
+    static uint8_t session_boiler_mode;
+    static BoilerConfiguration boiler_configuration;
+    static void save_configuration();
+    
     BoilerProfile();
     uint8_t get_target_temp();
     uint8_t period_of_day();
     void clear_eeprom();
-    void save_configuration();
     void set_target_temp(uint8_t temp);
     void set_boiler_mode(uint8_t target_mode);
+    void set_session_boiler_mode(uint8_t target_mode);
     void set_default_settings();
     void set_settings_standby(bool state);
     void set_boiler_id(String boiler_id);
+    void set_config_day_profile(uint8_t day, uint8_t value);
+    uint8_t get_profile_for_week_day();
     void temperature_pid_regulating();
     void temperature_pid_off();
-    void check_temperature();
+    uint8_t check_temperature();
     String get_boiler_id();
     String get_ssid();
     String get_pass();
@@ -88,6 +56,10 @@ class BoilerProfile
     uint8_t get_current_temperature();
     char *get_current_day(const char* fmt);
     char *get_current_time(const char* fmt);
+    uint8_t get_temperature_error();
+    uint8_t get_session_boiler_mode();
+    void set_day_preset(uint8_t day_number, uint8_t day_period, uint8_t value);
+    BoilerConfiguration get_boiler_configuration();
 };
 
 #endif

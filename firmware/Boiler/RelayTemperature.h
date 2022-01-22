@@ -1,8 +1,9 @@
-#ifndef SSR_TEMP_H
-#define SSR_TEMP_H
+#ifndef _SSR_TEMP_H
+#define _SSR_TEMP_H
 
 #include <Arduino.h>
-#include "errors.h"
+
+#include "boilerConstants.h"
 
 #define SSR_TEMP_PIN		        39
 
