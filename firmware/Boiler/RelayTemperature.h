@@ -3,7 +3,9 @@
 
 #include <Arduino.h>
 
-#include "boilerConstants.h"
+#include "BoilerConstants.h"
+#include "ErrorService.h"
+#include "DisplayManager.h"
 
 #define SSR_TEMP_PIN		        39
 

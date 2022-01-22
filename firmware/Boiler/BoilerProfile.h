@@ -10,9 +10,9 @@
 #include "stdint.h"
 #include "EEPROM.h"
 
-#include "ClockRTC.h"
-#include "TemperatureSensor.h"
 #include "BoilerConstants.h"
+#include "TemperatureSensor.h"
+#include "ClockRTC.h"
 
 class BoilerProfile
 {
@@ -29,13 +29,13 @@ class BoilerProfile
     static uint8_t session_boiler_mode;
     static BoilerConfiguration boiler_configuration;
     static void save_configuration();
+    static uint8_t get_target_temp();
+    static uint8_t period_of_day();
+    static void set_boiler_mode(uint8_t target_mode);
+    static void set_target_temp(uint8_t temp);
     
     BoilerProfile();
-    uint8_t get_target_temp();
-    uint8_t period_of_day();
     void clear_eeprom();
-    void set_target_temp(uint8_t temp);
-    void set_boiler_mode(uint8_t target_mode);
     void set_session_boiler_mode(uint8_t target_mode);
     void set_default_settings();
     void set_settings_standby(bool state);

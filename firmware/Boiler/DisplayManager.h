@@ -41,7 +41,6 @@ struct DisplayDataConfig {
 class DisplayManager
 {
   private:
-    DisplayPages page_name;
     DisplayDataConfig display_data_config;
     static uint8_t brightness;
     // позиция рамки в меню
@@ -59,6 +58,9 @@ class DisplayManager
     void _rotary_right(uint8_t session_boiler_mode);
     void _rotary_left(uint8_t session_boiler_mode);
   public:
+    static DisplayPages page_name;
+    static void set_page_name(DisplayPages page_name);
+    
     DisplayManager();
     void display_init();
     void paint();
@@ -68,7 +70,6 @@ class DisplayManager
     void set_display_data_config(DisplayDataConfig display_data_config);
     void set_t_newPage(int value);
     DisplayPages get_page_name();
-    void set_page_name(DisplayPages page_name);
     uint8_t get_menu_item();
     void set_menu_item(uint8_t menu_item);
     void set_temporary_target_temp(uint8_t temporary_target_temp);

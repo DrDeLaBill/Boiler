@@ -321,13 +321,13 @@ void InternalServer::server_init(){
       message += "\"no_sensor\"";
     }
 
-//    if (user_boiler_mode == MODE_WATER){
+//    if (BoilerProfile::session_boiler_mode == MODE_WATER){
 //      // котел работает по теплоносителю
 //      message += S_SETPOINTWATER;
-//    } else if (user_boiler_mode == MODE_PROFILE){
+//    } else if (BoilerProfile::session_boiler_mode == MODE_PROFILE){
 //      // котел работает по термопрофилю
 //      message += S_PROFILE;
-//    } else if (user_boiler_mode == MODE_AIR){
+//    } else if (BoilerProfile::session_boiler_mode == MODE_AIR){
 //      // котел работает по воздуху
 //      message += S_SETPOINT;
 //    }
@@ -347,17 +347,17 @@ void InternalServer::server_init(){
 
     String message = "\"";
 
-    if (user_boiler_mode == MODE_WATER){
+    if (BoilerProfile::session_boiler_mode == MODE_WATER){
       // режим работы по теплоносителю
       message += S_SETPOINTWATER;
       message += "\"";
       request->send(200, "text/plain", message);
-    } else if (user_boiler_mode == MODE_PROFILE){
+    } else if (BoilerProfile::session_boiler_mode == MODE_PROFILE){
       // режим работы по термопрофилю
       message += S_PROFILE;
       message += "\"";
       request->send(200, "text/plain", message);
-    } else if (user_boiler_mode == MODE_AIR){
+    } else if (BoilerProfile::session_boiler_mode == MODE_AIR){
       // режим работы уставка по воздуху
       message += S_SETPOINT;
       message += "\"";
@@ -377,13 +377,13 @@ void InternalServer::server_init(){
 //    Serial.println(target_mode);
     if (target_mode == S_SETPOINT){
       // работаем по воздуху
-      set_boiler_mode(MODE_AIR);
+      BoilerProfile::set_boiler_mode(MODE_AIR);
     } else if (target_mode == S_SETPOINTWATER){
       // работаем по теплоносителю
-      set_boiler_mode(MODE_WATER);
+      BoilerProfile::set_boiler_mode(MODE_WATER);
     } else if (target_mode == S_PROFILE){
       // работает по термопрофилю
-      set_boiler_mode(MODE_PROFILE);
+      BoilerProfile::set_boiler_mode(MODE_PROFILE);
     }
     
   });
@@ -396,7 +396,7 @@ void InternalServer::server_init(){
 //    if(!request->authenticate(http_login, http_pass))
 //        return request->requestAuthentication();
 
-    request->send(200, "text/plain", String(get_target_temp()));
+    request->send(200, "text/plain", String(BoilerProfile::get_target_temp()));
   });
 
   this->server->on(url_path.c_str(), HTTP_PUT, 
@@ -413,7 +413,7 @@ void InternalServer::server_init(){
 //    Serial.print("need_temp: ");
 //    Serial.println(need_temp);
     if (need_temp >= WATER_TEMP_MIN && need_temp <= WATER_TEMP_MAX){
-      set_target_temp(need_temp);
+      BoilerProfile::set_target_temp(need_temp);
     }
 
     request->send(200, "text/plain", "");
@@ -433,7 +433,7 @@ void InternalServer::server_init(){
     Serial.print("timezone: ");
     Serial.println(timezone);
     
-    clock_set_time(&datetime, &timezone);  
+    ClockRTC::clock_set_time(&datetime, &timezone);  
     request->send(200, "text/plain", "");
   });
   this->server->addHandler(handler);
@@ -513,18 +513,18 @@ void InternalServer::server_init(){
   this->server->begin();
 }
 
-char* get_preset(uint8_t preset_num) {
+String get_preset(uint8_t preset_num) {
   return presets[preset_num];
 }
 
-char* get_s_setpoint() {
+String get_s_setpoint() {
   return S_SETPOINT;
 }
 
-char* get_s_profile() {
+String get_s_profile() {
   return S_PROFILE;
 }
 
-char* get_s_setpointwater() {
+String get_s_setpointwater() {
   return S_SETPOINTWATER;
 }

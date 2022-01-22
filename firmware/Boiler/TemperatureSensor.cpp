@@ -4,7 +4,7 @@ TemperatureSensor::TemperatureSensor() {
   this->regulator_AIR = new GyverPID(kP_air, kI_air, kD_air, dT);
   this->regulator_WATER = new GyverPID(kP_water, kI_water, kD_water, dT);
   this->oneWire = new OneWire(ONE_WIRE_BUS);
-  this->sensors = new DallasTemperature(&oneWire);
+  this->sensors = new DallasTemperature(oneWire);
   this->radio_sensor = new RadioSensor();
   TemperatureSensor::current_temp = 0;                      
   TemperatureSensor::current_temp_water = 0;                   
@@ -27,7 +27,7 @@ TemperatureSensor::TemperatureSensor() {
 //extern uint8_t user_error;
 
 void TemperatureSensor::temp_init() {
-  this->radio_sensor->ext_raadio_init();
+  this->radio_sensor->radio_init();
   this->sensors->begin();
   this->sensors->setWaitForConversion(false);
   this->sensors->requestTemperatures();
@@ -53,14 +53,14 @@ void TemperatureSensor::pid_regulating(bool is_mode_water, uint8_t target_temper
 
     // разные пиды для режимов работы по воздуху и теплоносителю
     if (is_mode_water) {                                                                  // работать по воде
-      this->regulator_WATER->setpoint = get_target_temp();                           // Сообщаем регулятору температуру к которой следует стремиться
+      this->regulator_WATER->setpoint = target_temperature;                           // Сообщаем регулятору температуру к которой следует стремиться
       this->regulator_WATER->input = TemperatureSensor::current_temp;                                   // Сообщаем регулятору текущую температуру к которой будем стремиться
       
       this->pwm(this->regulator_WATER->getResultTimer());                                  // включаем ТТР, опираясь на температуру воды
 
       this->regulator_AIR->integral = 0;                                             //интегральная составляющая для воздуха не должна рости
 
-      if (abs(get_target_temp() - TemperatureSensor::current_temp) > SCATTER_TEMP){               // если текущая температура не достигла диапазона регулирования, недопускаем накопление интегральной ошибки
+      if (abs(target_temperature - TemperatureSensor::current_temp) > SCATTER_TEMP){               // если текущая температура не достигла диапазона регулирования, недопускаем накопление интегральной ошибки
         this->regulator_WATER->integral = 0;
       }
     } else {
@@ -72,7 +72,7 @@ void TemperatureSensor::pid_regulating(bool is_mode_water, uint8_t target_temper
       this->pwm(this->regulator_AIR->getResultTimer());                                    // включаем ТТР, опираясь на температуру воздуха
       this->regulator_WATER->integral = 0;
 
-      if (abs(get_target_temp() - TemperatureSensor::current_temp) > SCATTER_TEMP){               // если текущая температура не достигла диапазона регулирования, недопускаем накопление интегральной ошибки
+      if (abs(target_temperature - TemperatureSensor::current_temp) > SCATTER_TEMP){               // если текущая температура не достигла диапазона регулирования, недопускаем накопление интегральной ошибки
         this->regulator_AIR->integral = 0;                                           //интегральная составляющая для воздуха не должна рости
       }
     }

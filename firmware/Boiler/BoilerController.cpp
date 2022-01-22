@@ -38,7 +38,7 @@ void BoilerController::controller_run() {
     uint8_t errors[ERRORS_COUNT] = {};
     this->error_service->get_errors_list(errors);
     // проверим нагрев
-    if (this->error_service->is_set_error(ERROR_NOERROR)) {
+    if (ErrorService::is_set_error(ERROR_NOERROR)) {
       this->boiler_profile->temperature_pid_off();
     } else {
       this->boiler_profile->temperature_pid_regulating();
@@ -117,7 +117,7 @@ void BoilerController::_button_pressed_action() {
       // переходим из основного окна в режим настройки температуры
       this->display_manager->set_page_name(pageTempSet);
       this->display_manager->set_temporary_target_temp(
-        this->boiler_profile->get_target_temp()
+        BoilerProfile::get_target_temp()
       );
       break;
 
@@ -216,7 +216,7 @@ void BoilerController::_check_external_server_sttings() {
       if (this->external_server->get_new_wifi_settings() == SETS_NOT_SENDED){
         this->external_server->send_settings_to_server(
             this->boiler_profile->get_session_boiler_mode(),
-            this->boiler_profile->get_target_temp(),
+            BoilerProfile::get_target_temp(),
             this->boiler_profile->get_boiler_configuration()
         );
       }
@@ -230,7 +230,7 @@ void BoilerController::_check_external_server_sttings() {
       String url_to_server = path_to_server + "/status";
       this->external_server->start_http(url_to_server);
       doc["temp"] = this->boiler_profile->get_current_temperature();
-      doc["target_temp"] = this->boiler_profile->get_target_temp();
+      doc["target_temp"] = BoilerProfile::get_target_temp();
       uint8_t num_preset = this->boiler_profile->get_profile_for_week_day();
       doc["current_profile"] = this->internal_server->get_preset(num_preset);
       if (this->boiler_profile->is_mode_air())
@@ -392,13 +392,13 @@ void BoilerController::_fill_display_manager_configuration() {
   display_data_config.is_external_sensor = this->boiler_profile->is_mode_air() || this->boiler_profile->is_mode_profile();
   display_data_config.is_internal_sensor = this->boiler_profile->is_mode_air();
   display_data_config.is_radio_connected = this->boiler_profile->is_radio_connected();
-  display_data_config.is_overheat = this->error_service->is_set_error(ERROR_OVERHEAT) || this->error_service->is_set_error(ERROR_WATEROVERHEAT);
-  display_data_config.is_pumpbroken = this->error_service->is_set_error(ERROR_PUMPBROKEN);
-  display_data_config.is_ssrbroken = this->error_service->is_set_error(ERROR_SSRBROKEN);
-  display_data_config.is_tempsensbroken = this->error_service->is_set_error(ERROR_TEMPSENSBROKEN);
-  display_data_config.is_nopower = this->error_service->is_set_error(ERROR_NOPOWER);
+  display_data_config.is_overheat = ErrorService::is_set_error(ERROR_OVERHEAT) || ErrorService::is_set_error(ERROR_WATEROVERHEAT);
+  display_data_config.is_pumpbroken = ErrorService::is_set_error(ERROR_PUMPBROKEN);
+  display_data_config.is_ssrbroken = ErrorService::is_set_error(ERROR_SSRBROKEN);
+  display_data_config.is_tempsensbroken = ErrorService::is_set_error(ERROR_TEMPSENSBROKEN);
+  display_data_config.is_nopower = ErrorService::is_set_error(ERROR_NOPOWER);
   display_data_config.current_temperature = this->boiler_profile->get_current_temperature();
-  display_data_config.target_temperature = this->boiler_profile->get_target_temp();
+  display_data_config.target_temperature = BoilerProfile::get_target_temp();
   strncpy(display_data_config.current_day, this->boiler_profile->get_current_day("d/m/Y"), sizeof(display_data_config.current_day));
   strncpy(display_data_config.current_time, this->boiler_profile->get_current_time("H:i"), sizeof(display_data_config.current_time));
   //TODO: вот до сюда

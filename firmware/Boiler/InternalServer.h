@@ -20,13 +20,14 @@ class InternalServer
     AsyncWebServer* server;
     AsyncCallbackJsonWebHandler* handler;
   public:
-    InternalServer();
     static void handleUpload(AsyncWebServerRequest *request, String filename, size_t index, uint8_t *data, size_t len, bool final);
+    
+    InternalServer();
     void server_init();
-    char* get_preset(uint8_t preset_num);
-    char* get_s_setpoint();
-    char* get_s_profile();
-    char* get_s_setpointwater();
+    String get_preset(uint8_t preset_num);
+    String get_s_setpoint();
+    String get_s_profile();
+    String get_s_setpointwater();
 };
 
 #endif

@@ -4,16 +4,16 @@
  * 
  */
 
-#ifndef _TEMP_H_
-#define _TEMP_H_
+#ifndef _TEMPERATURE_SENSOR_H_
+#define _TEMPERATURE_SENSOR_H_
 
 #include <Arduino.h>
 #include <OneWire.h>
 #include <DallasTemperature.h>
 #include "GyverPID.h"
 
-#include "RadioSensor.h"
 #include "BoilerConstants.h"
+#include "RadioSensor.h"
 
 class TemperatureSensor
 {

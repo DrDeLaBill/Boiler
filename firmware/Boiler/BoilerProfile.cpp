@@ -13,7 +13,7 @@ BoilerProfile::BoilerProfile() {
   if (BoilerProfile::boiler_configuration.boiler_mode == 0xFF) {
     // EEPROM is empty
     this->set_default_settings();
-    this->save_configuration();
+    BoilerProfile::save_configuration();
   }
   Serial.print(F("\nboiler_name: "));
   Serial.println(BoilerProfile::boiler_configuration.boiler_name);
@@ -24,7 +24,7 @@ BoilerProfile::BoilerProfile() {
   BoilerProfile::session_boiler_mode = BoilerProfile::boiler_configuration.boiler_mode;
   
   if (this->is_mode_air() || this->is_mode_profile()) {
-    this->temperature_sensor->set_radio_sensor(this->get_target_temp());
+    this->temperature_sensor->set_radio_sensor(BoilerProfile::get_target_temp());
   }
 }
 
@@ -79,7 +79,7 @@ void BoilerProfile::set_default_settings(){
   BoilerProfile::session_boiler_mode = BoilerProfile::boiler_configuration.boiler_mode;
 
   // Сохранение настроек в EEPROM
-  this->save_configuration();
+  BoilerProfile::save_configuration();
 }
 
 void BoilerProfile::save_configuration() {
@@ -106,7 +106,7 @@ uint8_t BoilerProfile::get_target_temp(){
   if (BoilerProfile::session_boiler_mode == MODE_PROFILE){
     // котел работает по термопрофилю
     uint8_t num_preset = BoilerProfile::boiler_configuration.profile[ClockRTC::clock_get_day_of_week()];
-    return BoilerProfile::boiler_configuration.presets[num_preset][this->period_of_day()];
+    return BoilerProfile::boiler_configuration.presets[num_preset][BoilerProfile::period_of_day()];
   } else if (BoilerProfile::session_boiler_mode == MODE_AIR){
     // работаем по уставке по воздуху
     return BoilerProfile::boiler_configuration.target_temp_ext;
@@ -128,7 +128,7 @@ void BoilerProfile::set_target_temp(uint8_t temp) {
     BoilerProfile::boiler_configuration.target_temp_int = temp;
     BoilerProfile::session_target_temp_int = temp;
   }
-  this->save_configuration();
+  BoilerProfile::save_configuration();
 }
 
 uint8_t BoilerProfile::period_of_day() {
@@ -140,12 +140,12 @@ void BoilerProfile::set_boiler_mode(uint8_t target_mode){
   // установка режима работы
   BoilerProfile::boiler_configuration.boiler_mode = target_mode;
   BoilerProfile::session_boiler_mode = target_mode;
-  this->save_configuration();
+  BoilerProfile::save_configuration();
 }
 
 void BoilerProfile::set_settings_standby(bool state){
   BoilerProfile::boiler_configuration.standby_flag = state;
-  this->save_configuration();
+  BoilerProfile::save_configuration();
 }
 
 void BoilerProfile::_start_eeprom() {
@@ -209,7 +209,7 @@ bool BoilerProfile::is_mode_profile() {
 }
 
 void BoilerProfile::temperature_pid_regulating() {
-  this->temperature_sensor->pid_regulating(this->is_mode_water(), this->get_target_temp());
+  this->temperature_sensor->pid_regulating(this->is_mode_water(), BoilerProfile::get_target_temp());
 }
 
 void BoilerProfile::temperature_pid_off() {

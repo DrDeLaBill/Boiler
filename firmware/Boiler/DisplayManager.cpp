@@ -25,7 +25,7 @@ void DisplayManager::display_init() {
   this->u8g2->setContrast(70);
   this->u8g2->enableUTF8Print();
   this->u8g2->setFontDirection(0);
-  this->page_name = pageTemp;
+  DisplayManager::page_name = pageTemp;
   
   pinMode(LED_PIN, OUTPUT);
   digitalWrite(LED_PIN, HIGH);
@@ -34,7 +34,7 @@ void DisplayManager::display_init() {
 
 void DisplayManager::display_on() {
   // включаем дисплей и подсветку. Переходим на основную страницу.
-  this->page_name = pageTemp;
+  DisplayManager::page_name = pageTemp;
   this->menu_item = 0;
   this->u8g2->setPowerSave(false);
   digitalWrite(LED_PIN, HIGH);
@@ -71,16 +71,16 @@ void DisplayManager::check_page() {
   // проверяем время неактивности. Если в течении 5с не было активности возвращаемся на начальный экран.
   // время экрана "сохранено" - 1с
 
-  if (this->page_name != pageTemp && this->page_name != pageError) {
+  if (DisplayManager::page_name != pageTemp && DisplayManager::page_name != pageError) {
 
-    if (this->page_name == this->t_page_save_settings || this->page_name == this->t_page_save_settings) {
+    if (DisplayManager::page_name == this->t_page_save_settings || DisplayManager::page_name == this->t_page_save_settings) {
       if (millis() - this->t_page_save_settings >= SAVE_TIMEOUT) {
-        this->page_name = pageTemp; //TODO: повторяющийся код
+        DisplayManager::page_name = pageTemp; //TODO: повторяющийся код
         this->menu_item = 0;
         return;
       }
     } else if (millis() - this->t_newPage >= CANCEL_TIMEOUT) { //TODO: t_newPage
-      this->page_name = pageTemp;
+      DisplayManager::page_name = pageTemp;
       this->menu_item = 0;
     }
   }
@@ -92,7 +92,7 @@ void DisplayManager::paint() {
 
   this->u8g2->clearBuffer();
 
-  switch (this->page_name) { //TODO: остановился тут
+  switch (DisplayManager::page_name) { //TODO: остановился тут
     case pageTemp:
       // основной экран. Отображение текущей и уставной температуры.
 
@@ -295,10 +295,10 @@ void DisplayManager::_rotary_right(uint8_t session_boiler_mode) {
   // обработаем вращение энкодера вправо
   this->t_newPage = millis();
 
-  switch (this->page_name) {
+  switch (DisplayManager::page_name) {
     case pageTemp:
       // страница с настройками
-      this->page_name = pageSettings;
+      DisplayManager::page_name = pageSettings;
       break;
 
     case pageTempSet:
@@ -341,7 +341,7 @@ void DisplayManager::_rotary_left(uint8_t session_boiler_mode) {
   // обработаем вращение энкодера влево
   this->t_newPage = millis();
 
-  switch (this->page_name) {
+  switch (DisplayManager::page_name) {
     case pageTempSet:
       // страница настройки устанавливаемой температуры
 
@@ -361,7 +361,7 @@ void DisplayManager::_rotary_left(uint8_t session_boiler_mode) {
       // страница настроек
 
       if (this->menu_item == 0) {
-        this->page_name = pageTemp;
+        DisplayManager::page_name = pageTemp;
       } else {
         if (this->menu_item > 1) {
           this->menu_item--;
@@ -407,12 +407,12 @@ void DisplayManager::set_t_newPage(int value) {
 }
 
 DisplayPages DisplayManager::get_page_name() {
-  return this->page_name;
+  return DisplayManager::page_name;
 }
 
 // TODO: проверка на существование
 void DisplayManager::set_page_name(DisplayPages page_name) {
-  this->page_name = page_name;
+  DisplayManager::page_name = page_name;
 }
 
 uint8_t DisplayManager::get_menu_item() {
