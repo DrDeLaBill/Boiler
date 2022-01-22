@@ -1,7 +1,3 @@
-/*
- * 
- */
-
 #ifndef _PUMP_H_INCLUDED_
 #define _PUMP_H_INCLUDED_
 

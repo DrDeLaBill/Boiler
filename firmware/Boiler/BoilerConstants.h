@@ -140,7 +140,12 @@ const char* S_SETPOINT  = "setpoint";
 const char* S_SETPOINTWATER = "setpointwater";
 const char* S_PROFILE = "profile";
 
-const char* presets[NUM_PRESETS] = {S_WEEKDAYS, S_WEEKEND, S_CUSTOM, S_NOTFREEZE};
+const char* presets[NUM_PRESETS] = {
+  S_WEEKDAYS, 
+  S_WEEKEND, 
+  S_CUSTOM, 
+  S_NOTFREEZE
+};
 
 const char* http_login = "boilerClient";    // логин и пароль для входа на сайт
 const char* http_pass = "df78jhl<z";

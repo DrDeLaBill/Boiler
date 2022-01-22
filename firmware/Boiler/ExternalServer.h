@@ -1,5 +1,6 @@
 #ifndef _EXTERNAL_SERVER_H_
 #define _EXTERNAL_SERVER_H_
+
 #include <Arduino.h>
 #include <HTTPClient.h>
 #include <ArduinoJson.h>

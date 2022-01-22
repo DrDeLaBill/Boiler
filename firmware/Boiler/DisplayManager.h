@@ -6,13 +6,6 @@
 #include <U8g2lib.h> 
 #include "BoilerConstants.h"
 
-//TODO: include
-//#include "clock_rtc.h"
-//#include "tprofile.h"
-//#include "temp.h"
-//#include "errors.h"
-//#include "network.h"
-
 #define LED_PIN                     23      // пин подсветки дисплея
 
 #define CANCEL_TIMEOUT              5000    // время возврата на основной экран, если не было активности, мс

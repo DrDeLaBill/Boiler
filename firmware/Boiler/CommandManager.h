@@ -2,8 +2,8 @@
  * Обработчик команд Serial порта
  */
 
-#ifndef _COMMANDS_MANAGER_H_
-#define _COMMANDS_MANAGER_H_
+#ifndef _COMMAND_MANAGER_H_
+#define _COMMAND_MANAGER_H_
 
 #include <Arduino.h>
 

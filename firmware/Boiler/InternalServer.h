@@ -6,7 +6,6 @@
 #include <Update.h>
 #include "SPIFFS.h"
 
-#include "OneParamRewrite.h"
 #include "BoilerConstants.h"
 #include "BoilerProfile.h"
 #include "NetworkManager.h"
