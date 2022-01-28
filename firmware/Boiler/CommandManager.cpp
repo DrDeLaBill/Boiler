@@ -26,7 +26,7 @@ void CommandManager::_read_command() {
   }
 }
 
-//TODO: дописать вторую команду и отрефакторить boiler_id
+//TODO: дописать вторую команду и отрефакторить boiler_id, а также задержки между считыванием
 void CommandManager::_execute_command() {
   this->command = this->_split_string(this->message_from_port, ' ', 0);
   if (this->command == "set_boiler_id") {
