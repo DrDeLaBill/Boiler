@@ -5,7 +5,6 @@ CommandManager::CommandManager() {
 }
 
 void CommandManager::check_commands(){
-  Serial.println(F("Check serial port commands"));
   if (Serial.available() > 0) {
     this->_read_command();
     this->_execute_command();
@@ -27,6 +26,7 @@ void CommandManager::_read_command() {
   }
 }
 
+//TODO: дописать вторую команду и отрефакторить boiler_id
 void CommandManager::_execute_command() {
   this->command = this->_split_string(this->message_from_port, ' ', 0);
   if (this->command == "set_boiler_id") {

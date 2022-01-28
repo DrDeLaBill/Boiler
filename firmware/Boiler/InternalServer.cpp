@@ -513,18 +513,18 @@ void InternalServer::server_init(){
   this->server->begin();
 }
 
-String get_preset(uint8_t preset_num) {
-  return presets[preset_num];
+String InternalServer::get_preset(uint8_t preset_num) {
+  return DisplayManager::presets[preset_num];
 }
 
-String get_s_setpoint() {
+String InternalServer::get_s_setpoint() {
   return S_SETPOINT;
 }
 
-String get_s_profile() {
+String InternalServer::get_s_profile() {
   return S_PROFILE;
 }
 
-String get_s_setpointwater() {
+String InternalServer::get_s_setpointwater() {
   return S_SETPOINTWATER;
 }

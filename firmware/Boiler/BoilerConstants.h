@@ -121,34 +121,28 @@ struct BoilerConfiguration {
  * параметры переменных для REST API
  * (настройки для NetworkManager)
  */
-const char* S_SSID = "ssid";
-const char* S_PASSWORD = "password";
-const char* S_DT = "dt";
-const char* S_TZ = "tz";
-const char* S_NAME = "name";
-const char* S_WEEKDAYS = "weekdays";
-const char* S_WEEKEND = "weekend";
-const char* S_CUSTOM = "custom";
-const char* S_NOTFREEZE = "notfreeze";
-const char* S_H0 = "h0";
-const char* S_H1 = "h1";
-const char* S_H2 = "h2";
-const char* S_H3 = "h3";
-const char* S_H4 = "h4";
-const char* S_H5 = "h5";
-const char* S_SETPOINT  = "setpoint";
-const char* S_SETPOINTWATER = "setpointwater";
-const char* S_PROFILE = "profile";
+#define S_SSID "ssid"
+#define S_PASSWORD "password"
+#define S_DT "dt"
+#define S_TZ "tz"
+#define S_NAME "name"
+#define S_WEEKDAYS "weekdays"
+#define S_WEEKEND "weekend"
+#define S_CUSTOM "custom"
+#define S_NOTFREEZE "notfreeze"
+#define S_H0 "h0"
+#define S_H1 "h1"
+#define S_H2 "h2"
+#define S_H3 "h3"
+#define S_H4 "h4"
+#define S_H5 "h5"
+#define S_SETPOINT "setpoint"
+#define S_SETPOINTWATER "setpointwater"
+#define S_PROFILE "profile"
 
-const char* presets[NUM_PRESETS] = {
-  S_WEEKDAYS, 
-  S_WEEKEND, 
-  S_CUSTOM, 
-  S_NOTFREEZE
-};
-
-const char* http_login = "boilerClient";    // логин и пароль для входа на сайт
-const char* http_pass = "df78jhl<z";
+// логин и пароль для входа на сайт
+#define http_login "boilerClient"
+#define http_pass "df78jhl<z"
 
 //Рисунки на дисплее
 const unsigned char pict_air[] = {

@@ -1,7 +1,6 @@
 #include "ErrorService.h"
 
-//TODO: extern
-//extern DisplayPages page;
+Vector<uint8_t> ErrorService::errors_list;
 
 ErrorService::ErrorService() {
   pinMode(FLOW_IN_PIN, INPUT_PULLUP);

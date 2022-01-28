@@ -1,10 +1,11 @@
 #include "ExternalServer.h"
 
+uint32_t ExternalServer::last_time_http = 0;
+bool ExternalServer::got_new_wifi_settings = false;
+bool ExternalServer::connected_to_server = DISCONNECTED;
+
 ExternalServer::ExternalServer() {
   this->http = new HTTPClient();
-  ExternalServer::connected_to_server = DISCONNECTED;
-  ExternalServer::got_new_wifi_settings = false;
-  ExternalServer::last_time_http = 0;
 }
 
 void ExternalServer::send_settings_to_server(uint8_t session_boiler_mode,
@@ -52,7 +53,7 @@ void ExternalServer::send_settings_to_server(uint8_t session_boiler_mode,
     url_to_server = path_to_server + "/profile/";
 
     for (uint8_t j = 0; j < NUM_PRESETS; j++){
-      String url_profile = url_to_server + presets[j];
+      String url_profile = url_to_server + DisplayManager::presets[j];
       this->start_http(url_profile);
       this->http->setConnectTimeout(100);
       this->http->addHeader(HEADER_TYPE, JSON_HEADER);
@@ -85,7 +86,7 @@ void ExternalServer::send_settings_to_server(uint8_t session_boiler_mode,
     for (uint8_t i = 0; i < NUM_DAYS; i++){
       String p_day = "d";
       p_day += String(i);
-      doc[p_day] = presets[boiler_configuration.profile[i]];
+      doc[p_day] = DisplayManager::presets[boiler_configuration.profile[i]];
     }
     send_json = "";
     serializeJson(doc, send_json);

@@ -12,6 +12,7 @@
 #include "ExternalServer.h"
 #include "TemperatureSensor.h"
 #include "ClockRTC.h"
+#include "DisplayManager.h"
 
 class InternalServer
 {

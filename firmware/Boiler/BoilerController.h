@@ -50,6 +50,7 @@ class BoilerController
     BoilerController();
     void controller_init();
     void controller_run();
+    void serial_error_report(String target_url, int responce_code);
 };
 
 #endif

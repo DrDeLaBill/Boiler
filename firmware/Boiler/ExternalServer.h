@@ -6,6 +6,7 @@
 #include <ArduinoJson.h>
 
 #include "BoilerConstants.h"
+#include "DisplayManager.h"
 
 class ExternalServer
 {

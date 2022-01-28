@@ -4,6 +4,7 @@
 #include <Arduino.h>
 //модифицированная версия для больших шрифтов
 #include <U8g2lib.h> 
+
 #include "BoilerConstants.h"
 
 #define LED_PIN                     23      // пин подсветки дисплея
@@ -35,24 +36,32 @@ class DisplayManager
 {
   private:
     DisplayDataConfig display_data_config;
-    static uint8_t brightness;
-    // позиция рамки в меню
-    uint8_t menu_item;                  
-    // отображать "Сохранено" на 1с
-    uint32_t t_page_save_settings;
-    // если в течении 5с не было изменений, то отмена TODO: почему эта переменная ещё и extern
-    uint32_t t_newPage;
-    // настраиваемая температура
-    uint8_t temporary_target_temp;          
     
     //U8G2_PCD8544_84X48_F_4W_SW_SPI u8g2(U8G2_R0, /* clock=*/ 14, /* data=*/ 27, /* cs=*/ 26, /* dc=*/ 25, /* reset=*/ 33);  // Nokia 5110 Display
     U8G2_PCD8544_84X48_F_4W_HW_SPI *u8g2;  // Nokia 5110 Display
-
-    void _rotary_right(uint8_t session_boiler_mode);
-    void _rotary_left(uint8_t session_boiler_mode);
   public:
     static DisplayPages page_name;
+    static uint8_t brightness;
+    // если в течении 5с не было изменений, то отмена TODO: почему эта переменная ещё и extern
+    static uint32_t t_newPage;
+    // настраиваемая температура
+    static uint8_t temporary_target_temp; 
+    // отображать "Сохранено" на 1с
+    static uint32_t t_page_save_settings;
+    // позиция рамки в меню
+    static uint8_t menu_item;   
+    
     static void set_page_name(DisplayPages page_name);
+    static const char* presets[NUM_PRESETS];
+    static void rotary_right(uint8_t session_boiler_mode);
+    static void rotary_left(uint8_t session_boiler_mode);
+    static void set_t_newPage(int value);
+    static DisplayPages get_page_name();
+    static void set_temporary_target_temp(uint8_t temporary_target_temp);
+    static void set_t_page_save_settings(int value);
+    static uint8_t get_temporary_target_temp();
+    static uint8_t get_menu_item();
+    static void set_menu_item(uint8_t menu_item);
     
     DisplayManager();
     void display_init();
@@ -61,13 +70,6 @@ class DisplayManager
     void display_on();
     void display_lightning();
     void set_display_data_config(DisplayDataConfig display_data_config);
-    void set_t_newPage(int value);
-    DisplayPages get_page_name();
-    uint8_t get_menu_item();
-    void set_menu_item(uint8_t menu_item);
-    void set_temporary_target_temp(uint8_t temporary_target_temp);
-    uint8_t get_temporary_target_temp();
-    void set_t_page_save_settings(int value);
     void rotary_encoder_action(uint8_t rotary_state, uint8_t session_boiler_mode);
     void check_page();
 };

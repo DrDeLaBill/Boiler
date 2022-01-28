@@ -20,7 +20,6 @@ class BoilerProfile
     ClockRTC *clock_rtc;
     TemperatureSensor *temperature_sensor;
     
-    void _start_eeprom();
     void _serial_print_boiler_configuration();
   public:
     // требуемая температура теплоносителя (в данной сессии)
@@ -33,11 +32,15 @@ class BoilerProfile
     static uint8_t period_of_day();
     static void set_boiler_mode(uint8_t target_mode);
     static void set_target_temp(uint8_t temp);
+    static bool is_mode_air();
+    static bool is_mode_water();
+    static bool is_mode_profile();
+    static void clear_eeprom();
+    static void start_eeprom();
+    static void set_default_settings();
     
     BoilerProfile();
-    void clear_eeprom();
     void set_session_boiler_mode(uint8_t target_mode);
-    void set_default_settings();
     void set_settings_standby(bool state);
     void set_boiler_id(String boiler_id);
     void set_config_day_profile(uint8_t day, uint8_t value);
@@ -49,9 +52,6 @@ class BoilerProfile
     String get_ssid();
     String get_pass();
     void set_wifi_settings(String ssid, String pass);
-    bool is_mode_air();
-    bool is_mode_water();
-    bool is_mode_profile();
     bool is_radio_connected();
     uint8_t get_current_temperature();
     char *get_current_day(const char* fmt);

@@ -1,21 +1,20 @@
 #include "DisplayManager.h"
 
-//TODO: extern
-//extern BoilerConfig BoilerCfg; //######################################################################
-//
-//extern uint8_t current_temp;            // текущая температура для отображения и ПИД
-//extern uint32_t t_newPage;
-//extern uint8_t user_boiler_mode;
-//extern uint8_t user_error;
-//extern bool connected_to_server;
-//extern uint8_t radio_connected;
+DisplayPages DisplayManager::page_name = pageTemp;
+uint8_t DisplayManager::brightness = 255;
+const char* DisplayManager::presets[NUM_PRESETS] = {
+  S_WEEKDAYS, 
+  S_WEEKEND, 
+  S_CUSTOM, 
+  S_NOTFREEZE
+};
+uint8_t DisplayManager::menu_item = 0;              
+uint32_t DisplayManager::t_page_save_settings = 0;        
+uint32_t DisplayManager::t_newPage = 0;
+uint8_t DisplayManager::temporary_target_temp = 0;
 
 DisplayManager::DisplayManager() {
   this->u8g2 = new U8G2_PCD8544_84X48_F_4W_HW_SPI(U8G2_R0, /* cs=*/ 25, /* dc=*/ 26, /* reset=*/ U8X8_PIN_NONE);
-  DisplayManager::brightness = 255;
-  this->menu_item = 0;              
-  this->t_page_save_settings = 0;        
-  this->t_newPage = 0;
   this->display_init();
 }
 
@@ -24,20 +23,19 @@ void DisplayManager::display_init() {
   this->u8g2->setContrast(70);
   this->u8g2->enableUTF8Print();
   this->u8g2->setFontDirection(0);
-  DisplayManager::page_name = pageTemp;
   
   pinMode(LED_PIN, OUTPUT);
   digitalWrite(LED_PIN, HIGH);
-  this->t_newPage = millis();                         //TODO: откуда?
+  DisplayManager::t_newPage = millis();
 }
 
 void DisplayManager::display_on() {
   // включаем дисплей и подсветку. Переходим на основную страницу.
   DisplayManager::page_name = pageTemp;
-  this->menu_item = 0;
+  DisplayManager::menu_item = 0;
   this->u8g2->setPowerSave(false);
   digitalWrite(LED_PIN, HIGH);
-  this->t_newPage = millis();                         //TODO: откуда?
+  DisplayManager::t_newPage = millis();                         //TODO: откуда?
 }
 
 void DisplayManager::display_off() {
@@ -48,19 +46,19 @@ void DisplayManager::display_off() {
 
 void DisplayManager::display_lightning() {
   // плавно выключаем подсветку при отсутствии активности
-  if (this->t_newPage != 0) {                         
+  if (DisplayManager::t_newPage != 0) {                         
     //TODO: вся функция из extern
     
     // если недавно была активность то ждем время до выключения
-    if (millis() - t_newPage >= TIMEOUT_LIGHTNING) {                         //TODO: откуда?
+    if (millis() - DisplayManager::t_newPage >= TIMEOUT_LIGHTNING) {                         //TODO: откуда?
       ledcWrite(0, brightness--);
-      if (this->brightness == 0) {
+      if (DisplayManager::brightness == 0) {
         ledcWrite(0, 0);
-        t_newPage = 0;
+        DisplayManager::t_newPage = 0;
       }
     } else {
       // если время не подходит, то обновляем данные.
-      this->brightness = 255;
+      DisplayManager::brightness = 255;
       ledcWrite(0, 255);
     }
   }
@@ -72,15 +70,15 @@ void DisplayManager::check_page() {
 
   if (DisplayManager::page_name != pageTemp && DisplayManager::page_name != pageError) {
 
-    if (DisplayManager::page_name == this->t_page_save_settings || DisplayManager::page_name == this->t_page_save_settings) {
-      if (millis() - this->t_page_save_settings >= SAVE_TIMEOUT) {
+    if (DisplayManager::page_name == DisplayManager::t_page_save_settings || DisplayManager::page_name == DisplayManager::t_page_save_settings) {
+      if (millis() - DisplayManager::t_page_save_settings >= SAVE_TIMEOUT) {
         DisplayManager::page_name = pageTemp; //TODO: повторяющийся код
-        this->menu_item = 0;
+        DisplayManager::menu_item = 0;
         return;
       }
-    } else if (millis() - this->t_newPage >= CANCEL_TIMEOUT) { //TODO: t_newPage
+    } else if (millis() - DisplayManager::t_newPage >= CANCEL_TIMEOUT) { //TODO: t_newPage
       DisplayManager::page_name = pageTemp;
-      this->menu_item = 0;
+      DisplayManager::menu_item = 0;
     }
   }
 }
@@ -171,7 +169,7 @@ void DisplayManager::paint() {
 
       this->u8g2->setFont(u8g2_font_luBS12_tr);
       this->u8g2->setCursor(29, 38);
-      this->u8g2->print(this->temporary_target_temp);
+      this->u8g2->print(DisplayManager::temporary_target_temp);
       break;
 
     case pageSaveSettings:
@@ -207,11 +205,11 @@ void DisplayManager::paint() {
       this->u8g2->print("Сброс настроек");
       
 
-      if (this->menu_item == 0) {
+      if (DisplayManager::menu_item == 0) {
         // без выбора
-      } else if (this->menu_item == 1) {
+      } else if (DisplayManager::menu_item == 1) {
         this->u8g2->drawRFrame(0,  1, 78, 10, 4);
-      } else if (this->menu_item == 2) {
+      } else if (DisplayManager::menu_item == 2) {
         this->u8g2->drawRFrame(0, 12, 78, 10, 4);
       }
       break;
@@ -227,11 +225,11 @@ void DisplayManager::paint() {
       this->u8g2->setCursor(5, 32);
       this->u8g2->print("темп. воздух");
 
-      if (this->menu_item == 1) {
+      if (DisplayManager::menu_item == 1) {
         this->u8g2->drawRFrame(0, 1, 78, 10, 4);
-      } else if (this->menu_item == 2) {
+      } else if (DisplayManager::menu_item == 2) {
         this->u8g2->drawRFrame(0, 12, 78, 10, 4);
-      } else if (this->menu_item == 3){
+      } else if (DisplayManager::menu_item == 3){
         this->u8g2->drawRFrame(0, 23, 78, 10, 4);
       }
       break;
@@ -284,15 +282,15 @@ void DisplayManager::paint() {
 
 void DisplayManager::rotary_encoder_action(uint8_t rotary_state, uint8_t session_boiler_mode) {
   if (rotary_state == BUTTON_ROTARY_RIGHT) {
-    this->_rotary_right(session_boiler_mode);
+    DisplayManager::rotary_right(session_boiler_mode);
   } else if (rotary_state == BUTTON_ROTARY_LEFT) {
-    this->_rotary_left(session_boiler_mode);
+    DisplayManager::rotary_left(session_boiler_mode);
   }
 }
 
-void DisplayManager::_rotary_right(uint8_t session_boiler_mode) {
+void DisplayManager::rotary_right(uint8_t session_boiler_mode) {
   // обработаем вращение энкодера вправо
-  this->t_newPage = millis();
+  DisplayManager::t_newPage = millis();
 
   switch (DisplayManager::page_name) {
     case pageTemp:
@@ -305,12 +303,12 @@ void DisplayManager::_rotary_right(uint8_t session_boiler_mode) {
 
       // TODO: user_boiler_mode
       if (session_boiler_mode == MODE_WATER){
-        if (this->temporary_target_temp < WATER_TEMP_MAX) {
-          this->temporary_target_temp++;
+        if (DisplayManager::temporary_target_temp < WATER_TEMP_MAX) {
+          DisplayManager::temporary_target_temp++;
         }
       } else {
-        if (this->temporary_target_temp < AIR_TEMP_MAX) {
-          this->temporary_target_temp++;
+        if (DisplayManager::temporary_target_temp < AIR_TEMP_MAX) {
+          DisplayManager::temporary_target_temp++;
         }
       }
       break;
@@ -318,16 +316,16 @@ void DisplayManager::_rotary_right(uint8_t session_boiler_mode) {
     case pageSettings:
       // страница настроек
 
-      if (this->menu_item != 0 && this->menu_item < 3) {
-        this->menu_item++;
+      if (DisplayManager::menu_item != 0 && DisplayManager::menu_item < 3) {
+        DisplayManager::menu_item++;
       }
       break;
 
     case pageSetMode:
       // страница выбора режима работы
 
-      if (this->menu_item < 3) {
-        this->menu_item++;
+      if (DisplayManager::menu_item < 3) {
+        DisplayManager::menu_item++;
       }
       break;
 
@@ -336,9 +334,9 @@ void DisplayManager::_rotary_right(uint8_t session_boiler_mode) {
   }
 }
 
-void DisplayManager::_rotary_left(uint8_t session_boiler_mode) {
+void DisplayManager::rotary_left(uint8_t session_boiler_mode) {
   // обработаем вращение энкодера влево
-  this->t_newPage = millis();
+  DisplayManager::t_newPage = millis();
 
   switch (DisplayManager::page_name) {
     case pageTempSet:
@@ -346,12 +344,12 @@ void DisplayManager::_rotary_left(uint8_t session_boiler_mode) {
 
       // TODO: user_boiler_mode
       if (session_boiler_mode == MODE_WATER){
-        if (this->temporary_target_temp > WATER_TEMP_MIN) {
-          this->temporary_target_temp--;
+        if (DisplayManager::temporary_target_temp > WATER_TEMP_MIN) {
+          DisplayManager::temporary_target_temp--;
         }
       } else {
-        if (this->temporary_target_temp > AIR_TEMP_MIN) {
-          this->temporary_target_temp--;
+        if (DisplayManager::temporary_target_temp > AIR_TEMP_MIN) {
+          DisplayManager::temporary_target_temp--;
         }
       }
       break;
@@ -359,11 +357,11 @@ void DisplayManager::_rotary_left(uint8_t session_boiler_mode) {
     case pageSettings:
       // страница настроек
 
-      if (this->menu_item == 0) {
+      if (DisplayManager::menu_item == 0) {
         DisplayManager::page_name = pageTemp;
       } else {
-        if (this->menu_item > 1) {
-          this->menu_item--;
+        if (DisplayManager::menu_item > 1) {
+          DisplayManager::menu_item--;
         }
       }
       break;
@@ -371,8 +369,8 @@ void DisplayManager::_rotary_left(uint8_t session_boiler_mode) {
     case pageSetMode:
       // страница выбора режима работы
 
-      if (this->menu_item > 1) {
-        this->menu_item--;
+      if (DisplayManager::menu_item > 1) {
+        DisplayManager::menu_item--;
       }
       break;
 
@@ -402,7 +400,7 @@ void DisplayManager::set_display_data_config(DisplayDataConfig display_data_conf
 }
 
 void DisplayManager::set_t_newPage(int value) {
-  this->t_newPage = value;
+  DisplayManager::t_newPage = value;
 }
 
 DisplayPages DisplayManager::get_page_name() {
@@ -415,22 +413,22 @@ void DisplayManager::set_page_name(DisplayPages page_name) {
 }
 
 uint8_t DisplayManager::get_menu_item() {
-  return this->menu_item;
+  return DisplayManager::menu_item;
 }
 
 // TODO: проверка на существование
 void DisplayManager::set_menu_item(uint8_t menu_item) {
-  this->menu_item = menu_item;
+  DisplayManager::menu_item = menu_item;
 }
 
 void DisplayManager::set_temporary_target_temp(uint8_t temporary_target_temp) {
-  this->temporary_target_temp = temporary_target_temp;
+  DisplayManager::temporary_target_temp = temporary_target_temp;
 }
 
 void DisplayManager::set_t_page_save_settings(int value) {
-  this->t_page_save_settings = value;
+  DisplayManager::t_page_save_settings = value;
 }
 
 uint8_t DisplayManager::get_temporary_target_temp() {
-  return this->temporary_target_temp;
+  return DisplayManager::temporary_target_temp;
 }

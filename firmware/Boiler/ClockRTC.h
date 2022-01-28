@@ -8,7 +8,7 @@
 class ClockRTC
 {
   public:
-    static iarduino_RTC *watch;
+    static iarduino_RTC watch;
     static uint8_t clock_get_hours();
     static uint8_t clock_get_day_of_week();
     static char* clock_get_time(const char* fmt);

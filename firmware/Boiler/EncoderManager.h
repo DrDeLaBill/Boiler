@@ -1,18 +1,15 @@
 /*
  * обработка энкодера с кнопкой
  */
-
 #ifndef _ENCODER_H_
 #define _ENCODER_H_
+
 #include <Arduino.h>
 #include <ESP32Encoder.h>
-#include "BoilerConstants.h"
 
-//TODO: include
-//#include "tprofile.h"
-//#include "display.h"
-//#include "temp.h"'
-//#include "network.h"
+#include "BoilerConstants.h"
+#include "DisplayManager.h"
+#include "BoilerProfile.h"
 
 #define PIN_ENC_BUTTON                19          // пин подключения кнопки
 #define PIN_ENC_1                     5      
@@ -31,8 +28,9 @@ class EncoderManager
     uint32_t last_time_button;
     uint8_t button_last_state;
     uint8_t button_rotary_state;
-    static uint32_t last_time_debounce;
   public:
+    static uint32_t last_time_debounce;
+    
     EncoderManager();
     static void buttonISR();
     void encoder_init();
@@ -40,10 +38,10 @@ class EncoderManager
     uint8_t check_encoder_button();
     uint8_t check_encoder(bool standby);
     bool is_button_holded(uint8_t work_mode);
-    void button_pressed();
     void rotary_right();
     void rotary_left();
     uint8_t get_button_rotary_state();
+    void button_pressed_action();
 };
 
 #endif

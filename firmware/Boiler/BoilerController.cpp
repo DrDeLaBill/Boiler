@@ -1,6 +1,9 @@
 #include "BoilerController.h"
 
 BoilerController::BoilerController() {
+  Serial.begin(115200);
+  Serial.println(F("\n######################################################"));
+  Serial.println(F("Initialization started."));
   if(!SPIFFS.begin(true)){
     Serial.println(F("An Error has occurred while mounting SPIFFS"));
     //  "При монтировании SPIFFS произошла ошибка"
@@ -29,6 +32,16 @@ void BoilerController::controller_init() {
 }
 
 void BoilerController::controller_run() {
+  /*
+   * Загрузка значений по термопрофилю. Получение текущего времени.
+   * Измерение температуры. Теплоноситель и внешний датчик.
+   * Измерение температуры ТТ реле и включение вентилятора.
+   * Общение с сервером. Надо поговорить об этом с Ромой.
+   * Проверка исправности системы. Отображение ошибок.
+   * Опрос энкодера и кнопки.
+   * Рисование на дисплее.
+   * 
+   */
   // Проверка наличия команд через Serial порт
   this->_check_serial_port_commands();
 
@@ -108,83 +121,6 @@ void BoilerController::_check_network_settings() {
   }
 }
 
-void BoilerController::_button_pressed_action() {
-  // пробежимся по меню и сделаем соответствующие изменения
-  this->display_manager->set_t_newPage(millis());
-
-  switch (this->display_manager->get_page_name()) {
-    case pageTemp:
-      // переходим из основного окна в режим настройки температуры
-      this->display_manager->set_page_name(pageTempSet);
-      this->display_manager->set_temporary_target_temp(
-        BoilerProfile::get_target_temp()
-      );
-      break;
-
-    case pageTempSet:
-      // сохраняем установленную температуру
-      this->display_manager->set_page_name(pageSaveSettings);
-      this->display_manager->set_t_page_save_settings(millis());
-      this->boiler_profile->set_target_temp(
-        this->display_manager->get_temporary_target_temp()
-      );
-      break;
-
-    case pageSettings:
-      // переход в подменю настроек
-
-      switch (this->display_manager->get_menu_item()) {
-        case 0:
-          // включаем рамку выбора
-          this->display_manager->set_menu_item(1);
-          break;
-
-        case 1:
-          // переходим в выбор текущего режима работы
-          this->display_manager->set_page_name(pageSetMode);
-          if (this->boiler_profile->is_mode_profile()) {
-            this->display_manager->set_menu_item(1);
-          } else if (this->boiler_profile->is_mode_water()) {
-            this->display_manager->set_menu_item(2);
-          } else if (this->boiler_profile->is_mode_air()) {
-            this->display_manager->set_menu_item(3);
-          }
-          break;
-
-        case 2:
-          // стираем ее_пром
-          this->display_manager->set_page_name(pageResetSettings);
-          this->display_manager->set_t_page_save_settings(millis());
-          this->boiler_profile->clear_eeprom();
-          break;
-        default:
-          break;
-      }
-
-      break;
-
-    case pageSetMode:
-      // страница выбора режима работы
-
-      if (this->display_manager->get_menu_item() == 1) {
-        // если выбран термопрофиль
-        this->boiler_profile->set_boiler_mode(MODE_PROFILE);
-      } else if (this->display_manager->get_menu_item() == 2) {
-        // если выбран внутренний датчик
-        this->boiler_profile->set_boiler_mode(MODE_WATER);
-      } else if (this->display_manager->get_menu_item() == 3) {
-        // если выбран внешний датчик
-        this->boiler_profile->set_boiler_mode(MODE_AIR);
-      }
-      this->display_manager->set_page_name(pageResetSettings);
-      this->display_manager->set_t_page_save_settings(millis());
-      break;
-
-    default:
-      break;
-  }
-}
-
 bool BoilerController::_button_holded_action() {
   uint8_t button_state = this->encoder_manager->check_encoder(this->work_mode);
   this->display_manager->rotary_encoder_action(
@@ -194,7 +130,7 @@ bool BoilerController::_button_holded_action() {
   if (button_state == BUTTON_HOLDED) {
     return true;
   } else if (button_state == BUTTON_PRESSED) {
-    this->_button_pressed_action();
+    this->encoder_manager->button_pressed_action();
   }
   return false;
 }
@@ -233,11 +169,11 @@ void BoilerController::_check_external_server_sttings() {
       doc["target_temp"] = BoilerProfile::get_target_temp();
       uint8_t num_preset = this->boiler_profile->get_profile_for_week_day();
       doc["current_profile"] = this->internal_server->get_preset(num_preset);
-      if (this->boiler_profile->is_mode_air())
+      if (BoilerProfile::is_mode_air())
         doc["current_mode"] = String(this->internal_server->get_s_setpoint());
-      else if (this->boiler_profile->is_mode_profile()) 
+      else if (BoilerProfile::is_mode_profile()) 
         doc["current_mode"] = String(this->internal_server->get_s_profile());
-      else if (this->boiler_profile->is_mode_water()) 
+      else if (BoilerProfile::is_mode_water()) 
         doc["current_mode"] = String(this->internal_server->get_s_setpointwater());
       String send_json = "";
       serializeJson(doc, send_json);
@@ -281,10 +217,7 @@ void BoilerController::_check_external_server_sttings() {
               }
               this->boiler_profile->set_target_temp(need_temp);
             } else {
-              Serial.print(F("path: "));
-              Serial.println(url_to_server);
-              Serial.print(F("responseCode: "));
-              Serial.println(this->external_server->get_http_error(response_code));
+              this->serial_error_report(url_to_server, response_code);
             }
         }
   
@@ -337,10 +270,7 @@ void BoilerController::_check_external_server_sttings() {
               }
             }
           } else {
-            Serial.print(F("path: "));
-            Serial.println(url_to_server);
-            Serial.print(F("responseCode: "));
-            Serial.println(this->external_server->get_http_error(response_code));
+            this->serial_error_report(url_to_server, response_code);
           }
         }
         
@@ -348,10 +278,7 @@ void BoilerController::_check_external_server_sttings() {
         
       } else {
         this->external_server->close_http_session();
-        Serial.print(F("path: "));
-        Serial.println(url_to_server);
-        Serial.print(F("responseCode: "));
-        Serial.println(this->external_server->get_http_error(response_code));
+        this->serial_error_report(url_to_server, response_code);
         this->external_server->set_connected_to_server(false);
       }
     }
@@ -377,11 +304,15 @@ void BoilerController::_external_profile_settings_init(String url) {
   }
 
   } else {
-    Serial.print(F("path: "));
-    Serial.println(url);
-    Serial.print(F("responseCode: "));
-    Serial.println(this->external_server->get_http_error(response_code));
+    this->serial_error_report(url, response_code);
   }
+}
+
+void BoilerController::serial_error_report(String target_url, int response_code) {
+  Serial.print(F("path: "));
+  Serial.println(target_url);
+  Serial.print(F("responseCode: "));
+  Serial.println(this->external_server->get_http_error(response_code));
 }
 
 void BoilerController::_fill_display_manager_configuration() {
@@ -389,8 +320,8 @@ void BoilerController::_fill_display_manager_configuration() {
   display_data_config.is_wifi_connect = this->network_manager->is_wifi_connected();
   display_data_config.is_heating_on = this->relay_manager->is_heating_on();
   display_data_config.is_connected_to_server = this->external_server->get_connected_to_server();
-  display_data_config.is_external_sensor = this->boiler_profile->is_mode_air() || this->boiler_profile->is_mode_profile();
-  display_data_config.is_internal_sensor = this->boiler_profile->is_mode_air();
+  display_data_config.is_external_sensor = BoilerProfile::is_mode_air() || BoilerProfile::is_mode_profile();
+  display_data_config.is_internal_sensor = BoilerProfile::is_mode_air();
   display_data_config.is_radio_connected = this->boiler_profile->is_radio_connected();
   display_data_config.is_overheat = ErrorService::is_set_error(ERROR_OVERHEAT) || ErrorService::is_set_error(ERROR_WATEROVERHEAT);
   display_data_config.is_pumpbroken = ErrorService::is_set_error(ERROR_PUMPBROKEN);

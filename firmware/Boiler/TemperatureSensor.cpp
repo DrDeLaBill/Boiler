@@ -1,17 +1,18 @@
 #include "TemperatureSensor.h"
 
+uint8_t TemperatureSensor::current_temp = 0;
+uint8_t TemperatureSensor::radio_connected = 0;
+
 TemperatureSensor::TemperatureSensor() {
   this->regulator_AIR = new GyverPID(kP_air, kI_air, kD_air, dT);
   this->regulator_WATER = new GyverPID(kP_water, kI_water, kD_water, dT);
   this->oneWire = new OneWire(ONE_WIRE_BUS);
   this->sensors = new DallasTemperature(oneWire);
   this->radio_sensor = new RadioSensor();
-  TemperatureSensor::current_temp = 0;                      
-  TemperatureSensor::current_temp_water = 0;                   
-  TemperatureSensor::current_temp_air = 0;                    
+  this->current_temp_water = 0;                   
+  this->current_temp_air = 0;                    
   this->pid_last_time = 0;              
-  this->pwm_set_0_time = 0;                   
-  TemperatureSensor::radio_connected = 0;             
+  this->pwm_set_0_time = 0;
   this->check_ssr_last_time = 0;       
   this->check_ssr_last_temp = 0;  
   this->error = ERROR_NOERROR;
@@ -96,10 +97,10 @@ void TemperatureSensor::pwm(uint32_t on_time){
     if (time_msec == this->period_msec){
       if (this->check_ssr_last_time == 0){
         this->check_ssr_last_time = millis();
-        this->check_ssr_last_temp = (uint8_t)TemperatureSensor::current_temp_water;
+        this->check_ssr_last_temp = (uint8_t)this->current_temp_water;
       } else if (millis() - this->check_ssr_last_time >= HEATER_1DEGREE_TIMEOUT){
         // если за 15мин интенсивного нагрева температура теплоносителя не изменилась, то ошибка.
-        if ((uint8_t)TemperatureSensor::current_temp_water == this->check_ssr_last_temp){
+        if ((uint8_t)this->current_temp_water == this->check_ssr_last_temp){
           // error: don't heat
           this->error = ERROR_NOPOWER;
         }
@@ -137,7 +138,7 @@ uint8_t TemperatureSensor::update_current_temp_water() {
     
     // Check if reading was successful
     if (tempC != DEVICE_DISCONNECTED_C) {
-      TemperatureSensor::current_temp_water = tempC;
+      this->current_temp_water = tempC;
       if (sensors->isConversionComplete()){
         sensors->requestTemperaturesByIndex(0);
         sens_temp_tries = 5;
@@ -174,11 +175,11 @@ float TemperatureSensor::get_current_temp_water() {
 }
 
 void TemperatureSensor::set_current_temp_like_water_temp() {
-  TemperatureSensor::current_temp = (uint8_t)TemperatureSensor::current_temp_water;
+  TemperatureSensor::current_temp = (uint8_t)this->current_temp_water;
 }
 
 void TemperatureSensor::set_current_temp_like_air_temp() {
-  TemperatureSensor::current_temp = (uint8_t)TemperatureSensor::current_temp_air;
+  TemperatureSensor::current_temp = (uint8_t)this->current_temp_air;
 }
 
 uint8_t TemperatureSensor::get_radio_temp() {

@@ -1,12 +1,14 @@
 #include "BoilerProfile.h"
 
+uint8_t BoilerProfile::session_target_temp_int = 0;
+uint8_t BoilerProfile::session_boiler_mode = MODE_WATER;
+BoilerConfiguration BoilerProfile::boiler_configuration;
+
 BoilerProfile::BoilerProfile() {
   this->clock_rtc = new ClockRTC();
   this->temperature_sensor = new TemperatureSensor();
-  BoilerProfile::session_target_temp_int = 0;
-  BoilerProfile::session_boiler_mode = MODE_WATER;
   
-  this->_start_eeprom();
+  BoilerProfile::start_eeprom();
 
   this->_serial_print_boiler_configuration();
   
@@ -29,15 +31,15 @@ BoilerProfile::BoilerProfile() {
 }
 
 // Стирание eeprom
-void BoilerProfile::clear_eeprom () {
-  this->_start_eeprom();
+void BoilerProfile::clear_eeprom() {
+  BoilerProfile::start_eeprom();
 
-  for (uint8_t i = 0; i < sizeof(boiler_configuration); i++) {
+  for (uint8_t i = 0; i < sizeof(BoilerProfile::boiler_configuration); i++) {
     EEPROM.write(i, 0xFF);
   }
   EEPROM.commit();
   
-  this->set_default_settings();
+  BoilerProfile::set_default_settings();
 }
 
 void BoilerProfile::set_default_settings(){
@@ -148,7 +150,7 @@ void BoilerProfile::set_settings_standby(bool state){
   BoilerProfile::save_configuration();
 }
 
-void BoilerProfile::_start_eeprom() {
+void BoilerProfile::start_eeprom() {
   if (!EEPROM.begin(512)) {
     Serial.println(F("ERROR: Failed to initialise EEPROM"));
     Serial.println(F("Restarting..."));

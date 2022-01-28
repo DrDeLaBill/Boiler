@@ -1,10 +1,11 @@
 #include "NetworkManager.h"
 
+String NetworkManager::current_ssid = "";
+String NetworkManager::current_pass = "";
+
 NetworkManager::NetworkManager() {
   this->soft_ap_ssid = "BoilerAP";
   this->soft_ap_password = "12345678";
-  NetworkManager::current_ssid = "";
-  this->current_pass = "";
   this->network_init();
 }
 
@@ -54,7 +55,7 @@ void NetworkManager::connect_to_wifi(void){
 
 void NetworkManager::set_wifi_settings(String ssid, String pass) {
   NetworkManager::current_ssid = ssid;
-  this->current_pass = pass;
+  NetworkManager::current_pass = pass;
 }
 
 String NetworkManager::get_ssid() {
@@ -62,14 +63,14 @@ String NetworkManager::get_ssid() {
 }
 
 String NetworkManager::get_pass() {
-  return this->current_pass;
+  return NetworkManager::current_pass;
 }
 
-bool is_wifi_connected() {
+bool NetworkManager::is_wifi_connected() {
   return WiFi.status() == WL_CONNECTED;
 }
 
-uint8_t get_wifi_status() {
+uint8_t NetworkManager::get_wifi_status() {
   return WiFi.status();
 }
 

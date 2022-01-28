@@ -1,9 +1,10 @@
 #include "EncoderManager.h"
 
+uint32_t EncoderManager::last_time_debounce = 0;
+  
 EncoderManager::EncoderManager() {
   this->encoder = new ESP32Encoder();
   this->last_time_button = 0;
-  EncoderManager::last_time_debounce = 0;
   this->button_last_state = BUTTON_NO_PRESSED;
   this->button_rotary_state = BUTTON_NON_ROTARY;
   this->encoder_init();
@@ -107,7 +108,7 @@ uint8_t EncoderManager::check_encoder(bool standby) {
       // если кнопка была нажата
 
       //TODO :перенести функцию buutton_pressed со свитч в boiler controller (возвращать work_mode (наверно))
-      this->button_pressed();
+      this->button_pressed_action();
       button_state = BUTTON_NO_PRESSED;
     }
 
@@ -115,11 +116,11 @@ uint8_t EncoderManager::check_encoder(bool standby) {
     if (ticks > 0) {
       // вращение вправо
       this->button_rotary_state = BUTTON_ROTARY_RIGHT;
-      this->rotary_right();
+      DisplayManager::rotary_right(BoilerProfile::session_boiler_mode);
     } else if (ticks < 0) {
       // вращение влево
       this->button_rotary_state = BUTTON_ROTARY_LEFT;
-      this->rotary_left();
+      DisplayManager::rotary_left(BoilerProfile::session_boiler_mode);
     } else {
       this->button_rotary_state = BUTTON_NON_ROTARY;
     }
@@ -127,6 +128,84 @@ uint8_t EncoderManager::check_encoder(bool standby) {
   
   return button_state;
 }
+
+void EncoderManager::button_pressed_action() {
+  // пробежимся по меню и сделаем соответствующие изменения
+  DisplayManager::set_t_newPage(millis());
+
+  switch (DisplayManager::get_page_name()) {
+    case pageTemp:
+      // переходим из основного окна в режим настройки температуры
+      DisplayManager::set_page_name(pageTempSet);
+      DisplayManager::set_temporary_target_temp(
+        BoilerProfile::get_target_temp()
+      );
+      break;
+
+    case pageTempSet:
+      // сохраняем установленную температуру
+      DisplayManager::set_page_name(pageSaveSettings);
+      DisplayManager::set_t_page_save_settings(millis());
+      BoilerProfile::set_target_temp(
+        DisplayManager::get_temporary_target_temp()
+      );
+      break;
+
+    case pageSettings:
+      // переход в подменю настроек
+
+      switch (DisplayManager::get_menu_item()) {
+        case 0:
+          // включаем рамку выбора
+          DisplayManager::set_menu_item(1);
+          break;
+
+        case 1:
+          // переходим в выбор текущего режима работы
+          DisplayManager::set_page_name(pageSetMode);
+          if (BoilerProfile::is_mode_profile()) {
+            DisplayManager::set_menu_item(1);
+          } else if (BoilerProfile::is_mode_water()) {
+            DisplayManager::set_menu_item(2);
+          } else if (BoilerProfile::is_mode_air()) {
+            DisplayManager::set_menu_item(3);
+          }
+          break;
+
+        case 2:
+          // стираем ее_пром
+          DisplayManager::set_page_name(pageResetSettings);
+          DisplayManager::set_t_page_save_settings(millis());
+          BoilerProfile::clear_eeprom();
+          break;
+        default:
+          break;
+      }
+
+      break;
+
+    case pageSetMode:
+      // страница выбора режима работы
+
+      if (DisplayManager::get_menu_item() == 1) {
+        // если выбран термопрофиль
+        BoilerProfile::set_boiler_mode(MODE_PROFILE);
+      } else if (DisplayManager::get_menu_item() == 2) {
+        // если выбран внутренний датчик
+        BoilerProfile::set_boiler_mode(MODE_WATER);
+      } else if (DisplayManager::get_menu_item() == 3) {
+        // если выбран внешний датчик
+        BoilerProfile::set_boiler_mode(MODE_AIR);
+      }
+      DisplayManager::set_page_name(pageResetSettings);
+      DisplayManager::set_t_page_save_settings(millis());
+      break;
+
+    default:
+      break;
+  }
+}
+
 
 bool EncoderManager::is_button_holded(uint8_t work_mode) {
   return this->check_encoder(work_mode) == BUTTON_HOLDED;
