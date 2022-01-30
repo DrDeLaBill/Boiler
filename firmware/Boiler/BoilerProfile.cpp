@@ -11,11 +11,12 @@ BoilerProfile::BoilerProfile() {
   BoilerProfile::start_eeprom();
 
   this->_serial_print_boiler_configuration();
-  
+
+  Serial.print(F("Boiler mode: "));
+  Serial.println(String(BoilerProfile::boiler_configuration.boiler_mode));
   if (BoilerProfile::boiler_configuration.boiler_mode == 0xFF) {
     // EEPROM is empty
-    this->set_default_settings();
-    BoilerProfile::save_configuration();
+    BoilerProfile::set_default_settings();
   }
   Serial.print(F("\nboiler_name: "));
   Serial.println(BoilerProfile::boiler_configuration.boiler_name);
@@ -145,8 +146,8 @@ void BoilerProfile::set_boiler_mode(uint8_t target_mode){
   BoilerProfile::save_configuration();
 }
 
-void BoilerProfile::set_settings_standby(bool state){
-  BoilerProfile::boiler_configuration.standby_flag = state;
+void BoilerProfile::set_settings_standby(bool state_mode){
+  BoilerProfile::boiler_configuration.standby_flag = state_mode;
   BoilerProfile::save_configuration();
 }
 
@@ -156,6 +157,8 @@ void BoilerProfile::start_eeprom() {
     Serial.println(F("Restarting..."));
     delay(200);
     ESP.restart();
+  } else {
+    Serial.println(F("EEPROM start"));
   }
 }
 
@@ -167,6 +170,7 @@ void BoilerProfile::_serial_print_boiler_configuration() {
     Serial.print(ptr[i]);
     Serial.print(F(" "));
   }
+  Serial.println();
 }
 
 void BoilerProfile::set_boiler_id(String boiler_id) {

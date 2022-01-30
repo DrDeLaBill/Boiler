@@ -25,8 +25,8 @@
 class BoilerController 
 {
   private:
+    // режим работы: работа, режим ожидания
     bool work_mode;
-    bool p_mode;         // режим работы: работа, режим ожидания
     ErrorService *error_service;
     NetworkManager *network_manager;
     ExternalServer *external_server;
@@ -41,8 +41,6 @@ class BoilerController
     void _check_serial_port_commands();
     void _check_network_settings();
     void _fill_display_manager_configuration();
-    void _button_pressed_action();
-    bool _button_holded_action();
     void _check_button_commands();
     void _check_external_server_sttings();
     void _external_profile_settings_init(String url);

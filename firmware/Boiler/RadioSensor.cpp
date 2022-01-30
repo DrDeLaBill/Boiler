@@ -7,11 +7,14 @@ RadioSensor::RadioSensor() {
 }
 
 void RadioSensor::radio_init(){
-  
-	if (!this->radio->begin())
-	  Serial.println("radio init error"); // Инициализация модуля NRF24L01
-  else 
+  // Инициализация модуля NRF24L01
+	if (!this->radio->begin()) {
+	  Serial.println("radio init error"); 
+	}
+  else {
     Serial.println("radio init ok");
+  }
+  
 	this->radio->setChannel(0x6f);
 	this->radio->setDataRate(RF24_1MBPS); // Скорость обмена данными 1 Мбит/сек
 	this->radio->setPALevel(RF24_PA_HIGH);           //

@@ -20,15 +20,7 @@ TemperatureSensor::TemperatureSensor() {
   this->pid_init();
 }
 
-//TODO: extern
-//extern BoilerConfig BoilerCfg;
-//extern DisplayPages page;                       // флаг перерисовки дисплея
-//extern uint8_t user_target_temp_int;
-//extern uint8_t user_boiler_mode;
-//extern uint8_t user_error;
-
 void TemperatureSensor::temp_init() {
-  this->radio_sensor->radio_init();
   this->sensors->begin();
   this->sensors->setWaitForConversion(false);
   this->sensors->requestTemperatures();

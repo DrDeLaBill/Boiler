@@ -27,6 +27,7 @@ void DisplayManager::display_init() {
   pinMode(LED_PIN, OUTPUT);
   digitalWrite(LED_PIN, HIGH);
   DisplayManager::t_newPage = millis();
+  Serial.println(F("Display init"));
 }
 
 void DisplayManager::display_on() {
@@ -280,17 +281,19 @@ void DisplayManager::paint() {
   this->u8g2->sendBuffer();
 }
 
-void DisplayManager::rotary_encoder_action(uint8_t rotary_state, uint8_t session_boiler_mode) {
+void DisplayManager::rotary_encoder_action(uint8_t rotary_state) {
   if (rotary_state == BUTTON_ROTARY_RIGHT) {
-    DisplayManager::rotary_right(session_boiler_mode);
+    DisplayManager::rotary_right();
   } else if (rotary_state == BUTTON_ROTARY_LEFT) {
-    DisplayManager::rotary_left(session_boiler_mode);
+    DisplayManager::rotary_left();
   }
 }
 
-void DisplayManager::rotary_right(uint8_t session_boiler_mode) {
+void DisplayManager::rotary_right() {
   // обработаем вращение энкодера вправо
   DisplayManager::t_newPage = millis();
+
+  uint8_t session_boiler_mode = BoilerProfile::get_session_boiler_mode();
 
   switch (DisplayManager::page_name) {
     case pageTemp:
@@ -334,9 +337,11 @@ void DisplayManager::rotary_right(uint8_t session_boiler_mode) {
   }
 }
 
-void DisplayManager::rotary_left(uint8_t session_boiler_mode) {
+void DisplayManager::rotary_left() {
   // обработаем вращение энкодера влево
   DisplayManager::t_newPage = millis();
+
+  uint8_t session_boiler_mode = BoilerProfile::get_session_boiler_mode();
 
   switch (DisplayManager::page_name) {
     case pageTempSet:
@@ -395,8 +400,8 @@ void DisplayManager::set_display_data_config(DisplayDataConfig display_data_conf
   this->display_data_config.is_nopower = display_data_config.is_nopower;
   this->display_data_config.current_temperature = display_data_config.current_temperature;
   this->display_data_config.target_temperature = display_data_config.target_temperature;
-  strncpy(this->display_data_config.current_day, display_data_config.current_day, sizeof(display_data_config.current_day));
-  strncpy(this->display_data_config.current_time, display_data_config.current_time, sizeof(display_data_config.current_time));
+  strncpy(this->display_data_config.current_day, display_data_config.current_day, DISPLAY_CONF_STR_LENGTH);
+  strncpy(this->display_data_config.current_time, display_data_config.current_time, DISPLAY_CONF_STR_LENGTH);
 }
 
 void DisplayManager::set_t_newPage(int value) {

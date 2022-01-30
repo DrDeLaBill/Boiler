@@ -36,7 +36,7 @@ class EncoderManager
     void encoder_init();
     int32_t encoder_get_ticks();
     uint8_t check_encoder_button();
-    uint8_t check_encoder(bool standby);
+    uint8_t check_encoder(bool is_standby_mode);
     bool is_button_holded(uint8_t work_mode);
     void rotary_right();
     void rotary_left();

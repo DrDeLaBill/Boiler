@@ -29,26 +29,27 @@ class BoilerProfile
     static BoilerConfiguration boiler_configuration;
     static void save_configuration();
     static uint8_t get_target_temp();
+    static String get_boiler_id();
     static uint8_t period_of_day();
     static void set_boiler_mode(uint8_t target_mode);
     static void set_target_temp(uint8_t temp);
+    static void set_boiler_id(String boiler_id);
     static bool is_mode_air();
     static bool is_mode_water();
     static bool is_mode_profile();
     static void clear_eeprom();
     static void start_eeprom();
     static void set_default_settings();
+    static uint8_t get_session_boiler_mode();
     
     BoilerProfile();
     void set_session_boiler_mode(uint8_t target_mode);
     void set_settings_standby(bool state);
-    void set_boiler_id(String boiler_id);
     void set_config_day_profile(uint8_t day, uint8_t value);
     uint8_t get_profile_for_week_day();
     void temperature_pid_regulating();
     void temperature_pid_off();
     uint8_t check_temperature();
-    String get_boiler_id();
     String get_ssid();
     String get_pass();
     void set_wifi_settings(String ssid, String pass);
@@ -57,7 +58,6 @@ class BoilerProfile
     char *get_current_day(const char* fmt);
     char *get_current_time(const char* fmt);
     uint8_t get_temperature_error();
-    uint8_t get_session_boiler_mode();
     void set_day_preset(uint8_t day_number, uint8_t day_period, uint8_t value);
     BoilerConfiguration get_boiler_configuration();
 };

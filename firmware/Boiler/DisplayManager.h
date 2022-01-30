@@ -6,6 +6,7 @@
 #include <U8g2lib.h> 
 
 #include "BoilerConstants.h"
+#include "BoilerProfile.h"
 
 #define LED_PIN                     23      // пин подсветки дисплея
 
@@ -13,6 +14,8 @@
 #define SAVE_TIMEOUT                1300    // время показа экрана "сохранено", мс
 
 #define TIMEOUT_LIGHTNING           20000   // время до автоматического выключения подсветки
+
+#define DISPLAY_CONF_STR_LENGTH     15
 
 struct DisplayDataConfig {
   bool is_wifi_connect;
@@ -28,8 +31,8 @@ struct DisplayDataConfig {
   bool is_nopower;
   uint8_t current_temperature;
   uint8_t target_temperature;
-  char* current_day;
-  char* current_time;
+  char current_day[DISPLAY_CONF_STR_LENGTH];
+  char current_time[DISPLAY_CONF_STR_LENGTH];
 };
 
 class DisplayManager
@@ -53,8 +56,8 @@ class DisplayManager
     
     static void set_page_name(DisplayPages page_name);
     static const char* presets[NUM_PRESETS];
-    static void rotary_right(uint8_t session_boiler_mode);
-    static void rotary_left(uint8_t session_boiler_mode);
+    static void rotary_right();
+    static void rotary_left();
     static void set_t_newPage(int value);
     static DisplayPages get_page_name();
     static void set_temporary_target_temp(uint8_t temporary_target_temp);
@@ -70,7 +73,7 @@ class DisplayManager
     void display_on();
     void display_lightning();
     void set_display_data_config(DisplayDataConfig display_data_config);
-    void rotary_encoder_action(uint8_t rotary_state, uint8_t session_boiler_mode);
+    void rotary_encoder_action(uint8_t rotary_state);
     void check_page();
 };
 

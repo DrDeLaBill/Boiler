@@ -6,6 +6,7 @@
 
 #include <Arduino.h>
 
+// TODO: поменять пересичления на enum
 // Ошибки
 #define ERRORS_COUNT                  7           // Изменить, если количество поменяется
 

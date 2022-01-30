@@ -32,9 +32,9 @@ void ErrorService::check_failure(){
   this->_clear_errors();
 }
 
-void ErrorService::get_errors_list(uint8_t *result_errors_list) {
+void ErrorService::get_errors_list(uint8_t result_errors_list[ERRORS_COUNT]) {
   // Проверка на соответствие результирующего массива по его размеру
-  if (sizeof(result_errors_list) < ERRORS_COUNT) {
+  if (sizeof(result_errors_list) > ERRORS_COUNT) {
     Serial.println(F("ERROR: out of range array result_errors_list, please check the code"));
     Serial.println(F("ERROR: error display will not work"));
     return;
@@ -75,8 +75,7 @@ bool ErrorService::is_set_error(uint8_t error_name) {
 
 //TODO: переделать в перечисление enum
 bool ErrorService::type_error_validate(uint8_t error_type) {
-  return (error_type == ERROR_NOERROR ||
-      error_type == ERROR_OVERHEAT ||
+  return (error_type == ERROR_OVERHEAT ||
       error_type == ERROR_PUMPBROKEN ||
       error_type == ERROR_SSRBROKEN ||
       error_type == ERROR_TEMPSENSBROKEN ||

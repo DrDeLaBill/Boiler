@@ -48,10 +48,15 @@ uint8_t EncoderManager::check_encoder_button() {
      Если кнопка отпущена, то снова запоминаем время антидребезга.
   */
   // возвращает состояние кнопки: кратковременное нажатие, длинное нажатие
+  // возвращает состояние кнопки: кратковременное нажатие, длинное нажатие
+  Serial.print("last_time_button: ");
+  Serial.println(this->last_time_button);
+  Serial.println(abs(millis() - this->last_time_debounce));
+  Serial.println(TIME_DEBOUNCE);
   if (this->last_time_debounce == 0) {
     return BUTTON_NO_PRESSED;
   } else {
-    if (millis() - this->last_time_debounce >= TIME_DEBOUNCE) {
+    if (abs(millis() - this->last_time_debounce) >= TIME_DEBOUNCE) {
       // если кнопка нажата и время дребезга прошло проверяем на шум.
       if (digitalRead(PIN_ENC_BUTTON) == LOW) {
         // если кнопка нажата, то запоминаем время, если еще не сделали
@@ -59,7 +64,7 @@ uint8_t EncoderManager::check_encoder_button() {
           this->last_time_button = millis();
         } else {
           // оценим длительность нажатия
-          if (millis() - this->last_time_button >= TIME_BUTTON_HOLDED && this->button_last_state != BUTTON_HOLDED) {
+          if (abs(millis() - this->last_time_button) >= TIME_BUTTON_HOLDED && this->button_last_state != BUTTON_HOLDED) {
             this->button_last_state = BUTTON_HOLDED;
             this->last_time_button = 0;
             return BUTTON_HOLDED;
@@ -70,7 +75,7 @@ uint8_t EncoderManager::check_encoder_button() {
         if (this->last_time_button != 0) {
           // оценим время нажатия кнопки
           this->last_time_debounce = millis();
-          if (millis() - this->last_time_button >= TIME_BUTTON_PRESSED && this->button_last_state != BUTTON_HOLDED) {
+          if (abs(millis() - last_time_button) >= TIME_BUTTON_PRESSED && this->button_last_state != BUTTON_HOLDED) {
             this->last_time_button = 0;
             this->button_last_state = BUTTON_PRESSED;
             return BUTTON_PRESSED;
@@ -86,28 +91,23 @@ uint8_t EncoderManager::check_encoder_button() {
   }
 }
 
-uint8_t EncoderManager::check_encoder(bool standby) {
+uint8_t EncoderManager::check_encoder(bool is_standby_mode) {
   // в зависимости от текущего режима котла обработаем энкодер с кнопкой
 
   uint8_t button_state = this->check_encoder_button();
 
   if (button_state == BUTTON_HOLDED) {
     // длительное нажатие кнопки
-
-    #ifdef DEBUG_ON
-    Serial.println("button holded");
-    #endif
+    Serial.println("Button holded");
     return BUTTON_HOLDED;
   }
 
-  if (!standby) {
+  if (!is_standby_mode) {
     // если котел в рабочем режиме, то обрабатываем действия пользователя
     int32_t ticks = this->encoder_get_ticks();
 
     if (button_state == BUTTON_PRESSED) {
       // если кнопка была нажата
-
-      //TODO :перенести функцию buutton_pressed со свитч в boiler controller (возвращать work_mode (наверно))
       this->button_pressed_action();
       button_state = BUTTON_NO_PRESSED;
     }
@@ -115,18 +115,14 @@ uint8_t EncoderManager::check_encoder(bool standby) {
     // если было вращение энкодера
     if (ticks > 0) {
       // вращение вправо
-      this->button_rotary_state = BUTTON_ROTARY_RIGHT;
-      DisplayManager::rotary_right(BoilerProfile::session_boiler_mode);
+      DisplayManager::rotary_right();
     } else if (ticks < 0) {
       // вращение влево
-      this->button_rotary_state = BUTTON_ROTARY_LEFT;
-      DisplayManager::rotary_left(BoilerProfile::session_boiler_mode);
-    } else {
-      this->button_rotary_state = BUTTON_NON_ROTARY;
+      DisplayManager::rotary_left();
     }
   }
-  
-  return button_state;
+
+  return BUTTON_NO_PRESSED;
 }
 
 void EncoderManager::button_pressed_action() {

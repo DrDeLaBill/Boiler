@@ -3,12 +3,13 @@
 BoilerController::BoilerController() {
   Serial.begin(115200);
   Serial.println(F("\n######################################################"));
-  Serial.println(F("Initialization started."));
+  Serial.println(F("Initialization boiler started."));
   if(!SPIFFS.begin(true)){
     Serial.println(F("An Error has occurred while mounting SPIFFS"));
     //  "При монтировании SPIFFS произошла ошибка"
     ESP.restart();
   }
+  this->display_manager = new DisplayManager();
   this->error_service = new ErrorService();
   this->network_manager = new NetworkManager();
   this->external_server = new ExternalServer();
@@ -18,17 +19,25 @@ BoilerController::BoilerController() {
   this->encoder_manager = new EncoderManager();
   this->relay_manager = new RelayTemperature();
   this->pump_manager = new PumpManager();
-  this->display_manager = new DisplayManager();
   this->controller_init();
 }
 
 void BoilerController::controller_init() {
   this->work_mode = MODE_STANDBY;
-  this->p_mode = MODE_STANDBY;
   this->network_manager->set_wifi_settings(
     this->boiler_profile->get_ssid(),
     this->boiler_profile->get_pass()
   );
+  // проверяем, надо ли включаться или нет.
+  if (BoilerCfg.standby_flag == WORK) {
+    p_mode = MODE_WORK;
+    Serial.println("WORK MODE");
+    pump_on();
+  } else {
+    p_mode = MODE_STANDBY;
+    Serial.println("STANDBY MODE");
+    display_off();
+  }
 }
 
 void BoilerController::controller_run() {
@@ -43,7 +52,7 @@ void BoilerController::controller_run() {
    * 
    */
   // Проверка наличия команд через Serial порт
-  this->_check_serial_port_commands();
+  this->command_manager->check_commands();
 
   if (this->work_mode == MODE_WORK) {
     // Проверка наличия ошибок
@@ -59,7 +68,7 @@ void BoilerController::controller_run() {
     // нарисуем экран
     //TODO: проверить правильность функции
     this->_fill_display_manager_configuration();
-    this->display_manager->paint();
+//    this->display_manager->paint();
     // измерим температуру
     this->error_service->add_error(
       this->boiler_profile->check_temperature()
@@ -68,45 +77,31 @@ void BoilerController::controller_run() {
     // проверим температуру ТТ реле.
     // check_ssr_temp();
     // проверим энкодер
-    if (this->_button_holded_action()) {
+    if (this->encoder_manager->is_button_holded(this->work_mode)) {
       // если было долгое нажатие кнопки - переходим в режим ожидания
-      Serial.println(F("STANDBY MODE"));
+      Serial.println(F("set STANDBY MODE"));
       this->display_manager->display_off();
       this->boiler_profile->set_settings_standby(MODE_STANDBY);
-      this->p_mode = MODE_STANDBY;
+      this->work_mode = MODE_STANDBY;
     }
     this->_check_external_server_sttings();
     // Поменялись ли ssid и password сети wifi
     this->_check_network_settings();
-  }
-
-  if (this->work_mode == MODE_STANDBY) {
+  } else if (this->work_mode == MODE_STANDBY) {
     // режим ожидания
-    if (this->_button_holded_action()) {
+    if (this->encoder_manager->is_button_holded(this->work_mode)) {
       // если было долгое нажатие кнопки - переходим в режим работы
-      Serial.println(F("WORK MODE"));
+      Serial.println(F("set WORK MODE"));
       this->pump_manager->pump_on();
       this->display_manager->display_on();
-      this->boiler_profile->set_settings_standby(WORK);
+      this->boiler_profile->set_settings_standby(MODE_WORK);
       this->work_mode = MODE_WORK;
-      return;
     }
     this->pump_manager->pump_off();
   }
+  
   // Обработка ошибок
   this->error_service->init_error_actions();
-}
-
-void BoilerController::_check_serial_port_commands() {
-  this->command_manager->check_commands();
-  if (this->command_manager->get_command() == "set_boiler_id") {
-    String new_boiler_id = this->command_manager->get_new_boiler_id();
-    this->boiler_profile->set_boiler_id(new_boiler_id);
-  } else if (this->command_manager->get_command() == "get_boiler_id") {
-    String boiler_id = this->boiler_profile->get_boiler_id();
-    Serial.print("Boiler ID: ");
-    Serial.println(boiler_id);
-  }
 }
 
 // Совпадают ли ssid и pass BoilerProfile и NetworkManager
@@ -121,19 +116,20 @@ void BoilerController::_check_network_settings() {
   }
 }
 
-bool BoilerController::_button_holded_action() {
-  uint8_t button_state = this->encoder_manager->check_encoder(this->work_mode);
-  this->display_manager->rotary_encoder_action(
-    this->encoder_manager->get_button_rotary_state(),
-    this->boiler_profile->get_session_boiler_mode()
-  );
-  if (button_state == BUTTON_HOLDED) {
-    return true;
-  } else if (button_state == BUTTON_PRESSED) {
-    this->encoder_manager->button_pressed_action();
-  }
-  return false;
-}
+//TODO: для чего и откуда
+//bool BoilerController::_button_holded_action() {
+//  uint8_t button_state = this->encoder_manager->check_encoder(this->work_mode);
+//  this->display_manager->rotary_encoder_action(
+//    this->encoder_manager->get_button_rotary_state(),
+//    BoilerProfile::get_session_boiler_mode()
+//  );
+//  if (button_state == BUTTON_HOLDED) {
+//    return true;
+//  } else if (button_state == BUTTON_PRESSED) {
+//    this->encoder_manager->button_pressed_action();
+//  }
+//  return false;
+//}
 
 //TODO: сократить повторяющиеся части кода в функции (также для _external_profile_settings_init())
 void BoilerController::_check_external_server_sttings() {
@@ -151,7 +147,7 @@ void BoilerController::_check_external_server_sttings() {
       
       if (this->external_server->get_new_wifi_settings() == SETS_NOT_SENDED){
         this->external_server->send_settings_to_server(
-            this->boiler_profile->get_session_boiler_mode(),
+            BoilerProfile::get_session_boiler_mode(),
             BoilerProfile::get_target_temp(),
             this->boiler_profile->get_boiler_configuration()
         );
@@ -330,8 +326,7 @@ void BoilerController::_fill_display_manager_configuration() {
   display_data_config.is_nopower = ErrorService::is_set_error(ERROR_NOPOWER);
   display_data_config.current_temperature = this->boiler_profile->get_current_temperature();
   display_data_config.target_temperature = BoilerProfile::get_target_temp();
-  strncpy(display_data_config.current_day, this->boiler_profile->get_current_day("d/m/Y"), sizeof(display_data_config.current_day));
-  strncpy(display_data_config.current_time, this->boiler_profile->get_current_time("H:i"), sizeof(display_data_config.current_time));
-  //TODO: вот до сюда
+  strncpy(display_data_config.current_day, this->boiler_profile->get_current_day("d/m/Y"), DISPLAY_CONF_STR_LENGTH);
+  strncpy(display_data_config.current_time, this->boiler_profile->get_current_time("H:i"), DISPLAY_CONF_STR_LENGTH);
   this->display_manager->set_display_data_config(display_data_config);
 }
