@@ -49,10 +49,6 @@ uint8_t EncoderManager::check_encoder_button() {
   */
   // возвращает состояние кнопки: кратковременное нажатие, длинное нажатие
   // возвращает состояние кнопки: кратковременное нажатие, длинное нажатие
-  Serial.print("last_time_button: ");
-  Serial.println(this->last_time_button);
-  Serial.println(abs(millis() - this->last_time_debounce));
-  Serial.println(TIME_DEBOUNCE);
   if (this->last_time_debounce == 0) {
     return BUTTON_NO_PRESSED;
   } else {

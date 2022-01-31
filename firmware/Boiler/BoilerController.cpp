@@ -68,14 +68,14 @@ void BoilerController::controller_run() {
     // нарисуем экран
     //TODO: проверить правильность функции
     this->_fill_display_manager_configuration();
-//    this->display_manager->paint();
+    this->display_manager->paint();
     // измерим температуру
     this->error_service->add_error(
       this->boiler_profile->check_temperature()
     );
 
     // проверим температуру ТТ реле.
-    // check_ssr_temp();
+    this->relay_manager->check_ssr_temp();
     // проверим энкодер
     if (this->encoder_manager->is_button_holded(this->work_mode)) {
       // если было долгое нажатие кнопки - переходим в режим ожидания
@@ -94,7 +94,7 @@ void BoilerController::controller_run() {
       Serial.println(F("set WORK MODE"));
       this->pump_manager->pump_on();
       this->display_manager->display_on();
-      this->boiler_profile->set_settings_standby(MODE_WORK);
+      this->boiler_profile->set_settings_standby(WORK);
       this->work_mode = MODE_WORK;
     }
     this->pump_manager->pump_off();

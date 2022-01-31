@@ -19,7 +19,9 @@
 #include "EncoderManager.h"
 #include "ExternalServer.h"
 #include "InternalServer.h"
+//TODO: переместить relay temperaturre (проводной сенсор) в класс TEmperatureSensor
 #include "RelayTemperature.h"
+#include "PumpManager.h"
 #include "PumpManager.h"
 
 class BoilerController 

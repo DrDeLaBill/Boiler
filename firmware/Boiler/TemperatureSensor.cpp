@@ -18,6 +18,7 @@ TemperatureSensor::TemperatureSensor() {
   this->error = ERROR_NOERROR;
   this->temp_init();
   this->pid_init();
+  Serial.println(F("Temperature sensor init"));
 }
 
 void TemperatureSensor::temp_init() {

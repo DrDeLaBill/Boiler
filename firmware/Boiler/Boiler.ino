@@ -1,5 +1,5 @@
 #include "BoilerController.h"
-
+//TODO: перевести почти всё в статик
 #define DEBUG_ON    1
 
 BoilerController *boiler_controller;
