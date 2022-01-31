@@ -51,7 +51,6 @@ enum ConnectStatus {
 };
 
 // Настройки профиля бойлера (BoilerPRofile)
-
 #define STANDBY                     false
 #define WORK                        true
 

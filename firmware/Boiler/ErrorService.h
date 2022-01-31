@@ -7,10 +7,8 @@
 
 #include <Arduino.h>
 #include <Vector.h>
+
 #include "BoilerConstants.h"
-//TODO: include
-//#include "display.h"
-//#include "pump.h"
 
 #define CRASH_OUT_PIN   33     // выход на расцепитель
 

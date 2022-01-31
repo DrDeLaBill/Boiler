@@ -29,14 +29,14 @@ void BoilerController::controller_init() {
     this->boiler_profile->get_pass()
   );
   // проверяем, надо ли включаться или нет.
-  if (BoilerCfg.standby_flag == WORK) {
-    p_mode = MODE_WORK;
+  if (BoilerProfile::boiler_configuration.standby_flag == WORK) {
+    this->work_mode = MODE_WORK;
     Serial.println("WORK MODE");
-    pump_on();
+    this->pump_manager->pump_on();
   } else {
-    p_mode = MODE_STANDBY;
+    this->work_mode = MODE_STANDBY;
     Serial.println("STANDBY MODE");
-    display_off();
+    this->display_manager->display_off();
   }
 }
 
