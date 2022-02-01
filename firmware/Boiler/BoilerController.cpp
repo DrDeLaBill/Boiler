@@ -312,21 +312,19 @@ void BoilerController::serial_error_report(String target_url, int response_code)
 }
 
 void BoilerController::_fill_display_manager_configuration() {
-  DisplayDataConfig display_data_config;
-  display_data_config.is_wifi_connect = this->network_manager->is_wifi_connected();
-  display_data_config.is_heating_on = this->relay_manager->is_heating_on();
-  display_data_config.is_connected_to_server = this->external_server->get_connected_to_server();
-  display_data_config.is_external_sensor = BoilerProfile::is_mode_air() || BoilerProfile::is_mode_profile();
-  display_data_config.is_internal_sensor = BoilerProfile::is_mode_air();
-  display_data_config.is_radio_connected = this->boiler_profile->is_radio_connected();
-  display_data_config.is_overheat = ErrorService::is_set_error(ERROR_OVERHEAT) || ErrorService::is_set_error(ERROR_WATEROVERHEAT);
-  display_data_config.is_pumpbroken = ErrorService::is_set_error(ERROR_PUMPBROKEN);
-  display_data_config.is_ssrbroken = ErrorService::is_set_error(ERROR_SSRBROKEN);
-  display_data_config.is_tempsensbroken = ErrorService::is_set_error(ERROR_TEMPSENSBROKEN);
-  display_data_config.is_nopower = ErrorService::is_set_error(ERROR_NOPOWER);
-  display_data_config.current_temperature = this->boiler_profile->get_current_temperature();
-  display_data_config.target_temperature = BoilerProfile::get_target_temp();
-  strncpy(display_data_config.current_day, this->boiler_profile->get_current_day("d/m/Y"), DISPLAY_CONF_STR_LENGTH);
-  strncpy(display_data_config.current_time, this->boiler_profile->get_current_time("H:i"), DISPLAY_CONF_STR_LENGTH);
-  this->display_manager->set_display_data_config(display_data_config);
+  DisplayManager::display_data_config.is_wifi_connect = this->network_manager->is_wifi_connected();
+  DisplayManager::display_data_config.is_heating_on = this->relay_manager->is_heating_on();
+  DisplayManager::display_data_config.is_connected_to_server = this->external_server->get_connected_to_server();
+  DisplayManager::display_data_config.is_external_sensor = BoilerProfile::is_mode_air() || BoilerProfile::is_mode_profile();
+  DisplayManager::display_data_config.is_internal_sensor = BoilerProfile::is_mode_air();
+  DisplayManager::display_data_config.is_radio_connected = this->boiler_profile->is_radio_connected();
+  DisplayManager::display_data_config.is_overheat = ErrorService::is_set_error(ERROR_OVERHEAT) || ErrorService::is_set_error(ERROR_WATEROVERHEAT);
+  DisplayManager::display_data_config.is_pumpbroken = ErrorService::is_set_error(ERROR_PUMPBROKEN);
+  DisplayManager::display_data_config.is_ssrbroken = ErrorService::is_set_error(ERROR_SSRBROKEN);
+  DisplayManager::display_data_config.is_tempsensbroken = ErrorService::is_set_error(ERROR_TEMPSENSBROKEN);
+  DisplayManager::display_data_config.is_nopower = ErrorService::is_set_error(ERROR_NOPOWER);
+  DisplayManager::display_data_config.current_temperature = this->boiler_profile->get_current_temperature();
+  DisplayManager::display_data_config.target_temperature = BoilerProfile::get_target_temp();
+  strncpy(DisplayManager::display_data_config.current_day, this->boiler_profile->get_current_day("d/m/Y"), DISPLAY_CONF_STR_LENGTH);
+  strncpy(DisplayManager::display_data_config.current_time, this->boiler_profile->get_current_time("H:i"), DISPLAY_CONF_STR_LENGTH);
 }

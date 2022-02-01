@@ -38,11 +38,10 @@ struct DisplayDataConfig {
 class DisplayManager
 {
   private:
-    DisplayDataConfig display_data_config;
-    
     //U8G2_PCD8544_84X48_F_4W_SW_SPI u8g2(U8G2_R0, /* clock=*/ 14, /* data=*/ 27, /* cs=*/ 26, /* dc=*/ 25, /* reset=*/ 33);  // Nokia 5110 Display
     U8G2_PCD8544_84X48_F_4W_HW_SPI *u8g2;  // Nokia 5110 Display
   public:
+    static DisplayDataConfig display_data_config;
     static DisplayPages page_name;
     static uint8_t brightness;
     // если в течении 5с не было изменений, то отмена TODO: почему эта переменная ещё и extern
@@ -72,7 +71,6 @@ class DisplayManager
     void display_off();
     void display_on();
     void display_lightning();
-    void set_display_data_config(DisplayDataConfig display_data_config);
     void rotary_encoder_action(uint8_t rotary_state);
     void check_page();
 };
