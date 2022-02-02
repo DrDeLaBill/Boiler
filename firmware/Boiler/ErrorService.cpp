@@ -16,26 +16,22 @@ ErrorService::ErrorService() {
   delay(SSR_DELAY);
   Serial.print(F("SSR_value: "));
   Serial.println(analogRead(SSR_IN_PIN));
-
-  this->user_error = ERROR_NOERROR;
 }
 
 void ErrorService::check_failure(){
   // проверяем систему на появление аварийных ситуаций
   if (ErrorService::is_set_error(ERROR_SSRBROKEN)){ // check_pump()
-    this->user_error = ERROR_PUMPBROKEN;
-    return;
+    ErrorService::add_error(ERROR_PUMPBROKEN);
+  } else {
+    // сбрасываем текущие ошибки
+    this->_clear_errors();
   }
-  
-  // сбрасываем текущие ошибки
-  this->user_error = ERROR_NOERROR;
-  this->_clear_errors();
 }
 
-void ErrorService::get_errors_list(uint8_t result_errors_list[ERRORS_COUNT]) {
+void ErrorService::get_errors_list(uint8_t result_errors_list[]) {
   // Проверка на соответствие результирующего массива по его размеру
   if (sizeof(result_errors_list) > ERRORS_COUNT) {
-    Serial.println(F("ERROR: out of range array result_errors_list, please check the code"));
+    Serial.println(F("ERROR: out of range array result_errors_list, please check configuration"));
     Serial.println(F("ERROR: error display will not work"));
     return;
   }
