@@ -27,13 +27,15 @@ void RadioSensor::radio_init(){
 uint8_t RadioSensor::get_radio_temp(float* pTemp){
 	if (millis() - this->last_time_online < RECEIVE_TIMEOUT){
 		if (this->radio->available()){
-			// TODO: написать проверку приходящих данных. 
+			// TODO: написать проверку приходящих данных. !! валидация
 			// Возможно, добавится отправка других данных с датчика.
 			
 			this->last_time_online = millis();
 			this->radio->read(pTemp, sizeof(float));
 		  return GOT_EXT_TEMP;
-		} else return NO_EXT_TEMP;
+		} else {
+		  return NO_EXT_TEMP;
+		}
 	} else {
 		// time over
 		this->last_time_online = millis() - (RECEIVE_TIMEOUT / 2);

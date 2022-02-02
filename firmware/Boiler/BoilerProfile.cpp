@@ -269,12 +269,14 @@ void BoilerProfile::set_day_preset(uint8_t day_number, uint8_t day_period, uint8
     BoilerProfile::boiler_configuration.presets[day_number][day_period] = value;
 }
 
+//TODO: переместить в TemperaturSensor
 void BoilerProfile::check_temperature() {
   uint8_t sens_status       = this->temperature_sensor->update_current_temp_water();
   float current_temp_water  = this->temperature_sensor->get_current_temp_water();
   uint8_t temp_error        = this->temperature_sensor->get_error();
 
   if (sens_status == GOT_TEMP){
+    Serial.println("got temp");
     if (current_temp_water >= WATER_TEMP_LIM){
       // если температура теплоносителя стала аварийно высокой
       // здесь надо отключать силовое питание!
@@ -290,6 +292,7 @@ void BoilerProfile::check_temperature() {
     }
 
     if (BoilerProfile::session_boiler_mode == MODE_WATER){
+      Serial.println("mode water");
       this->temperature_sensor->set_current_temp_like_water_temp();
     }
   }
@@ -300,8 +303,11 @@ void BoilerProfile::check_temperature() {
   }
   
   sens_status = this->temperature_sensor->get_radio_temp();
+  Serial.println("sens_status");
+  Serial.println(sens_status);
 
   if (sens_status == GOT_EXT_TEMP){
+    Serial.println("GOT_EXT_TEMP");
     if (this->temperature_sensor->is_radio_lost()){
       // если датчик отваливался, а теперь появился
       // проверим, надо ли нам переключить режим обратно
@@ -312,22 +318,27 @@ void BoilerProfile::check_temperature() {
     this->temperature_sensor->set_radio_on();
     
     if (this->is_mode_air() || this->is_mode_profile()){
+      Serial.println("mode air");
       this->temperature_sensor->set_current_temp_like_air_temp();
     }
   } else if (sens_status == RADIO_ERROR){
     // датчика нет
-    if (this->temperature_sensor->is_radio_on() || 
-        this->temperature_sensor->is_radio_wait()
-    ){
+    Serial.println("RADIO_ERROR");
+    if (this->temperature_sensor->is_radio_on() || this->temperature_sensor->is_radio_wait()){
       // а до этого был или должен был быть
       // то переключаем режим работы на уставку по воде
       if (BoilerProfile::boiler_configuration.boiler_mode == MODE_AIR || BoilerProfile::boiler_configuration.boiler_mode == MODE_PROFILE){
         BoilerProfile::session_boiler_mode = MODE_WATER;
         BoilerProfile::session_target_temp_int = (uint8_t)this->temperature_sensor->get_current_temp_water();
+        Serial.println("mode water no radio");
         this->temperature_sensor->set_current_temp_like_water_temp();
       }
     }
     this->temperature_sensor->set_radio_lost();
+  } else if (sens_status == NO_EXT_TEMP) {
+    Serial.println("NO_EXT_TEMP");
+  } else {
+    Serial.println("error radio code");
   }
 }
 

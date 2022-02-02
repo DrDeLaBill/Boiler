@@ -123,15 +123,11 @@ void TemperatureSensor::pid_init(){
 uint8_t TemperatureSensor::update_current_temp_water() {
   // считывание данных с датчика температуры с некоторой периодичностью
   if (millis() - TemperatureSensor::ds18b20_last_time >= DS18B20_MEAS_PERIOD){
-    Serial.println("check temp");
     TemperatureSensor::ds18b20_last_time = millis();
     
-    float tempC = sensors->getTempCByIndex(0);  
-    Serial.println("tempC");
-    Serial.println(tempC);
+    float tempC = sensors->getTempCByIndex(0);
     // Check if reading was successful
     if (tempC != DEVICE_DISCONNECTED_C) {
-      Serial.println("DEVICE_CONNECTED");
       this->current_temp_water = tempC;
       if (sensors->isConversionComplete()){
         sensors->requestTemperaturesByIndex(0);
@@ -145,7 +141,6 @@ uint8_t TemperatureSensor::update_current_temp_water() {
       TemperatureSensor::sens_temp_tries = 5;
       return TEMP_SENS_ERROR;
     } else {
-      Serial.println("sens_temp_tries");
       sens_temp_tries--;
       return NO_TEMP;
     }
@@ -177,8 +172,10 @@ void TemperatureSensor::set_current_temp_like_air_temp() {
   TemperatureSensor::current_temp = (uint8_t)this->current_temp_air;
 }
 
+//TODO: убрать указатель
 uint8_t TemperatureSensor::get_radio_temp() {
   this->radio_sensor->get_radio_temp(&current_temp_air);
+  return current_temp_air;
 }
 
 bool TemperatureSensor::is_radio_lost() {

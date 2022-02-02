@@ -10,8 +10,8 @@
 
 #define RECEIVE_TIMEOUT		    200000L		    // таймаут приема данных в мс
 
-#define GOT_EXT_TEMP 			    1
 #define NO_EXT_TEMP				    0
+#define GOT_EXT_TEMP          1
 #define RADIO_ERROR	          255			      // ошибка приема
 
 class RadioSensor
