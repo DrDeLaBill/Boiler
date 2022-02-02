@@ -31,7 +31,6 @@ class BoilerController
     ExternalServer *external_server;
     InternalServer *internal_server;
     BoilerProfile *boiler_profile;
-    CommandManager *command_manager;
     EncoderManager *encoder_manager;
     RelayTemperature *relay_manager;
     PumpManager *pump_manager;
@@ -44,6 +43,8 @@ class BoilerController
     void _check_external_server_sttings();
     void _external_profile_settings_init(String url);
   public:
+    static CommandManager command_manager;
+    
     BoilerController();
     void controller_init();
     void controller_run();

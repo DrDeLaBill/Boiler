@@ -10,9 +10,10 @@
 
 #include "BoilerConstants.h"
 
-#define CRASH_OUT_PIN   33     // выход на расцепитель
-
-#define SSR_DELAY       19    // ms
+// выход на расцепитель
+#define CRASH_OUT_PIN   33
+// ms
+#define SSR_DELAY       19
 
 class ErrorService
 {

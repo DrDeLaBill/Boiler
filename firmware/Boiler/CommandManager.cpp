@@ -1,31 +1,26 @@
 #include "CommandManager.h"
 
-CommandManager::CommandManager() {
-  this->_clear_data();
-  this->command_read_delay = millis();
-}
+String CommandManager::message_from_port = "";
 
 void CommandManager::check_commands(){
-  if (Serial.available() > 0 && this->_is_time_to_read()) {
-    this->_read_command();
-    this->_execute_command();
-    this->command_read_delay = millis();
+  if (Serial.available() > 0) {
+    CommandManager::_read_command();
+    CommandManager::_execute_command();
   }
 }
 
 void CommandManager::_read_command() {
-  this->_clear_data();
+  CommandManager::_clear_data();
   while (Serial.available() > 0) {
-    this->message_from_port += Serial.readString();
+    CommandManager::message_from_port += Serial.readString();
   }
 }
 
-//TODO: отрефакторить boiler_id, очищать ввод
 void CommandManager::_execute_command() {
-  String command = this->_split_string(this->message_from_port, ' ', 0);
+  String command = CommandManager::_split_string(CommandManager::message_from_port, ' ', 0);
   command.trim();
   if (command.equals("set_boiler_id")) {
-    String new_boiler_id = this->_split_string(this->message_from_port, ' ', 1);
+    String new_boiler_id = CommandManager::_split_string(CommandManager::message_from_port, ' ', 1);
     Serial.println(F("Setting new boiler ID"));
     Serial.print(F("Old boiler ID: "));
     Serial.println(BoilerProfile::get_boiler_id());
@@ -47,15 +42,11 @@ void CommandManager::_execute_command() {
     Serial.print(command);
     Serial.println(F("'"));
   }
-  this->_clear_data();
+  CommandManager::_clear_data();
 }
 
 void CommandManager::_clear_data() {
-  this->message_from_port = "";
-}
-
-bool CommandManager::_is_time_to_read() {
-  return abs(millis() - this->command_read_delay) > READ_DELAY_TIME;
+  CommandManager::message_from_port = "";
 }
 
 String CommandManager::_split_string(String data, char separator, int index)

@@ -127,9 +127,11 @@ uint8_t TemperatureSensor::update_current_temp_water() {
     TemperatureSensor::ds18b20_last_time = millis();
     
     float tempC = sensors->getTempCByIndex(0);  
+    Serial.println("tempC");
     Serial.println(tempC);
     // Check if reading was successful
     if (tempC != DEVICE_DISCONNECTED_C) {
+      Serial.println("DEVICE_CONNECTED");
       this->current_temp_water = tempC;
       if (sensors->isConversionComplete()){
         sensors->requestTemperaturesByIndex(0);
@@ -143,7 +145,8 @@ uint8_t TemperatureSensor::update_current_temp_water() {
       TemperatureSensor::sens_temp_tries = 5;
       return TEMP_SENS_ERROR;
     } else {
-      TemperatureSensor::sens_temp_tries--;
+      Serial.println("sens_temp_tries");
+      sens_temp_tries--;
       return NO_TEMP;
     }
   }
