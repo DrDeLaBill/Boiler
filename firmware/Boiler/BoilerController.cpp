@@ -29,7 +29,7 @@ void BoilerController::controller_init() {
     this->boiler_profile->get_pass()
   );
   // проверяем, надо ли включаться или нет.
-  if (BoilerProfile::boiler_configuration.standby_flag == WORK) {
+  if (BoilerProfile::boiler_configuration.standby_flag == MODE_STANDBY) {
     this->work_mode = MODE_WORK;
     Serial.println("WORK MODE");
     this->pump_manager->pump_on();
@@ -69,10 +69,9 @@ void BoilerController::controller_run() {
     //TODO: проверить правильность функции
     this->_fill_display_manager_configuration();
     this->display_manager->paint();
+    
     // измерим температуру
-    this->error_service->add_error(
-      this->boiler_profile->check_temperature()
-    );
+    this->boiler_profile->check_temperature();
 
     // проверим температуру ТТ реле.
     this->relay_manager->check_ssr_temp();
@@ -94,7 +93,7 @@ void BoilerController::controller_run() {
       Serial.println(F("set WORK MODE"));
       this->pump_manager->pump_on();
       this->display_manager->display_on();
-      this->boiler_profile->set_settings_standby(WORK);
+      this->boiler_profile->set_settings_standby(MODE_WORK);
       this->work_mode = MODE_WORK;
     }
     this->pump_manager->pump_off();

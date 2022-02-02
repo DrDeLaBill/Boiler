@@ -42,7 +42,7 @@ class DisplayManager
     U8G2_PCD8544_84X48_F_4W_HW_SPI *u8g2;  // Nokia 5110 Display
   public:
     static DisplayDataConfig display_data_config;
-    static DisplayPages page_name;
+    static DisplayPage page_name;
     static uint8_t brightness;
     // если в течении 5с не было изменений, то отмена TODO: почему эта переменная ещё и extern
     static uint32_t t_newPage;
@@ -53,12 +53,12 @@ class DisplayManager
     // позиция рамки в меню
     static uint8_t menu_item;   
     
-    static void set_page_name(DisplayPages page_name);
+    static void set_page_name(DisplayPage page_name);
     static const char* presets[NUM_PRESETS];
     static void rotary_right();
     static void rotary_left();
     static void set_t_newPage(int value);
-    static DisplayPages get_page_name();
+    static DisplayPage get_page_name();
     static void set_temporary_target_temp(uint8_t temporary_target_temp);
     static void set_t_page_save_settings(int value);
     static uint8_t get_temporary_target_temp();

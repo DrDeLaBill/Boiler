@@ -9,7 +9,7 @@ RelayTemperature::RelayTemperature() {
 
 //TODO: extern
 //extern uint8_t user_error;
-//extern DisplayPages page;
+//extern DisplayPage page;
 
 void RelayTemperature::ssr_temp_init(){
 	pinMode(SSR_TEMP_PIN, INPUT);

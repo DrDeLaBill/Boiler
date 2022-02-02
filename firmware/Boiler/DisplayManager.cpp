@@ -1,6 +1,6 @@
 #include "DisplayManager.h"
 
-DisplayPages DisplayManager::page_name = pageTemp;
+DisplayPage DisplayManager::page_name = pageTemp;
 uint8_t DisplayManager::brightness = 255;
 const char* DisplayManager::presets[NUM_PRESETS] = {
   S_WEEKDAYS, 
@@ -387,12 +387,12 @@ void DisplayManager::set_t_newPage(int value) {
   DisplayManager::t_newPage = value;
 }
 
-DisplayPages DisplayManager::get_page_name() {
+DisplayPage DisplayManager::get_page_name() {
   return DisplayManager::page_name;
 }
 
 // TODO: проверка на существование
-void DisplayManager::set_page_name(DisplayPages page_name) {
+void DisplayManager::set_page_name(DisplayPage page_name) {
   DisplayManager::page_name = page_name;
 }
 

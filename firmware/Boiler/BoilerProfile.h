@@ -11,6 +11,7 @@
 #include "EEPROM.h"
 
 #include "BoilerConstants.h"
+#include "ErrorService.h"
 #include "TemperatureSensor.h"
 #include "ClockRTC.h"
 
@@ -49,7 +50,7 @@ class BoilerProfile
     uint8_t get_profile_for_week_day();
     void temperature_pid_regulating();
     void temperature_pid_off();
-    uint8_t check_temperature();
+    void check_temperature();
     String get_ssid();
     String get_pass();
     void set_wifi_settings(String ssid, String pass);

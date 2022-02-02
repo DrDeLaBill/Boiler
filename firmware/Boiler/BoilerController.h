@@ -6,11 +6,8 @@
 #ifndef _BOILER_CONTROLLER_H_
 #define _BOILER_CONTROLLER_H_
 
-// Режимы работы
-#define MODE_STANDBY          true
-#define MODE_WORK             false
-
 #include <Arduino.h>
+#include "BoilerConstants.h"
 #include "BoilerProfile.h"
 #include "CommandManager.h"
 #include "ErrorService.h"

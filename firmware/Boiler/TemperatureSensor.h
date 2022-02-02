@@ -67,6 +67,10 @@ class TemperatureSensor
     static uint8_t current_temp;
     // статус подключения внешнего датчика           
     static uint8_t radio_connected;
+    // количество попыток чтения
+    static uint8_t sens_temp_tries;
+    // хранение времени для периода датчика
+    static uint32_t ds18b20_last_time;
     
     TemperatureSensor();
     void temp_init();

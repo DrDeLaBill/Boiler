@@ -2,6 +2,8 @@
 
 uint8_t TemperatureSensor::current_temp = 0;
 uint8_t TemperatureSensor::radio_connected = 0;
+uint8_t TemperatureSensor::sens_temp_tries = 5;
+uint32_t TemperatureSensor::ds18b20_last_time = millis();
 
 TemperatureSensor::TemperatureSensor() {
   this->regulator_AIR = new GyverPID(kP_air, kI_air, kD_air, dT);
@@ -120,31 +122,28 @@ void TemperatureSensor::pid_init(){
 
 uint8_t TemperatureSensor::update_current_temp_water() {
   // считывание данных с датчика температуры с некоторой периодичностью
-  // TODO: serial
-  static uint8_t sens_temp_tries = 5;       // количество попыток чтения
-  static uint32_t ds18b20_last_time = millis();    // хранение времени для периода датчика
-
-  if (millis() - ds18b20_last_time >= DS18B20_MEAS_PERIOD){
-    ds18b20_last_time = millis();
+  if (millis() - TemperatureSensor::ds18b20_last_time >= DS18B20_MEAS_PERIOD){
+    Serial.println("check temp");
+    TemperatureSensor::ds18b20_last_time = millis();
     
     float tempC = sensors->getTempCByIndex(0);  
-    
+    Serial.println(tempC);
     // Check if reading was successful
     if (tempC != DEVICE_DISCONNECTED_C) {
       this->current_temp_water = tempC;
       if (sensors->isConversionComplete()){
         sensors->requestTemperaturesByIndex(0);
-        sens_temp_tries = 5;
+        TemperatureSensor::sens_temp_tries = 5;
         return GOT_TEMP;
       } else {
         return NO_TEMP;
       }
-    } else if (sens_temp_tries == 0) {
+    } else if (TemperatureSensor::sens_temp_tries == 0) {
       Serial.println("Error: Could not read temperature data");
-      sens_temp_tries = 5;
+      TemperatureSensor::sens_temp_tries = 5;
       return TEMP_SENS_ERROR;
     } else {
-      sens_temp_tries--;
+      TemperatureSensor::sens_temp_tries--;
       return NO_TEMP;
     }
   }

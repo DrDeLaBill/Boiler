@@ -10,22 +10,28 @@
 // Ошибки
 #define ERRORS_COUNT                  7           // Изменить, если количество поменяется
 
-#define ERROR_NOERROR                 0           // нет ошибок
-#define ERROR_OVERHEAT                1           // перегрев (аварийный датчик), которого нет
-#define ERROR_PUMPBROKEN              2           // насос неисправен
-#define ERROR_SSRBROKEN               3           // твердотельные реле не выключаются
-#define ERROR_TEMPSENSBROKEN          4           // датчик температуры теплоносителя не работает
-#define ERROR_WATEROVERHEAT           5           // перегрев теплоносителя (обычный датчик)
-#define ERROR_NOPOWER                 6           // нет нагрева
+enum ErrorTypes {
+  ERROR_NOERROR,                                  // нет ошибок
+  ERROR_OVERHEAT,                                 // перегрев (аварийный датчик), которого нет
+  ERROR_PUMPBROKEN,                               // насос неисправен
+  ERROR_SSRBROKEN,                                // твердотельные реле не выключаются
+  ERROR_TEMPSENSBROKEN,                           // датчик температуры теплоносителя не работает
+  ERROR_WATEROVERHEAT,                            // перегрев теплоносителя (обычный датчик)
+  ERROR_NOPOWER                                   // нет нагрева
+};
 
 // Состояния кнопки-энкодера
-#define BUTTON_NO_PRESSED             0
-#define BUTTON_PRESSED                1
-#define BUTTON_HOLDED                 2
-#define BUTTON_RELEASED               3
-#define BUTTON_NON_ROTARY             0
-#define BUTTON_ROTARY_RIGHT           1
-#define BUTTON_ROTARY_LEFT            2
+enum ButtonPressedState {
+  BUTTON_NO_PRESSED,
+  BUTTON_PRESSED,
+  BUTTON_HOLDED,
+  BUTTON_RELEASED,
+};
+enum ButtonRotaryState {
+  BUTTON_NON_ROTARY,
+  BUTTON_ROTARY_RIGHT,
+  BUTTON_ROTARY_LEFT
+};
 
 // Настройки для температурного сенсора
 #define AIR_TEMP_MIN                  10          // минимальная температура в комнате
@@ -45,14 +51,15 @@
 #define WEB_REQUESTS_PERIOD           10000       // период отправки статуса на веб-сервер
 
 enum ConnectStatus {
-  DISCONNECTED = 0,
+  DISCONNECTED,
   CONNECTED,
   SETS_NOT_SENDED
 };
 
 // Настройки профиля бойлера (BoilerPRofile)
-#define STANDBY                     false
-#define WORK                        true
+// Режимы работы
+#define MODE_STANDBY          true
+#define MODE_WORK             false
 
 #define TARGET_TEMP_EXT_DEFAULT     20      // установленная температура воздуха по умолчанию
 #define TARGET_TEMP_INT_DEFAULT     10      // установленная температура теплоносителя по умолчанию
@@ -66,10 +73,13 @@ enum ConnectStatus {
 #define NUM_PERIODS                 6       // 6 периодов в сутках
 #define NUM_PRESETS                 4       // общее количество возможных пресетов
 
-#define PRESET_WEEKDAY              0       // пресеты, по ним адресуются значения в массиве profile[]
-#define PRESET_WEEKEND              1
-#define PRESET_CUSTOM               2
-#define PRESET_NOTFREEZE            3
+// пресеты, по ним адресуются значения в массиве profile[]
+enum ProfilePreset {
+  PRESET_WEEKDAY,
+  PRESET_WEEKEND,
+  PRESET_CUSTOM,
+  PRESET_NOTFREEZE
+};
 
 // Настройки температурного сенсора (TemperatureSensor)
 #define HEAT_LED_PIN            0
@@ -80,13 +90,17 @@ enum ConnectStatus {
 #define WATER_TEMP_MAX          60          // максимальная температура теплоносителя
 #define WATER_TEMP_LIM          85.0f       // аварийная температура теплоносителя - 85*
 
-#define GOT_TEMP                1
-#define NO_TEMP                 2
-#define TEMP_SENS_ERROR         3
+enum TempSensState {
+  GOT_TEMP,
+  NO_TEMP,
+  TEMP_SENS_ERROR
+};
 
-#define RADIO_ON                1
-#define RADIO_LOST              2
-#define RADIO_WAIT              3
+enum RadioSensState {
+  RADIO_ON,
+  RADIO_LOST,
+  RADIO_WAIT
+};
 
 #define DS18B20_MEAS_PERIOD     1000        // период измерения с датчика DS18B20 в мс
 #define HEATER_1DEGREE_TIMEOUT  900000
@@ -97,7 +111,7 @@ enum ConnectStatus {
 #define HEATER_OFF              LOW
 
 // Режимы работы бойлера
-enum {
+enum ModeType {
   MODE_WATER,
   MODE_AIR,
   MODE_PROFILE
@@ -175,7 +189,7 @@ const unsigned char inet[] = {
 };
 
 // Страницы дисплея
-enum DisplayPages {
+enum DisplayPage {
   pageTemp,
   pageTempSet,
   pageSaveSettings,

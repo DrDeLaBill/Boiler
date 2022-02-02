@@ -52,7 +52,7 @@ void BoilerProfile::set_default_settings(){
   Serial.println(BoilerProfile::boiler_configuration.boiler_mode);
   BoilerProfile::boiler_configuration.target_temp_int = TARGET_TEMP_INT_DEFAULT;
   BoilerProfile::boiler_configuration.target_temp_ext = TARGET_TEMP_EXT_DEFAULT;
-  BoilerProfile::boiler_configuration.standby_flag = WORK;
+  BoilerProfile::boiler_configuration.standby_flag = MODE_STANDBY;
   BoilerProfile::boiler_configuration.ssid[0] = '\0';
   BoilerProfile::boiler_configuration.password[0] = '\0';
   
@@ -269,24 +269,24 @@ void BoilerProfile::set_day_preset(uint8_t day_number, uint8_t day_period, uint8
     BoilerProfile::boiler_configuration.presets[day_number][day_period] = value;
 }
 
-uint8_t BoilerProfile::check_temperature() {
+void BoilerProfile::check_temperature() {
   uint8_t sens_status       = this->temperature_sensor->update_current_temp_water();
   float current_temp_water  = this->temperature_sensor->get_current_temp_water();
   uint8_t temp_error        = this->temperature_sensor->get_error();
 
   if (sens_status == GOT_TEMP){
     if (current_temp_water >= WATER_TEMP_LIM){
-        // если температура теплоносителя стала аварийно высокой
-        // здесь надо отключать силовое питание!
-        temp_error = ERROR_WATEROVERHEAT;
+      // если температура теплоносителя стала аварийно высокой
+      // здесь надо отключать силовое питание!
+      ErrorService::add_error(ERROR_WATEROVERHEAT);
     } else {
       // если температура понизилась, то может и не стоит возвращаться в обычный режим?
-      temp_error = ERROR_NOERROR;
+      ErrorService::add_error(ERROR_NOERROR);
     }
       
     if (temp_error == ERROR_TEMPSENSBROKEN){
       // если датчик температуры был неисправен, а теперь починился
-      temp_error = ERROR_NOERROR;
+      ErrorService::add_error(ERROR_NOERROR);
     }
 
     if (BoilerProfile::session_boiler_mode == MODE_WATER){
@@ -296,7 +296,7 @@ uint8_t BoilerProfile::check_temperature() {
 
   if (sens_status == TEMP_SENS_ERROR){
     // датчик не выходит на связь
-    temp_error = ERROR_TEMPSENSBROKEN;
+    ErrorService::add_error(ERROR_TEMPSENSBROKEN);
   }
   
   sens_status = this->temperature_sensor->get_radio_temp();
@@ -329,8 +329,6 @@ uint8_t BoilerProfile::check_temperature() {
     }
     this->temperature_sensor->set_radio_lost();
   }
-
-  return temp_error;
 }
 
 /*
