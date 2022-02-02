@@ -1,5 +1,7 @@
 #include "BoilerController.h"
 
+CommandManager BoilerController::command_manager;
+
 BoilerController::BoilerController() {
   Serial.begin(115200);
   Serial.println(F("\n######################################################"));
@@ -15,7 +17,6 @@ BoilerController::BoilerController() {
   this->external_server = new ExternalServer();
   this->boiler_profile = new BoilerProfile();
   this->internal_server = new InternalServer();
-  this->command_manager = new CommandManager();
   this->encoder_manager = new EncoderManager();
   this->relay_manager = new RelayTemperature();
   this->pump_manager = new PumpManager();
@@ -52,7 +53,7 @@ void BoilerController::controller_run() {
    * 
    */
   // Проверка наличия команд через Serial порт
-  this->command_manager->check_commands();
+  CommandManager::check_commands();
 
   if (this->work_mode == MODE_WORK) {
     // Проверка наличия ошибок

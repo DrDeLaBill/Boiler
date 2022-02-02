@@ -13,18 +13,13 @@
 
 class CommandManager
 {
-  private:
-    String message_from_port;
-    uint32_t command_read_delay;
-    
-    void _read_command();
-    void _execute_command();
-    void _clear_data();
-    bool _is_time_to_read();
-    String _split_string(String data, char separator, int index);
   public:
-    CommandManager();
-    void check_commands();
+    static String message_from_port;
+    static void check_commands();
+    static void _read_command();
+    static void _execute_command();
+    static void _clear_data();
+    static String _split_string(String data, char separator, int index);
 };
 
 #endif
