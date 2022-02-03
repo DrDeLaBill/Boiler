@@ -15,11 +15,11 @@
 #include "TemperatureSensor.h"
 #include "ClockRTC.h"
 
+//TODO: написать функции is_set_session_boiler_mode(mode) и is_set_config_boiler_mode(mode)
 class BoilerProfile
 {
   private:
     ClockRTC *clock_rtc;
-    TemperatureSensor *temperature_sensor;
     
     void _serial_print_boiler_configuration();
   public:
@@ -48,17 +48,12 @@ class BoilerProfile
     void set_settings_standby(bool state);
     void set_config_day_profile(uint8_t day, uint8_t value);
     uint8_t get_profile_for_week_day();
-    void temperature_pid_regulating();
-    void temperature_pid_off();
     void check_temperature();
     String get_ssid();
     String get_pass();
     void set_wifi_settings(String ssid, String pass);
-    bool is_radio_connected();
-    uint8_t get_current_temperature();
     char *get_current_day(const char* fmt);
     char *get_current_time(const char* fmt);
-    uint8_t get_temperature_error();
     void set_day_preset(uint8_t day_number, uint8_t day_period, uint8_t value);
     BoilerConfiguration get_boiler_configuration();
 };

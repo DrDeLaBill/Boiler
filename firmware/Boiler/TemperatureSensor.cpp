@@ -4,20 +4,19 @@ uint8_t TemperatureSensor::current_temp = 0;
 uint8_t TemperatureSensor::radio_connected = 0;
 uint8_t TemperatureSensor::sens_temp_tries = 5;
 uint32_t TemperatureSensor::ds18b20_last_time = millis();
+RadioSensor TemperatureSensor::radio_sensor;
 
 TemperatureSensor::TemperatureSensor() {
   this->regulator_AIR = new GyverPID(kP_air, kI_air, kD_air, dT);
   this->regulator_WATER = new GyverPID(kP_water, kI_water, kD_water, dT);
   this->oneWire = new OneWire(ONE_WIRE_BUS);
   this->sensors = new DallasTemperature(oneWire);
-  this->radio_sensor = new RadioSensor();
   this->current_temp_water = 0;                   
   this->current_temp_air = 0;                    
   this->pid_last_time = 0;              
   this->pwm_set_0_time = 0;
   this->check_ssr_last_time = 0;       
   this->check_ssr_last_temp = 0;  
-  this->error = ERROR_NOERROR;
   this->temp_init();
   this->pid_init();
   Serial.println(F("Temperature sensor init"));
@@ -29,9 +28,71 @@ void TemperatureSensor::temp_init() {
   this->sensors->requestTemperatures();
 }
 
+void TemperatureSensor::check_temperature() {
+  uint8_t sens_status = this->update_current_temp_water();
+
+  if (sens_status == GOT_TEMP){
+    if (this->current_temp_water >= WATER_TEMP_LIM){
+      // если температура теплоносителя стала аварийно высокой
+      // здесь надо отключать силовое питание!
+      ErrorService::add_error(ERROR_WATEROVERHEAT);
+    } else {
+      // если температура понизилась, то может и не стоит возвращаться в обычный режим?
+      ErrorService::clear_errors();
+    }
+      
+    if (ErrorService::is_set_error(ERROR_TEMPSENSBROKEN)){
+      // если датчик температуры был неисправен, а теперь починился
+      ErrorService::clear_errors();
+    }
+
+    if (BoilerProfile::session_boiler_mode == MODE_WATER){
+      this->set_current_temp_like_water_temp();
+    }
+  }
+
+  if (sens_status == TEMP_SENS_ERROR){
+    // датчик не выходит на связь
+    ErrorService::add_error(ERROR_TEMPSENSBROKEN);
+  }
+  
+  sens_status = this->update_radio_temp();
+
+  if (sens_status == GOT_EXT_TEMP){
+    if (this->is_radio_lost()){
+      // если датчик отваливался, а теперь появился
+      // проверим, надо ли нам переключить режим обратно
+      //TODO: заменить проверку мода на функцию
+      if (BoilerProfile::boiler_configuration.boiler_mode == MODE_AIR || BoilerProfile::boiler_configuration.boiler_mode == MODE_PROFILE){
+        BoilerProfile::session_boiler_mode = BoilerProfile::boiler_configuration.boiler_mode;
+      }
+    }
+    this->set_radio_on();
+    
+    if (BoilerProfile::is_mode_air() || BoilerProfile::is_mode_profile()){ //##############################################
+      this->set_current_temp_like_air_temp();
+    }
+  } else if (sens_status == RADIO_ERROR){
+    // датчика нет
+    Serial.println("RADIO_ERROR");
+    if (this->is_radio_on() || this->is_radio_wait()){
+      // а до этого был или должен был быть
+      // то переключаем режим работы на уставку по воде
+      Serial.println("validate true");
+      if (BoilerProfile::boiler_configuration.boiler_mode == MODE_AIR || BoilerProfile::boiler_configuration.boiler_mode == MODE_PROFILE){
+        Serial.println("set boiler mode water");
+        BoilerProfile::session_boiler_mode = MODE_WATER;
+        BoilerProfile::session_target_temp_int = (uint8_t)this->get_current_temp_water();
+        this->set_current_temp_like_water_temp();
+      }
+    }
+    this->set_radio_lost();
+  }
+}
+
 void TemperatureSensor::set_radio_sensor(uint8_t target_temperature){
-  this->radio_sensor->clear_timeout_radio_sens();
-  if (this->is_radio_connected() != RADIO_ON) {
+  TemperatureSensor::radio_sensor.clear_timeout_radio_sens();
+  if (TemperatureSensor::is_radio_connected() != RADIO_ON) {
     TemperatureSensor::radio_connected = RADIO_WAIT;
   }
   TemperatureSensor::current_temp = target_temperature;          // пока датчик не отправил данные, загружаем это значение
@@ -88,7 +149,6 @@ void TemperatureSensor::pwm(uint32_t on_time){
     digitalWrite(SSR1_OUT_PIN, HEATER_ON);
     digitalWrite(HEAT_LED_PIN, LOW);
 
-    this->error = ERROR_NOERROR;
     if (time_msec == this->period_msec){
       if (this->check_ssr_last_time == 0){
         this->check_ssr_last_time = millis();
@@ -97,7 +157,7 @@ void TemperatureSensor::pwm(uint32_t on_time){
         // если за 15мин интенсивного нагрева температура теплоносителя не изменилась, то ошибка.
         if ((uint8_t)this->current_temp_water == this->check_ssr_last_temp){
           // error: don't heat
-          this->error = ERROR_NOPOWER;
+          ErrorService::add_error(ERROR_NOPOWER);
         }
       }
     } else  {
@@ -156,12 +216,8 @@ uint8_t TemperatureSensor::get_current_temperature() {
   return TemperatureSensor::current_temp;
 }
 
-uint8_t TemperatureSensor::get_error() {
-  return this->error;
-}
-
 float TemperatureSensor::get_current_temp_water() {
-  return current_temp_water;
+  return this->current_temp_water;
 }
 
 void TemperatureSensor::set_current_temp_like_water_temp() {
@@ -174,13 +230,13 @@ void TemperatureSensor::set_current_temp_like_air_temp() {
 
 //TODO: убрать указатель
 float TemperatureSensor::get_radio_temp() {
-  return this->radio_sensor->get_radio_temp();
+  return TemperatureSensor::radio_sensor.get_radio_temp();
 }
 
 uint8_t TemperatureSensor::update_radio_temp() {
-  uint8_t radio_sensor_status = this->radio_sensor->update_radio_temp();
+  uint8_t radio_sensor_status = TemperatureSensor::radio_sensor.update_radio_temp();
   if (radio_sensor_status == GOT_EXT_TEMP) {
-    this->current_temp_air = this->radio_sensor->get_radio_temp();
+    this->current_temp_air = TemperatureSensor::radio_sensor.get_radio_temp();
   }
   return radio_sensor_status;
 }

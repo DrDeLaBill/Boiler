@@ -14,6 +14,7 @@
 
 #include "BoilerConstants.h"
 #include "RadioSensor.h"
+#include "BoilerProfile.h"
 
 class TemperatureSensor
 {
@@ -45,8 +46,6 @@ class TemperatureSensor
     
     OneWire *oneWire;
     DallasTemperature *sensors;
-
-    RadioSensor *radio_sensor;
      
     // текущая температура теплоносителя                         
     float current_temp_water;     
@@ -63,6 +62,7 @@ class TemperatureSensor
 
     uint8_t error;
   public:
+    static RadioSensor radio_sensor;
     // текущая температура для отображения и ПИД
     static uint8_t current_temp;
     // статус подключения внешнего датчика           
@@ -71,19 +71,19 @@ class TemperatureSensor
     static uint8_t sens_temp_tries;
     // хранение времени для периода датчика
     static uint32_t ds18b20_last_time;
+    static void set_radio_sensor(uint8_t target_temperature);
+    static bool is_radio_connected();
     
     TemperatureSensor();
+    void check_temperature();
     void temp_init();
     uint8_t update_current_temp_water();
     void pid_off();
     void pid_init();
     void pwm(uint32_t time_on);
     void pid_regulating(bool is_mode_water, uint8_t target_temperature);
-    void set_radio_sensor(uint8_t target_temperature);
-    bool is_radio_connected();
     uint8_t get_current_temperature();
     float get_current_temp_water();
-    uint8_t get_error();
     void set_current_temp_like_water_temp();
     void set_current_temp_like_air_temp();
     float get_radio_temp();

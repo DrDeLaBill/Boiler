@@ -21,12 +21,12 @@ class ErrorService
     uint8_t user_error;
     
     void _remove_error();
-    void _clear_errors();
   public:
     static Vector<uint8_t> errors_list;
     static bool is_set_error(uint8_t error_name);
     static void add_error(uint8_t new_error);
     static bool type_error_validate(uint8_t error_type);
+    static void clear_errors();
     
     ErrorService();
     void check_failure();

@@ -31,6 +31,7 @@ class BoilerController
     ExternalServer *external_server;
     InternalServer *internal_server;
     BoilerProfile *boiler_profile;
+    TemperatureSensor *temperature_sensor;
     EncoderManager *encoder_manager;
     RelayTemperature *relay_manager;
     PumpManager *pump_manager;

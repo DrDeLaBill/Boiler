@@ -15,6 +15,7 @@ BoilerController::BoilerController() {
   this->error_service = new ErrorService();
   this->network_manager = new NetworkManager();
   this->external_server = new ExternalServer();
+  this->temperature_sensor = new TemperatureSensor();
   this->boiler_profile = new BoilerProfile();
   this->internal_server = new InternalServer();
   this->encoder_manager = new EncoderManager();
@@ -62,9 +63,9 @@ void BoilerController::controller_run() {
     this->error_service->get_errors_list(errors);
     // проверим нагрев
     if (ErrorService::is_set_error(ERROR_NOERROR)) {
-      this->boiler_profile->temperature_pid_off();
+      this->temperature_sensor->pid_off();
     } else {
-      this->boiler_profile->temperature_pid_regulating();
+      this->temperature_sensor->pid_regulating(BoilerProfile::is_mode_water(), BoilerProfile::get_target_temp());
     }
     // нарисуем экран
     //TODO: проверить правильность функции
@@ -72,7 +73,7 @@ void BoilerController::controller_run() {
     this->display_manager->paint();
     
     // измерим температуру
-    this->boiler_profile->check_temperature();
+    this->temperature_sensor->check_temperature();
 
     // проверим температуру ТТ реле.
     this->relay_manager->check_ssr_temp();
@@ -161,7 +162,7 @@ void BoilerController::_check_external_server_sttings() {
       // отправляем текущий статус котла
       String url_to_server = path_to_server + "/status";
       this->external_server->start_http(url_to_server);
-      doc["temp"] = this->boiler_profile->get_current_temperature();
+      doc["temp"] = this->temperature_sensor->get_current_temperature();
       doc["target_temp"] = BoilerProfile::get_target_temp();
       uint8_t num_preset = this->boiler_profile->get_profile_for_week_day();
       doc["current_profile"] = this->internal_server->get_preset(num_preset);
@@ -317,13 +318,13 @@ void BoilerController::_fill_display_manager_configuration() {
   DisplayManager::display_data_config.is_connected_to_server = this->external_server->get_connected_to_server();
   DisplayManager::display_data_config.is_external_sensor = BoilerProfile::is_mode_air() || BoilerProfile::is_mode_profile();
   DisplayManager::display_data_config.is_internal_sensor = BoilerProfile::is_mode_air();
-  DisplayManager::display_data_config.is_radio_connected = this->boiler_profile->is_radio_connected();
+  DisplayManager::display_data_config.is_radio_connected = this->temperature_sensor->is_radio_connected();
   DisplayManager::display_data_config.is_overheat = ErrorService::is_set_error(ERROR_OVERHEAT) || ErrorService::is_set_error(ERROR_WATEROVERHEAT);
   DisplayManager::display_data_config.is_pumpbroken = ErrorService::is_set_error(ERROR_PUMPBROKEN);
   DisplayManager::display_data_config.is_ssrbroken = ErrorService::is_set_error(ERROR_SSRBROKEN);
   DisplayManager::display_data_config.is_tempsensbroken = ErrorService::is_set_error(ERROR_TEMPSENSBROKEN);
   DisplayManager::display_data_config.is_nopower = ErrorService::is_set_error(ERROR_NOPOWER);
-  DisplayManager::display_data_config.current_temperature = this->boiler_profile->get_current_temperature();
+  DisplayManager::display_data_config.current_temperature = this->temperature_sensor->get_current_temperature();
   DisplayManager::display_data_config.target_temperature = BoilerProfile::get_target_temp();
   strncpy(DisplayManager::display_data_config.current_day, this->boiler_profile->get_current_day("d/m/Y"), DISPLAY_CONF_STR_LENGTH);
   strncpy(DisplayManager::display_data_config.current_time, this->boiler_profile->get_current_time("H:i"), DISPLAY_CONF_STR_LENGTH);

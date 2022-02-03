@@ -6,7 +6,6 @@ BoilerConfiguration BoilerProfile::boiler_configuration;
 
 BoilerProfile::BoilerProfile() {
   this->clock_rtc = new ClockRTC();
-  this->temperature_sensor = new TemperatureSensor();
   
   BoilerProfile::start_eeprom();
 
@@ -27,7 +26,7 @@ BoilerProfile::BoilerProfile() {
   BoilerProfile::session_boiler_mode = BoilerProfile::boiler_configuration.boiler_mode;
   
   if (this->is_mode_air() || this->is_mode_profile()) {
-    this->temperature_sensor->set_radio_sensor(BoilerProfile::get_target_temp());
+    TemperatureSensor::set_radio_sensor(BoilerProfile::get_target_temp());
   }
 }
 
@@ -214,32 +213,12 @@ bool BoilerProfile::is_mode_profile() {
     return BoilerProfile::session_boiler_mode == MODE_PROFILE;
 }
 
-void BoilerProfile::temperature_pid_regulating() {
-  this->temperature_sensor->pid_regulating(this->is_mode_water(), BoilerProfile::get_target_temp());
-}
-
-void BoilerProfile::temperature_pid_off() {
-  this->temperature_sensor->pid_off();
-}
-
-bool BoilerProfile::is_radio_connected() {
-  return this->temperature_sensor->is_radio_connected();
-}
-
-uint8_t BoilerProfile::get_current_temperature() {
-  return this->temperature_sensor->get_current_temperature();
-}
-
 char *BoilerProfile::get_current_day(const char* fmt) {
   return ClockRTC::clock_get_time(fmt);
 }
 
 char *BoilerProfile::get_current_time(const char* fmt){
   return ClockRTC::clock_get_time(fmt);
-}
-
-uint8_t BoilerProfile::get_temperature_error() {
-  return this->temperature_sensor->get_error();
 }
 
 BoilerConfiguration BoilerProfile::get_boiler_configuration() {
@@ -271,66 +250,7 @@ void BoilerProfile::set_day_preset(uint8_t day_number, uint8_t day_period, uint8
 
 //TODO: переместить в TemperaturSensor
 void BoilerProfile::check_temperature() {
-  uint8_t sens_status       = this->temperature_sensor->update_current_temp_water();
-  float current_temp_water  = this->temperature_sensor->get_current_temp_water();
-  uint8_t temp_error        = this->temperature_sensor->get_error();
-
-  if (sens_status == GOT_TEMP){
-    if (current_temp_water >= WATER_TEMP_LIM){
-      // если температура теплоносителя стала аварийно высокой
-      // здесь надо отключать силовое питание!
-      ErrorService::add_error(ERROR_WATEROVERHEAT);
-    } else {
-      // если температура понизилась, то может и не стоит возвращаться в обычный режим?
-      ErrorService::add_error(ERROR_NOERROR);
-    }
-      
-    if (temp_error == ERROR_TEMPSENSBROKEN){
-      // если датчик температуры был неисправен, а теперь починился
-      ErrorService::add_error(ERROR_NOERROR);
-    }
-
-    if (BoilerProfile::session_boiler_mode == MODE_WATER){
-      this->temperature_sensor->set_current_temp_like_water_temp();
-    }
-  }
-
-  if (sens_status == TEMP_SENS_ERROR){
-    // датчик не выходит на связь
-    ErrorService::add_error(ERROR_TEMPSENSBROKEN);
-  }
   
-  sens_status = this->temperature_sensor->update_radio_temp();
-
-  if (sens_status == GOT_EXT_TEMP){
-    if (this->temperature_sensor->is_radio_lost()){
-      // если датчик отваливался, а теперь появился
-      // проверим, надо ли нам переключить режим обратно
-      if (BoilerProfile::boiler_configuration.boiler_mode == MODE_AIR || BoilerProfile::boiler_configuration.boiler_mode == MODE_PROFILE){
-        BoilerProfile::session_boiler_mode = BoilerProfile::boiler_configuration.boiler_mode;
-      }
-    }
-    this->temperature_sensor->set_radio_on();
-    
-    if (this->is_mode_air() || this->is_mode_profile()){
-      this->temperature_sensor->set_current_temp_like_air_temp();
-    }
-  } else if (sens_status == RADIO_ERROR){
-    // датчика нет
-    Serial.println("RADIO_ERROR");
-    if (this->temperature_sensor->is_radio_on() || this->temperature_sensor->is_radio_wait()){
-      // а до этого был или должен был быть
-      // то переключаем режим работы на уставку по воде
-      Serial.println("validate true");
-      if (BoilerProfile::boiler_configuration.boiler_mode == MODE_AIR || BoilerProfile::boiler_configuration.boiler_mode == MODE_PROFILE){
-        Serial.println("set boiler mode water");
-        BoilerProfile::session_boiler_mode = MODE_WATER;
-        BoilerProfile::session_target_temp_int = (uint8_t)this->temperature_sensor->get_current_temp_water();
-        this->temperature_sensor->set_current_temp_like_water_temp();
-      }
-    }
-    this->temperature_sensor->set_radio_lost();
-  }
 }
 
 /*

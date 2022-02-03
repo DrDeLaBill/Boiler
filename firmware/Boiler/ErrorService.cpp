@@ -24,7 +24,7 @@ void ErrorService::check_failure(){
     ErrorService::add_error(ERROR_PUMPBROKEN);
   } else {
     // сбрасываем текущие ошибки
-    this->_clear_errors();
+    ErrorService::clear_errors();
   }
 }
 
@@ -56,7 +56,7 @@ void ErrorService::_remove_error() {
   
 }
 
-void ErrorService::_clear_errors() {
+void ErrorService::clear_errors() {
   ErrorService::errors_list.clear();
 }
 
