@@ -323,7 +323,7 @@ void BoilerProfile::check_temperature() {
     }
   } else if (sens_status == RADIO_ERROR){
     // датчика нет
-    Serial.println("RADIO_ERROR");
+    Serial.println(F("ERROR: Radio sensor connect error. There is no radio sensor."));
     if (this->temperature_sensor->is_radio_on() || this->temperature_sensor->is_radio_wait()){
       // а до этого был или должен был быть
       // то переключаем режим работы на уставку по воде
@@ -336,9 +336,9 @@ void BoilerProfile::check_temperature() {
     }
     this->temperature_sensor->set_radio_lost();
   } else if (sens_status == NO_EXT_TEMP) {
-    Serial.println("NO_EXT_TEMP");
+    Serial.println(F("Cannot get radio sensor temperature."));
   } else {
-    Serial.println("error radio code");
+    Serial.println(F("FATAL ERROR: error radio sensor code, cannot get radio sensor status."));
   }
 }
 
