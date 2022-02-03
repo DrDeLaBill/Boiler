@@ -86,7 +86,8 @@ class TemperatureSensor
     uint8_t get_error();
     void set_current_temp_like_water_temp();
     void set_current_temp_like_air_temp();
-    uint8_t get_radio_temp();
+    float get_radio_temp();
+    uint8_t update_radio_temp();
     bool is_radio_lost();
     bool is_radio_wait();
     bool is_radio_on();

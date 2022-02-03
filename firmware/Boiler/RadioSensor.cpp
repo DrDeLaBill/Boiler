@@ -1,5 +1,7 @@
 #include "RadioSensor.h"
 
+float RadioSensor::radio_sens_temp = 0.0;
+
 RadioSensor::RadioSensor() {
   this->radio = new RF24(PIN_CE, PIN_CSN); 
   this->last_time_online = 0;
@@ -24,14 +26,13 @@ void RadioSensor::radio_init(){
   this->clear_timeout_radio_sens();
 }
 
-uint8_t RadioSensor::get_radio_temp(float* pTemp){
+uint8_t RadioSensor::update_radio_temp(){
 	if (millis() - this->last_time_online < RECEIVE_TIMEOUT){
 		if (this->radio->available()){
 			// TODO: написать проверку приходящих данных. !! валидация
 			// Возможно, добавится отправка других данных с датчика.
-			
 			this->last_time_online = millis();
-			this->radio->read(pTemp, sizeof(float));
+			this->radio->read(&RadioSensor::radio_sens_temp, sizeof(float));
 		  return GOT_EXT_TEMP;
 		} else {
 		  return NO_EXT_TEMP;
@@ -42,6 +43,10 @@ uint8_t RadioSensor::get_radio_temp(float* pTemp){
     Serial.println("radio sensor doesn't answer");
 		return RADIO_ERROR;
 	}
+}
+
+float RadioSensor::get_radio_temp() {
+  return RadioSensor::radio_sens_temp;
 }
 
 void RadioSensor::clear_timeout_radio_sens(){

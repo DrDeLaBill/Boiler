@@ -8,7 +8,7 @@
 #define PIN_CE 				        15 			      // Номер пина Arduino, к которому подключен вывод CE радиомодуля
 #define PIN_CSN 			        2 			      // Номер пина Arduino, к которому подключен вывод CSN радиомодуля
 
-#define RECEIVE_TIMEOUT		    200000L		    // таймаут приема данных в мс
+#define RECEIVE_TIMEOUT		    120000		    // таймаут приема данных в мс
 
 #define NO_EXT_TEMP				    0
 #define GOT_EXT_TEMP          1
@@ -22,9 +22,12 @@ class RadioSensor
     // время последнего приема данных
     uint32_t last_time_online;  
   public:
+    static float radio_sens_temp;
+    
     RadioSensor();
     void radio_init(void); //TODO: ext_temp_init();
-    uint8_t get_radio_temp(float *temp); //TODO: get_ext_temp
+    uint8_t update_radio_temp(); //TODO: get_ext_temp
+    float get_radio_temp();
     void clear_timeout_radio_sens(); //TODO: clear_timeout_ext_sens
 };
 

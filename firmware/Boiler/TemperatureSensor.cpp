@@ -173,9 +173,16 @@ void TemperatureSensor::set_current_temp_like_air_temp() {
 }
 
 //TODO: убрать указатель
-uint8_t TemperatureSensor::get_radio_temp() {
-  this->radio_sensor->get_radio_temp(&current_temp_air);
-  return current_temp_air;
+float TemperatureSensor::get_radio_temp() {
+  return this->radio_sensor->get_radio_temp();
+}
+
+uint8_t TemperatureSensor::update_radio_temp() {
+  uint8_t radio_sensor_status = this->radio_sensor->update_radio_temp();
+  if (radio_sensor_status == GOT_EXT_TEMP) {
+    this->current_temp_air = this->radio_sensor->get_radio_temp();
+  }
+  return radio_sensor_status;
 }
 
 bool TemperatureSensor::is_radio_lost() {

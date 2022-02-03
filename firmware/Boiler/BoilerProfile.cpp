@@ -276,7 +276,6 @@ void BoilerProfile::check_temperature() {
   uint8_t temp_error        = this->temperature_sensor->get_error();
 
   if (sens_status == GOT_TEMP){
-    Serial.println("got temp");
     if (current_temp_water >= WATER_TEMP_LIM){
       // если температура теплоносителя стала аварийно высокой
       // здесь надо отключать силовое питание!
@@ -292,7 +291,6 @@ void BoilerProfile::check_temperature() {
     }
 
     if (BoilerProfile::session_boiler_mode == MODE_WATER){
-      Serial.println("mode water");
       this->temperature_sensor->set_current_temp_like_water_temp();
     }
   }
@@ -302,12 +300,9 @@ void BoilerProfile::check_temperature() {
     ErrorService::add_error(ERROR_TEMPSENSBROKEN);
   }
   
-  sens_status = this->temperature_sensor->get_radio_temp();
-  Serial.println("sens_status");
-  Serial.println(sens_status);
+  sens_status = this->temperature_sensor->update_radio_temp();
 
   if (sens_status == GOT_EXT_TEMP){
-    Serial.println("GOT_EXT_TEMP");
     if (this->temperature_sensor->is_radio_lost()){
       // если датчик отваливался, а теперь появился
       // проверим, надо ли нам переключить режим обратно
@@ -318,27 +313,23 @@ void BoilerProfile::check_temperature() {
     this->temperature_sensor->set_radio_on();
     
     if (this->is_mode_air() || this->is_mode_profile()){
-      Serial.println("mode air");
       this->temperature_sensor->set_current_temp_like_air_temp();
     }
   } else if (sens_status == RADIO_ERROR){
     // датчика нет
-    Serial.println(F("ERROR: Radio sensor connect error. There is no radio sensor."));
+    Serial.println("RADIO_ERROR");
     if (this->temperature_sensor->is_radio_on() || this->temperature_sensor->is_radio_wait()){
       // а до этого был или должен был быть
       // то переключаем режим работы на уставку по воде
+      Serial.println("validate true");
       if (BoilerProfile::boiler_configuration.boiler_mode == MODE_AIR || BoilerProfile::boiler_configuration.boiler_mode == MODE_PROFILE){
+        Serial.println("set boiler mode water");
         BoilerProfile::session_boiler_mode = MODE_WATER;
         BoilerProfile::session_target_temp_int = (uint8_t)this->temperature_sensor->get_current_temp_water();
-        Serial.println("mode water no radio");
         this->temperature_sensor->set_current_temp_like_water_temp();
       }
     }
     this->temperature_sensor->set_radio_lost();
-  } else if (sens_status == NO_EXT_TEMP) {
-    Serial.println(F("Cannot get radio sensor temperature."));
-  } else {
-    Serial.println(F("FATAL ERROR: error radio sensor code, cannot get radio sensor status."));
   }
 }
 
