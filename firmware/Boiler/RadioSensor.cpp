@@ -11,10 +11,10 @@ RadioSensor::RadioSensor() {
 void RadioSensor::radio_init(){
   // Инициализация модуля NRF24L01
 	if (!this->radio->begin()) {
-	  Serial.println("radio init error"); 
+	  Serial.println("Radio init error"); 
 	}
   else {
-    Serial.println("radio init ok");
+    Serial.println("Radio init ok");
   }
   
 	this->radio->setChannel(0x6f);

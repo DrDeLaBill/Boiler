@@ -7,36 +7,38 @@
 
 #include "BoilerConstants.h"
 #include "DisplayManager.h"
+#include "NetworkManager.h"
+#include "BoilerProfile.h"
+#include "InternalServer.h"
 
 class ExternalServer
 {
-  private:
-    HTTPClient *http;
-    const char* HEADER_TYPE = "Content-Type";
-    const char* JSON_HEADER = "application/json";
-    const char* WebServerAddr = "http://192.168.10.199";
-    const char* boiler_id = "abcdabcd12";
   public:
+    static const char* HEADER_TYPE;
+    static const char* JSON_HEADER;
+    static const char* WebServerAddr;
+    static const char* boiler_id;
+  
+    static HTTPClient http;
     static uint32_t last_time_http;
     static bool got_new_wifi_settings;
     static bool connected_to_server;
     
-    ExternalServer();
-    void send_settings_to_server(uint8_t session_boiler_mode,
-                                 uint8_t target_temp,
-                                 BoilerConfiguration boiler_configuration);
-    uint8_t get_connected_to_server();
-    bool is_new_wifi_settings();
-    void set_new_wifi_settings_flag(bool new_flag);
-    void set_connected_to_server(bool value);
-    void start_http(String url_to_serer);
-    String get_web_server_address();
-    void http_send_json(String json_string);
-    void close_http_session();
-    int http_get();
-    String http_get_string();
-    String get_http_error(int response_code);
-    uint8_t get_new_wifi_settings();
+    static void check_settings();
+    static void profile_settings_init(String url);
+    static uint8_t get_new_wifi_settings();
+    static void set_new_wifi_settings_flag(bool new_flag);
+    static void send_settings_to_server();
+    static String get_web_server_address();
+    static void serial_error_report(String target_url, int response_code);
+    static void close_http_session();
+    static void set_connected_to_server(bool value);
+    static void start_http(String url_to_serer);
+    static String http_get_string();
+    static int http_get();
+    static String get_http_error(int response_code);
+    static uint8_t get_connected_to_server();
+    static void http_send_json(String json_string);
 };
 
 #endif
