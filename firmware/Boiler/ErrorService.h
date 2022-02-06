@@ -17,25 +17,21 @@
 
 class ErrorService
 {
-  private:
-    uint8_t user_error;
-    
-    void _remove_error();
   public:
     static Vector<uint8_t> errors_list;
+    
+    ErrorService();
     static bool is_set_error(uint8_t error_name);
     static void add_error(uint8_t new_error);
     static bool type_error_validate(uint8_t error_type);
     static void clear_errors();
-    
-    ErrorService();
-    void check_failure();
+    static void check_failure();
     // Возвращает текущие ошибки
-    void get_errors_list(uint8_t *result_errors_list);
+    static void get_errors_list(uint8_t *result_errors_list);
     // Возвращает все существующие ошибки
-    void get_all_errors();
-    void enable_crash_out_pin();
-    void init_error_actions();
+    static void get_all_errors();
+    static void enable_crash_out_pin();
+    static void init_error_actions();
 };
 
 #endif

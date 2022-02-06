@@ -1,5 +1,8 @@
 #include "BoilerController.h"
 
+ErrorService BoilerController::error_service;
+NetworkManager BoilerController::network_manager;
+  
 CommandManager BoilerController::command_manager;
 
 BoilerController::BoilerController() {
@@ -12,8 +15,6 @@ BoilerController::BoilerController() {
     ESP.restart();
   }
   this->display_manager = new DisplayManager();
-  this->error_service = new ErrorService();
-  this->network_manager = new NetworkManager();
   this->external_server = new ExternalServer();
   this->temperature_sensor = new TemperatureSensor();
   this->boiler_profile = new BoilerProfile();
@@ -26,7 +27,7 @@ BoilerController::BoilerController() {
 
 void BoilerController::controller_init() {
   this->work_mode = MODE_STANDBY;
-  this->network_manager->set_wifi_settings(
+  NetworkManager::set_wifi_settings(
     this->boiler_profile->get_ssid(),
     this->boiler_profile->get_pass()
   );
@@ -58,9 +59,9 @@ void BoilerController::controller_run() {
 
   if (this->work_mode == MODE_WORK) {
     // Проверка наличия ошибок
-    this->error_service->check_failure();
+    ErrorService::check_failure();
     uint8_t errors[ERRORS_COUNT] = {};
-    this->error_service->get_errors_list(errors);
+    ErrorService::get_errors_list(errors);
     // проверим нагрев
     if (ErrorService::is_set_error(ERROR_NOERROR)) {
       this->temperature_sensor->pid_off();
@@ -102,17 +103,17 @@ void BoilerController::controller_run() {
   }
   
   // Обработка ошибок
-  this->error_service->init_error_actions();
+  ErrorService::init_error_actions();
 }
 
 // Совпадают ли ssid и pass BoilerProfile и NetworkManager
 void BoilerController::_check_network_settings() {
-  if (this->network_manager->get_ssid() != this->boiler_profile->get_ssid() 
-      || this->network_manager->get_pass() != this->boiler_profile->get_pass()
+  if (NetworkManager::get_ssid() != this->boiler_profile->get_ssid() 
+      || NetworkManager::get_pass() != this->boiler_profile->get_pass()
   ) {
     this->boiler_profile->set_wifi_settings(
-      this->network_manager->get_ssid(),
-      this->network_manager->get_pass()
+      NetworkManager::get_ssid(),
+      NetworkManager::get_pass()
     );
   }
 }
@@ -135,11 +136,11 @@ void BoilerController::_check_network_settings() {
 //TODO: сократить повторяющиеся части кода в функции (также для _external_profile_settings_init())
 void BoilerController::_check_external_server_sttings() {
   if (this->external_server->get_new_wifi_settings()) {
-    this->network_manager->connect_to_wifi();
+    NetworkManager::connect_to_wifi();
     this->external_server->set_new_wifi_settings_flag(false);
   }
   // Проверяем подключение к интернету.
-  if (this->network_manager->get_wifi_status() == WL_CONNECTED){
+  if (NetworkManager::get_wifi_status() == WL_CONNECTED){
     // отправляем статус и запрашиваем настройки раз в минуту.
     
     if (millis() - ExternalServer::last_time_http >= WEB_REQUESTS_PERIOD){
@@ -313,7 +314,7 @@ void BoilerController::serial_error_report(String target_url, int response_code)
 }
 
 void BoilerController::_fill_display_manager_configuration() {
-  DisplayManager::display_data_config.is_wifi_connect = this->network_manager->is_wifi_connected();
+  DisplayManager::display_data_config.is_wifi_connect = NetworkManager::is_wifi_connected();
   DisplayManager::display_data_config.is_heating_on = this->relay_manager->is_heating_on();
   DisplayManager::display_data_config.is_connected_to_server = this->external_server->get_connected_to_server();
   DisplayManager::display_data_config.is_external_sensor = BoilerProfile::is_mode_air() || BoilerProfile::is_mode_profile();

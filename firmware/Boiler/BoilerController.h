@@ -26,8 +26,6 @@ class BoilerController
   private:
     // режим работы: работа, режим ожидания
     bool work_mode;
-    ErrorService *error_service;
-    NetworkManager *network_manager;
     ExternalServer *external_server;
     InternalServer *internal_server;
     BoilerProfile *boiler_profile;
@@ -44,6 +42,9 @@ class BoilerController
     void _check_external_server_sttings();
     void _external_profile_settings_init(String url);
   public:
+    static ErrorService error_service;
+    static NetworkManager network_manager;
+    
     static CommandManager command_manager;
     
     BoilerController();

@@ -14,7 +14,7 @@ ErrorService::ErrorService() {
   digitalWrite(SSR2_OUT_PIN, LOW);
   digitalWrite(SSR3_OUT_PIN, LOW);
   delay(SSR_DELAY);
-  Serial.print(F("SSR_value: "));
+  Serial.print(F("SSR input pin: "));
   Serial.println(analogRead(SSR_IN_PIN));
 }
 
@@ -52,10 +52,6 @@ void ErrorService::add_error(uint8_t new_error) {
   }
 }
 
-void ErrorService::_remove_error() {
-  
-}
-
 void ErrorService::clear_errors() {
   ErrorService::errors_list.clear();
 }
@@ -86,10 +82,10 @@ void ErrorService::init_error_actions() {
       case ERROR_NOERROR:
         break;
       case ERROR_PUMPBROKEN:
-        this->enable_crash_out_pin();
+        ErrorService::enable_crash_out_pin();
         break;
       default:
-        this->enable_crash_out_pin();
+        ErrorService::enable_crash_out_pin();
         break;
     }
   }

@@ -21,26 +21,25 @@
 
 class NetworkManager
 {
-  private:
-    // ssid и pass точки доступа котла
-    const char *soft_ap_ssid;        
-    const char *soft_ap_password;
-    
   public:
+    // ssid и pass точки доступа котла
+    static const char *soft_ap_ssid;        
+    static const char *soft_ap_password;
+    
     static String current_ssid;
     static String current_pass;
     
     NetworkManager();
-    void network_init();
-    void connect_to_wifi(void);
-    void server_init();
-    void send_settings_to_server(void);
-    void check_new_settings(BoilerConfiguration boiler_configuration);
-    void set_wifi_settings(String ssid, String pass);
-    String get_ssid();
-    String get_pass();
-    bool is_wifi_connected();
-    uint8_t get_wifi_status();
+    static void network_init();
+    static void connect_to_wifi(void);
+    static void server_init();
+    static void send_settings_to_server(void);
+    static void check_new_settings(BoilerConfiguration boiler_configuration);
+    static void set_wifi_settings(String ssid, String pass);
+    static String get_ssid();
+    static String get_pass();
+    static bool is_wifi_connected();
+    static uint8_t get_wifi_status();
 };
 
 #endif

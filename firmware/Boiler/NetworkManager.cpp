@@ -2,21 +2,17 @@
 
 String NetworkManager::current_ssid = "";
 String NetworkManager::current_pass = "";
+const char* NetworkManager::soft_ap_ssid = "BoilerAP";
+const char* NetworkManager::soft_ap_password = "12345678";
 
 NetworkManager::NetworkManager() {
-  this->soft_ap_ssid = "BoilerAP";
-  this->soft_ap_password = "12345678";
-  this->network_init();
-}
-
-void NetworkManager::network_init(){
   WiFi.mode(WIFI_MODE_STA);
   WiFi.softAP(soft_ap_ssid, soft_ap_password);
   Serial.println(F("WIFI AP has been set"));
   Serial.print(F("ESP32 IP as soft AP: "));
   Serial.println(WiFi.softAPIP());
 
-  this->connect_to_wifi();
+  NetworkManager::connect_to_wifi();
 
   if(!MDNS.begin("boiler")) {
    Serial.println(F("Error starting mDNS"));
@@ -25,7 +21,7 @@ void NetworkManager::network_init(){
 
   MDNS.addService("http", "tcp", 80);
 
-  this->server_init();
+  NetworkManager::server_init();
 }
 
 void NetworkManager::connect_to_wifi(void){
@@ -44,7 +40,7 @@ void NetworkManager::connect_to_wifi(void){
       Serial.print(F("ESP32 IP on the WiFi network: "));
       Serial.println(WiFi.localIP());
 
-      this->send_settings_to_server();
+      NetworkManager::send_settings_to_server();
     } else {
       Serial.println(F("Couldn't connect to WiFi network."));
     }
