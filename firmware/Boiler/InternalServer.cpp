@@ -513,6 +513,7 @@ void InternalServer::server_init(){
   this->server->begin();
 }
 
+//TODO: не тут должно быть
 String InternalServer::get_preset(uint8_t preset_num) {
   return DisplayManager::presets[preset_num];
 }

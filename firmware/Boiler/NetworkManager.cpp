@@ -6,6 +6,14 @@ const char* NetworkManager::soft_ap_ssid = "BoilerAP";
 const char* NetworkManager::soft_ap_password = "12345678";
 
 NetworkManager::NetworkManager() {
+  //TODO: для проверки, убрать потом
+  Serial.println("network manager");
+  Serial.println(this->soft_ap_ssid);
+  Serial.println(this->soft_ap_password);
+  this->network_init();
+}
+
+void NetworkManager::network_init(){
   WiFi.mode(WIFI_MODE_STA);
   WiFi.softAP(soft_ap_ssid, soft_ap_password);
   Serial.println(F("WIFI AP has been set"));
@@ -24,7 +32,7 @@ NetworkManager::NetworkManager() {
   NetworkManager::server_init();
 }
 
-void NetworkManager::connect_to_wifi(void){
+void NetworkManager::connect_to_wifi(){
   if (NetworkManager::current_ssid.length() != 0){
     WiFi.begin(NetworkManager::current_ssid.c_str(), NetworkManager::current_pass.c_str());
 
@@ -32,7 +40,7 @@ void NetworkManager::connect_to_wifi(void){
      
     while (WiFi.status() != WL_CONNECTED && millis() - last_time_wifi < WIFI_CONNECT_TIMEOUT){
       delay(1000);
-      Serial.print("Connecting to WiFi..");
+      Serial.print(F("Connecting to WiFi.."));
       Serial.println(NetworkManager::current_ssid);
     }
     if (WiFi.status() == WL_CONNECTED){
@@ -46,6 +54,15 @@ void NetworkManager::connect_to_wifi(void){
     }
   } else {
     Serial.println(F("WIFI client settings not found!"));
+  }
+}
+
+// Совпадают ли ssid и pass BoilerProfile и NetworkManager
+void NetworkManager::check_new_settings() {
+  String ssid = NetworkManager::get_ssid();
+  String pass = NetworkManager::get_pass();
+  if (!ssid.equals(BoilerProfile::get_ssid()) || !pass.equals(BoilerProfile::get_pass())) {
+    BoilerProfile::set_wifi_settings(ssid, pass);
   }
 }
 
@@ -71,5 +88,4 @@ uint8_t NetworkManager::get_wifi_status() {
 }
 
 void NetworkManager::server_init(){}
-void NetworkManager::send_settings_to_server(void){}
-void NetworkManager::check_new_settings(BoilerConfiguration boiler_configuration){}
+void NetworkManager::send_settings_to_server(){}

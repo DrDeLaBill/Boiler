@@ -5,8 +5,6 @@
 #ifndef _COMMAND_MANAGER_H_
 #define _COMMAND_MANAGER_H_
 
-#define READ_DELAY_TIME 500 //command read delay mls
-
 #include <Arduino.h>
 
 #include "BoilerProfile.h"

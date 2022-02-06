@@ -42,19 +42,19 @@ class BoilerProfile
     static void start_eeprom();
     static void set_default_settings();
     static uint8_t get_session_boiler_mode();
+    static String get_ssid();
+    static String get_pass();
+    static void set_wifi_settings(String ssid, String pass);
+    static uint8_t get_profile_for_week_day();
+    static void set_config_day_profile(uint8_t day, uint8_t value);
+    static void set_day_preset(uint8_t day_number, uint8_t day_period, uint8_t value);
     
     BoilerProfile();
     void set_session_boiler_mode(uint8_t target_mode);
     void set_settings_standby(bool state);
-    void set_config_day_profile(uint8_t day, uint8_t value);
-    uint8_t get_profile_for_week_day();
     void check_temperature();
-    String get_ssid();
-    String get_pass();
-    void set_wifi_settings(String ssid, String pass);
     char *get_current_day(const char* fmt);
     char *get_current_time(const char* fmt);
-    void set_day_preset(uint8_t day_number, uint8_t day_period, uint8_t value);
     BoilerConfiguration get_boiler_configuration();
 };
 

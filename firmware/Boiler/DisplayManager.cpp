@@ -91,7 +91,7 @@ void DisplayManager::paint() {
 
   this->u8g2->clearBuffer();
 
-  switch (DisplayManager::page_name) { //TODO: остановился тут
+  switch (DisplayManager::page_name) {
     case pageTemp:
       // основной экран. Отображение текущей и уставной температуры.
 

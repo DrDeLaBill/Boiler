@@ -39,8 +39,6 @@ class BoilerController
     void _check_network_settings();
     void _fill_display_manager_configuration();
     void _check_button_commands();
-    void _check_external_server_sttings();
-    void _external_profile_settings_init(String url);
   public:
     static ErrorService error_service;
     static NetworkManager network_manager;
@@ -48,9 +46,7 @@ class BoilerController
     static CommandManager command_manager;
     
     BoilerController();
-    void controller_init();
     void controller_run();
-    void serial_error_report(String target_url, int responce_code);
 };
 
 #endif
