@@ -27,6 +27,7 @@ class NetworkManager
     static const char *soft_ap_ssid;
     static const char *soft_ap_password;
 
+    NetworkManager();
     static String current_ssid;
     static String current_pass;
     static void check_new_settings();
@@ -36,11 +37,8 @@ class NetworkManager
     static void send_settings_to_server();
     static uint8_t get_wifi_status();
     static bool is_wifi_connected();
-
-    NetworkManager();
-    void network_init();
-    void server_init();
-    void set_wifi_settings(String ssid, String pass);
+    static void server_init();
+    static void set_wifi_settings(String ssid, String pass);
 };
 
 #endif

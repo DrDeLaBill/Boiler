@@ -37,10 +37,9 @@ struct DisplayDataConfig {
 
 class DisplayManager
 {
-  private:
-    //U8G2_PCD8544_84X48_F_4W_SW_SPI u8g2(U8G2_R0, /* clock=*/ 14, /* data=*/ 27, /* cs=*/ 26, /* dc=*/ 25, /* reset=*/ 33);  // Nokia 5110 Display
-    U8G2_PCD8544_84X48_F_4W_HW_SPI *u8g2;  // Nokia 5110 Display
   public:
+    //U8G2_PCD8544_84X48_F_4W_SW_SPI u8g2(U8G2_R0, /* clock=*/ 14, /* data=*/ 27, /* cs=*/ 26, /* dc=*/ 25, /* reset=*/ 33);  // Nokia 5110 Display
+    static U8G2_PCD8544_84X48_F_4W_HW_SPI u8g2;  // Nokia 5110 Display
     static DisplayDataConfig display_data_config;
     static DisplayPage page_name;
     static uint8_t brightness;
@@ -53,6 +52,7 @@ class DisplayManager
     // позиция рамки в меню
     static uint8_t menu_item;   
     
+    DisplayManager();
     static void set_page_name(DisplayPage page_name);
     static const char* presets[NUM_PRESETS];
     static void rotary_right();
@@ -64,15 +64,13 @@ class DisplayManager
     static uint8_t get_temporary_target_temp();
     static uint8_t get_menu_item();
     static void set_menu_item(uint8_t menu_item);
-    
-    DisplayManager();
-    void display_init();
-    void paint();
-    void display_off();
-    void display_on();
-    void display_lightning();
-    void rotary_encoder_action(uint8_t rotary_state);
-    void check_page();
+    static void display_init();
+    static void paint();
+    static void display_off();
+    static void display_on();
+    static void display_lightning();
+    static void rotary_encoder_action(uint8_t rotary_state);
+    static void check_page();
 };
 
 

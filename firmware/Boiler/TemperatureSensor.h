@@ -18,21 +18,19 @@
 
 class TemperatureSensor
 {
-  private:
+  public:
     //пиды по воздуху
-    float kP_air = 7;                             //Пропорциональная составляющая
-    float kI_air = 0.5;                           //Интегральная составляющая
-    float kD_air = 0.3;                           //Дифференциальная составляющая
-    
+    static float kP_air;                             //Пропорциональная составляющая
+    static float kI_air;                           //Интегральная составляющая
+    static float kD_air;                           //Дифференциальная составляющая
     //пиды по воде
-    float kP_water = 7;                           //Пропорциональная составляющая
-    float kI_water = 0.5;                         //Интегральная составляющая
-    float kD_water = 0.3;                         //Дифференциальная составляющая
-    
-    float dT = 1000;                              //Время расчета для обоих регуляторов
-    
-    const uint32_t period_msec = 1000;            // время, за которое переключается включение/выключение ТТР
-    
+    static float kP_water;                           //Пропорциональная составляющая
+    static float kI_water;                         //Интегральная составляющая
+    static float kD_water;                         //Дифференциальная составляющая
+    //Время расчета для обоих регуляторов
+    static float dT;
+    // время, за которое переключается включение/выключение ТТР
+    static const uint32_t period_msec;
     /*
      * 
      * в процессе работы можно менять коэффициенты
@@ -41,27 +39,23 @@ class TemperatureSensor
      * regulator.Kd = 0;
      * 
      */
-    GyverPID *regulator_AIR;
-    GyverPID *regulator_WATER;
-    
-    OneWire *oneWire;
-    DallasTemperature *sensors;
-     
+    static GyverPID regulator_AIR;
+    static GyverPID regulator_WATER;
+    static OneWire oneWire;
+    static DallasTemperature sensors;
     // текущая температура теплоносителя                         
-    float current_temp_water;     
+    static float current_temp_water;     
     // текущая температура с внешнего датчика                
-    float current_temp_air;    
+    static float current_temp_air;    
     // хранение времени для периода передачи текущей температуры в пид регулятор                   
-    uint32_t pid_last_time;       
+    static uint32_t pid_last_time;       
     // Время, когда надо выключить TTP                  
-    uint32_t pwm_set_0_time;           
+    static uint32_t pwm_set_0_time;           
     // для оценки нагрева теплоносителя
-    uint32_t check_ssr_last_time;                   
+    static uint32_t check_ssr_last_time;                   
     // для оценки нагрева теплоносителя
-    uint8_t check_ssr_last_temp;
-
-    uint8_t error;
-  public:
+    static uint8_t check_ssr_last_temp;
+    // Беспроводной сенсор температуры воздуха
     static RadioSensor radio_sensor;
     // текущая температура для отображения и ПИД
     static uint8_t current_temp;
@@ -71,28 +65,28 @@ class TemperatureSensor
     static uint8_t sens_temp_tries;
     // хранение времени для периода датчика
     static uint32_t ds18b20_last_time;
+    
+    TemperatureSensor();
     static void set_radio_sensor(uint8_t target_temperature);
     static bool is_radio_connected();
     static uint8_t get_current_temperature();
-    
-    TemperatureSensor();
-    void check_temperature();
-    void temp_init();
-    uint8_t update_current_temp_water();
-    void pid_off();
-    void pid_init();
-    void pwm(uint32_t time_on);
-    void pid_regulating(bool is_mode_water, uint8_t target_temperature);
-    float get_current_temp_water();
-    void set_current_temp_like_water_temp();
-    void set_current_temp_like_air_temp();
-    float get_radio_temp();
-    uint8_t update_radio_temp();
-    bool is_radio_lost();
-    bool is_radio_wait();
-    bool is_radio_on();
-    void set_radio_on();
-    void set_radio_lost();
+    static void check_temperature();
+    static void temp_init();
+    static uint8_t update_current_temp_water();
+    static void pid_off();
+    static void pid_init();
+    static void pwm(uint32_t time_on);
+    static void pid_regulating(bool is_mode_water, uint8_t target_temperature);
+    static float get_current_temp_water();
+    static void set_current_temp_like_water_temp();
+    static void set_current_temp_like_air_temp();
+    static float get_radio_temp();
+    static uint8_t update_radio_temp();
+    static bool is_radio_lost();
+    static bool is_radio_wait();
+    static bool is_radio_on();
+    static void set_radio_on();
+    static void set_radio_lost();
 };
 
 #endif

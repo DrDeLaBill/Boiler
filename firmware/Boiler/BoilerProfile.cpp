@@ -1,15 +1,14 @@
 #include "BoilerProfile.h"
 
+ClockRTC BoilerProfile::clock_rtc;
 uint8_t BoilerProfile::session_target_temp_int = 0;
 uint8_t BoilerProfile::session_boiler_mode = MODE_WATER;
 BoilerConfiguration BoilerProfile::boiler_configuration;
 
 BoilerProfile::BoilerProfile() {
-  this->clock_rtc = new ClockRTC();
-  
   BoilerProfile::start_eeprom();
 
-  this->_serial_print_boiler_configuration();
+  BoilerProfile::_serial_print_boiler_configuration();
 
   Serial.print(F("Boiler mode: "));
   Serial.println(String(BoilerProfile::boiler_configuration.boiler_mode));
@@ -25,7 +24,7 @@ BoilerProfile::BoilerProfile() {
   BoilerProfile::session_target_temp_int = BoilerProfile::boiler_configuration.target_temp_int;
   BoilerProfile::session_boiler_mode = BoilerProfile::boiler_configuration.boiler_mode;
   
-  if (this->is_mode_air() || this->is_mode_profile()) {
+  if (BoilerProfile::is_mode_air() || BoilerProfile::is_mode_profile()) {
     TemperatureSensor::set_radio_sensor(BoilerProfile::get_target_temp());
   }
 }

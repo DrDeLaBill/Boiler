@@ -8,12 +8,8 @@ const char* NetworkManager::soft_ap_password = "12345678";
 NetworkManager::NetworkManager() {
   //TODO: для проверки, убрать потом
   Serial.println("network manager");
-  Serial.println(this->soft_ap_ssid);
-  Serial.println(this->soft_ap_password);
-  this->network_init();
-}
-
-void NetworkManager::network_init(){
+  Serial.println(NetworkManager::soft_ap_ssid);
+  Serial.println(NetworkManager::soft_ap_password);
   WiFi.mode(WIFI_MODE_STA);
   WiFi.softAP(soft_ap_ssid, soft_ap_password);
   Serial.println(F("WIFI AP has been set"));

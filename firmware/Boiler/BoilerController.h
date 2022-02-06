@@ -24,26 +24,21 @@
 class BoilerController 
 {
   private:
-    // режим работы: работа, режим ожидания
-    bool work_mode;
-    ExternalServer *external_server;
-    InternalServer *internal_server;
-    BoilerProfile *boiler_profile;
-    TemperatureSensor *temperature_sensor;
     EncoderManager *encoder_manager;
     RelayTemperature *relay_manager;
     PumpManager *pump_manager;
-    DisplayManager *display_manager;
 
-    void _check_serial_port_commands();
-    void _check_network_settings();
     void _fill_display_manager_configuration();
-    void _check_button_commands();
   public:
+    // режим работы: работа, режим ожидания
+    static bool work_mode;
     static ErrorService error_service;
     static NetworkManager network_manager;
-    
+    static TemperatureSensor temperature_sensor;
     static CommandManager command_manager;
+    static BoilerProfile boiler_profile;
+    static DisplayManager display_manager;
+    static InternalServer internal_server;
     
     BoilerController();
     void controller_run();

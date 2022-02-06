@@ -19,15 +19,16 @@
 class BoilerProfile
 {
   private:
-    ClockRTC *clock_rtc;
-    
     void _serial_print_boiler_configuration();
   public:
+    static ClockRTC clock_rtc;
     // требуемая температура теплоносителя (в данной сессии)
     static uint8_t session_target_temp_int;
     // режим работы котла (в данной сессии)
     static uint8_t session_boiler_mode;
     static BoilerConfiguration boiler_configuration;
+
+    BoilerProfile();
     static void save_configuration();
     static uint8_t get_target_temp();
     static String get_boiler_id();
@@ -48,14 +49,12 @@ class BoilerProfile
     static uint8_t get_profile_for_week_day();
     static void set_config_day_profile(uint8_t day, uint8_t value);
     static void set_day_preset(uint8_t day_number, uint8_t day_period, uint8_t value);
-    
-    BoilerProfile();
-    void set_session_boiler_mode(uint8_t target_mode);
-    void set_settings_standby(bool state);
-    void check_temperature();
-    char *get_current_day(const char* fmt);
-    char *get_current_time(const char* fmt);
-    BoilerConfiguration get_boiler_configuration();
+    static void set_session_boiler_mode(uint8_t target_mode);
+    static void set_settings_standby(bool state);
+    static void check_temperature();
+    static char *get_current_day(const char* fmt);
+    static char *get_current_time(const char* fmt);
+    static BoilerConfiguration get_boiler_configuration();
 };
 
 #endif
