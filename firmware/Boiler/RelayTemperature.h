@@ -21,15 +21,14 @@
 
 class RelayTemperature
 {
-  private:
-    uint16_t ssr_temp_buf[SSR_TEMP_BUF_SIZE];
-    uint32_t ssr_temp_summ;
-    uint32_t ssr_broken_last_time;
   public:
+    static uint16_t ssr_temp_buf[SSR_TEMP_BUF_SIZE];
+    static uint32_t ssr_temp_summ;
+    static uint32_t ssr_broken_last_time;
+    
     RelayTemperature();
-    void ssr_temp_init();
-    uint8_t check_ssr_temp();
-    bool is_heating_on();
+    static uint8_t check_ssr_temp();
+    static bool is_heating_on();
 };
 
 #endif

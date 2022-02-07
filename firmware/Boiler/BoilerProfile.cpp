@@ -247,11 +247,6 @@ void BoilerProfile::set_day_preset(uint8_t day_number, uint8_t day_period, uint8
     BoilerProfile::boiler_configuration.presets[day_number][day_period] = value;
 }
 
-//TODO: переместить в TemperaturSensor
-void BoilerProfile::check_temperature() {
-  
-}
-
 /*
    что здесь будет хранииться? Нам нужно понимать, если датчик температуры отваливается,
    то переходим на сохранение текущей температуры. Но при перезагрузке мы должны вернуться

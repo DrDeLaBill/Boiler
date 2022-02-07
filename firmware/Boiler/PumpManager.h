@@ -15,15 +15,15 @@
 
 class PumpManager
 {
-  private:
-    uint8_t pump_state;
-    uint32_t pump_off_delay;
   public:
+    static uint8_t pump_state;
+    static uint32_t pump_off_delay;
+    
     PumpManager();
-    void pump_init();
-    void pump_on();
-    void pump_off();
-    uint8_t check_pump();
+    static void pump_init();
+    static void pump_on();
+    static void pump_off();
+    static uint8_t check_pump();
 };
 
 #endif

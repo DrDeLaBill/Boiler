@@ -62,7 +62,7 @@ void InternalServer::handleUpload(AsyncWebServerRequest *request, String filenam
     }
 }
 
-InternalServer::InternalServer() {
+void InternalServer::internal_server_init() {
   AsyncCallbackJsonWebHandler* handler;
   AsyncWebServer server(80);
   // страница для загрузки новой прошивки

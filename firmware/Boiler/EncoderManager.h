@@ -21,27 +21,25 @@
 
 class EncoderManager
 {
-  private:
-    ESP32Encoder *encoder;
-    const int32_t count_default = 1000000;
-    int32_t count;
-    uint32_t last_time_button;
-    uint8_t button_last_state;
-    uint8_t button_rotary_state;
   public:
+    static ESP32Encoder encoder;
+    static const int32_t count_default;
+    static int32_t count;
+    static uint32_t last_time_button;
+    static uint8_t button_last_state;
+    static uint8_t button_rotary_state;
     static uint32_t last_time_debounce;
     
     EncoderManager();
     static void buttonISR();
-    void encoder_init();
-    int32_t encoder_get_ticks();
-    uint8_t check_encoder_button();
-    uint8_t check_encoder(bool is_standby_mode);
-    bool is_button_holded(uint8_t work_mode);
-    void rotary_right();
-    void rotary_left();
-    uint8_t get_button_rotary_state();
-    void button_pressed_action();
+    static int32_t encoder_get_ticks();
+    static uint8_t check_encoder_button();
+    static uint8_t check_encoder(bool is_standby_mode);
+    static bool is_button_holded(uint8_t work_mode);
+    static void rotary_right();
+    static void rotary_left();
+    static uint8_t get_button_rotary_state();
+    static void button_pressed_action();
 };
 
 #endif

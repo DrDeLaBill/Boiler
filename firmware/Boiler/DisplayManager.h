@@ -7,6 +7,11 @@
 
 #include "BoilerConstants.h"
 #include "BoilerProfile.h"
+#include "ErrorService.h"
+#include "TemperatureSensor.h"
+#include "NetworkManager.h"
+#include "RelayTemperature.h"
+#include "ExternalServer.h"
 
 #define LED_PIN                     23      // пин подсветки дисплея
 
@@ -71,6 +76,7 @@ class DisplayManager
     static void display_lightning();
     static void rotary_encoder_action(uint8_t rotary_state);
     static void check_page();
+    static void fill_display_default_configuration();
 };
 
 

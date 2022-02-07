@@ -379,6 +379,24 @@ void DisplayManager::rotary_left() {
   }
 }
 
+void DisplayManager::fill_display_default_configuration() {
+  DisplayManager::display_data_config.is_wifi_connect = NetworkManager::is_wifi_connected();
+  DisplayManager::display_data_config.is_heating_on = RelayTemperature::is_heating_on();
+  DisplayManager::display_data_config.is_connected_to_server = ExternalServer::get_connected_to_server();
+  DisplayManager::display_data_config.is_external_sensor = BoilerProfile::is_mode_air() || BoilerProfile::is_mode_profile();
+  DisplayManager::display_data_config.is_internal_sensor = BoilerProfile::is_mode_air();
+  DisplayManager::display_data_config.is_radio_connected = TemperatureSensor::is_radio_connected();
+  DisplayManager::display_data_config.is_overheat = ErrorService::is_set_error(ERROR_OVERHEAT) || ErrorService::is_set_error(ERROR_WATEROVERHEAT);
+  DisplayManager::display_data_config.is_pumpbroken = ErrorService::is_set_error(ERROR_PUMPBROKEN);
+  DisplayManager::display_data_config.is_ssrbroken = ErrorService::is_set_error(ERROR_SSRBROKEN);
+  DisplayManager::display_data_config.is_tempsensbroken = ErrorService::is_set_error(ERROR_TEMPSENSBROKEN);
+  DisplayManager::display_data_config.is_nopower = ErrorService::is_set_error(ERROR_NOPOWER);
+  DisplayManager::display_data_config.current_temperature = TemperatureSensor::get_current_temperature();
+  DisplayManager::display_data_config.target_temperature = BoilerProfile::get_target_temp();
+  strncpy(DisplayManager::display_data_config.current_day, BoilerProfile::get_current_day("d/m/Y"), DISPLAY_CONF_STR_LENGTH);
+  strncpy(DisplayManager::display_data_config.current_time, BoilerProfile::get_current_time("H:i"), DISPLAY_CONF_STR_LENGTH);
+}
+
 void DisplayManager::set_t_newPage(int value) {
   DisplayManager::t_newPage = value;
 }

@@ -17,7 +17,7 @@
 class InternalServer
 {
   public:    
-    InternalServer();
+    static void internal_server_init();
     static void handleUpload(AsyncWebServerRequest *request, String filename, size_t index, uint8_t *data, size_t len, bool final);
     static String get_preset(uint8_t preset_num);
     static String get_s_setpoint();
