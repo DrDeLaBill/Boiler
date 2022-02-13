@@ -15,7 +15,6 @@
 #include "TemperatureSensor.h"
 #include "ClockRTC.h"
 
-//TODO: написать функции is_set_session_boiler_mode(mode) и is_set_config_boiler_mode(mode)
 class BoilerProfile
 {
   private:

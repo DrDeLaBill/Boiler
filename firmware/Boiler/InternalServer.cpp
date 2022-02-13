@@ -507,20 +507,3 @@ void InternalServer::internal_server_init() {
    
   server.begin();
 }
-
-//TODO: не тут должно быть, убрать всё это говно отсюда
-String InternalServer::get_preset(uint8_t preset_num) {
-  return DisplayManager::presets[preset_num];
-}
-
-String InternalServer::get_s_setpoint() {
-  return S_SETPOINT;
-}
-
-String InternalServer::get_s_profile() {
-  return S_PROFILE;
-}
-
-String InternalServer::get_s_setpointwater() {
-  return S_SETPOINTWATER;
-}

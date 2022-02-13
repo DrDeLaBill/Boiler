@@ -1,45 +1,41 @@
 #include "RadioSensor.h"
 
 float RadioSensor::radio_sens_temp = 0.0;
+uint32_t RadioSensor::last_time_online = 0;
+RF24 RadioSensor::radio(PIN_CE, PIN_CSN);
 
 RadioSensor::RadioSensor() {
-  this->radio = new RF24(PIN_CE, PIN_CSN); 
-  this->last_time_online = 0;
-  this->radio_init();
-}
-
-void RadioSensor::radio_init(){
   // Инициализация модуля NRF24L01
-	if (!this->radio->begin()) {
-	  Serial.println("Radio init error"); 
-	}
+  if (!RadioSensor::radio.begin()) {
+    Serial.println("Radio module init error"); 
+  }
   else {
-    Serial.println("Radio init ok");
+    Serial.println("Radio module init ok");
   }
   
-	this->radio->setChannel(0x6f);
-	this->radio->setDataRate(RF24_1MBPS); // Скорость обмена данными 1 Мбит/сек
-	this->radio->setPALevel(RF24_PA_HIGH);           //
-	this->radio->openReadingPipe(1, 0x7878787878LL); // Открываем трубу ID передатчика
-	this->radio->startListening(); // Начинаем прослушивать открываемую трубу
+  RadioSensor::radio.setChannel(0x6f);
+  RadioSensor::radio.setDataRate(RF24_1MBPS); // Скорость обмена данными 1 Мбит/сек
+  RadioSensor::radio.setPALevel(RF24_PA_HIGH);           //
+  RadioSensor::radio.openReadingPipe(1, 0x7878787878LL); // Открываем трубу ID передатчика
+  RadioSensor::radio.startListening(); // Начинаем прослушивать открываемую трубу
   
-  this->clear_timeout_radio_sens();
+  RadioSensor::clear_timeout_radio_sens();
 }
 
 uint8_t RadioSensor::update_radio_temp(){
-	if (millis() - this->last_time_online < RECEIVE_TIMEOUT){
-		if (this->radio->available()){
+	if (millis() - RadioSensor::last_time_online < RECEIVE_TIMEOUT){
+		if (RadioSensor::radio.available()){
 			// TODO: написать проверку приходящих данных. !! валидация
 			// Возможно, добавится отправка других данных с датчика.
-			this->last_time_online = millis();
-			this->radio->read(&RadioSensor::radio_sens_temp, sizeof(float));
+			RadioSensor::last_time_online = millis();
+			RadioSensor::radio.read(&RadioSensor::radio_sens_temp, sizeof(float));
 		  return GOT_EXT_TEMP;
 		} else {
 		  return NO_EXT_TEMP;
 		}
 	} else {
 		// time over
-		this->last_time_online = millis() - (RECEIVE_TIMEOUT / 2);
+		RadioSensor::last_time_online = millis() - (RECEIVE_TIMEOUT / 2);
     Serial.println("radio sensor doesn't answer");
 		return RADIO_ERROR;
 	}
@@ -50,5 +46,5 @@ float RadioSensor::get_radio_temp() {
 }
 
 void RadioSensor::clear_timeout_radio_sens(){
-  this->last_time_online = millis();
+  RadioSensor::last_time_online = millis();
 }

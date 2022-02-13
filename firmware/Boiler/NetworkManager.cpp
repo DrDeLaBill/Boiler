@@ -6,15 +6,8 @@ const char* NetworkManager::soft_ap_ssid = "BoilerAP";
 const char* NetworkManager::soft_ap_password = "12345678";
 
 NetworkManager::NetworkManager() {
-  //TODO: для проверки, убрать потом
-  Serial.println("network manager");
-  Serial.println(NetworkManager::soft_ap_ssid);
-  Serial.println(NetworkManager::soft_ap_password);
   WiFi.mode(WIFI_MODE_STA);
   WiFi.softAP(soft_ap_ssid, soft_ap_password);
-  Serial.println(F("WIFI AP has been set"));
-  Serial.print(F("ESP32 IP as soft AP: "));
-  Serial.println(WiFi.softAPIP());
 
   NetworkManager::connect_to_wifi();
 

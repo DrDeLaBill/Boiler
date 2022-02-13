@@ -33,7 +33,7 @@ void DisplayManager::display_on() {
   DisplayManager::menu_item = 0;
   DisplayManager::u8g2.setPowerSave(false);
   digitalWrite(LED_PIN, HIGH);
-  DisplayManager::t_newPage = millis();                         //TODO: откуда?
+  DisplayManager::t_newPage = millis();
 }
 
 void DisplayManager::display_off() {
@@ -44,11 +44,9 @@ void DisplayManager::display_off() {
 
 void DisplayManager::display_lightning() {
   // плавно выключаем подсветку при отсутствии активности
-  if (DisplayManager::t_newPage != 0) {                         
-    //TODO: вся функция из extern
-    
+  if (DisplayManager::t_newPage != 0) {
     // если недавно была активность то ждем время до выключения
-    if (millis() - DisplayManager::t_newPage >= TIMEOUT_LIGHTNING) {                         //TODO: откуда?
+    if (millis() - DisplayManager::t_newPage >= TIMEOUT_LIGHTNING) {
       ledcWrite(0, brightness--);
       if (DisplayManager::brightness == 0) {
         ledcWrite(0, 0);
@@ -68,21 +66,24 @@ void DisplayManager::check_page() {
 
   if (DisplayManager::page_name != pageTemp && DisplayManager::page_name != pageError) {
 
-    if (DisplayManager::page_name == DisplayManager::t_page_save_settings || DisplayManager::page_name == DisplayManager::t_page_save_settings) {
+    if (DisplayManager::page_name == DisplayManager::t_page_save_settings) {
       if (millis() - DisplayManager::t_page_save_settings >= SAVE_TIMEOUT) {
-        DisplayManager::page_name = pageTemp; //TODO: повторяющийся код
-        DisplayManager::menu_item = 0;
+        DisplayManager::set_temp_page();
         return;
       }
-    } else if (millis() - DisplayManager::t_newPage >= CANCEL_TIMEOUT) { //TODO: t_newPage
-      DisplayManager::page_name = pageTemp;
-      DisplayManager::menu_item = 0;
+    } else if (millis() - DisplayManager::t_newPage >= CANCEL_TIMEOUT) {
+      DisplayManager::set_temp_page();
     }
   }
 }
 
+void DisplayManager::set_temp_page() {
+  DisplayManager::page_name = pageTemp;
+  DisplayManager::menu_item = 0;
+}
+
 void DisplayManager::paint() {
-  DisplayManager::check_page(); //TODO: check_page()
+  DisplayManager::check_page();
   //display_lightning();
 
   DisplayManager::u8g2.clearBuffer();
@@ -96,9 +97,8 @@ void DisplayManager::paint() {
         DisplayManager::u8g2.drawXBM(0, 0, 12, 9, wifi);
       }
 
-      //TODO: старый код в комментах
       // если у нас сейчас "работает" нагрев, то показываем это.
-      if (DisplayManager::display_data_config.is_heating_on){ //digitalRead(SSR1_OUT_PIN) вот он)
+      if (DisplayManager::display_data_config.is_heating_on){
         DisplayManager::u8g2.drawXBM(14, 0, 9, 9, heat);
       }
 
@@ -109,17 +109,17 @@ void DisplayManager::paint() {
 
       
       // рисование текущего датчика температуры
-      if (DisplayManager::display_data_config.is_external_sensor){ //user_boiler_mode == MODE_AIR || user_boiler_mode == MODE_PROFILE
+      if (DisplayManager::display_data_config.is_external_sensor){
         // если выбран внешний датчик температуры или термопрофиль
         DisplayManager::u8g2.drawXBM(65, 20, 16, 16, pict_air);
-      } else if (DisplayManager::display_data_config.is_internal_sensor){ //user_boiler_mode == MODE_WATER
+      } else if (DisplayManager::display_data_config.is_internal_sensor){
         // иначе если выбран датчик температуры теплоносителя
         DisplayManager::u8g2.drawXBM(65, 20, 16, 16, pict_water);
       }
 
       // если есть радиосвязь с датчиком, то рисуем термометр
-      if (DisplayManager::display_data_config.is_radio_connected){ //radio_connected == RADIO_ON
-        DisplayManager::u8g2.drawXBM(50, 20, 9, 16, pict_therm); //TODO: pict_therm
+      if (DisplayManager::display_data_config.is_radio_connected){
+        DisplayManager::u8g2.drawXBM(50, 20, 9, 16, pict_therm);
       }
 
       // текущая температура

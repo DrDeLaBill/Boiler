@@ -136,13 +136,13 @@ void ExternalServer::check_settings() {
       doc["temp"] = TemperatureSensor::get_current_temperature();
       doc["target_temp"] = BoilerProfile::get_target_temp();
       uint8_t num_preset = BoilerProfile::get_profile_for_week_day();
-      doc["current_profile"] = InternalServer::get_preset(num_preset);
+      doc["current_profile"] = DisplayManager::presets[num_preset];
       if (BoilerProfile::is_set_session_boiler_mode(MODE_AIR))
-        doc["current_mode"] = String(InternalServer::get_s_setpoint());
+        doc["current_mode"] = String(S_SETPOINT);
       else if (BoilerProfile::is_set_session_boiler_mode(MODE_PROFILE))
-        doc["current_mode"] = String(InternalServer::get_s_profile());
+        doc["current_mode"] = String(S_PROFILE);
       else if (BoilerProfile::is_set_session_boiler_mode(MODE_WATER))
-        doc["current_mode"] = String(InternalServer::get_s_setpointwater());
+        doc["current_mode"] = String(S_SETPOINTWATER);
       String send_json = "";
       serializeJson(doc, send_json);
       ExternalServer::http_send_json(send_json);
@@ -169,13 +169,13 @@ void ExternalServer::check_settings() {
               deserializeJson(sets,ExternalServer::http_get_string());
               ExternalServer::close_http_session();
               
-              if (sets["mode"] == InternalServer::get_s_setpoint()){
+              if (sets["mode"] == S_SETPOINT){
                 // работаем по воздуху
                 BoilerProfile::set_boiler_mode(MODE_AIR);
-              } else if (sets["mode"] == InternalServer::get_s_setpointwater()){
+              } else if (sets["mode"] == S_SETPOINTWATER){
                 // работаем по теплоносителю
                 BoilerProfile::set_boiler_mode(MODE_WATER);
-              } else if (sets["mode"] == InternalServer::get_s_profile()){
+              } else if (sets["mode"] == S_PROFILE){
                 // работаем по термопрофилю
                 BoilerProfile::set_boiler_mode(MODE_PROFILE);
               }

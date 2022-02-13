@@ -48,7 +48,7 @@ class DisplayManager
     static DisplayDataConfig display_data_config;
     static DisplayPage page_name;
     static uint8_t brightness;
-    // если в течении 5с не было изменений, то отмена TODO: почему эта переменная ещё и extern
+    // если в течении 5с не было изменений, то отмена
     static uint32_t t_newPage;
     // настраиваемая температура
     static uint8_t temporary_target_temp; 
@@ -77,6 +77,7 @@ class DisplayManager
     static void rotary_encoder_action(uint8_t rotary_state);
     static void check_page();
     static void fill_display_default_configuration();
+    static void set_temp_page();
 };
 
 

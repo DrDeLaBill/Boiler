@@ -70,14 +70,13 @@ void TemperatureSensor::check_temperature() {
     if (TemperatureSensor::is_radio_lost()){
       // если датчик отваливался, а теперь появился
       // проверим, надо ли нам переключить режим обратно
-      //TODO: заменить проверку мода на функцию
       if (BoilerProfile::is_set_config_boiler_mode(MODE_AIR) || BoilerProfile::is_set_config_boiler_mode(MODE_PROFILE)){
         BoilerProfile::session_boiler_mode = BoilerProfile::boiler_configuration.boiler_mode;
       }
     }
     TemperatureSensor::set_radio_on();
     
-    if (BoilerProfile::is_set_session_boiler_mode(MODE_AIR) || BoilerProfile::is_set_session_boiler_mode(MODE_PROFILE)){ //##############################################
+    if (BoilerProfile::is_set_session_boiler_mode(MODE_AIR) || BoilerProfile::is_set_session_boiler_mode(MODE_PROFILE)){
       TemperatureSensor::set_current_temp_like_air_temp();
     }
   } else if (sens_status == RADIO_ERROR){
@@ -236,7 +235,6 @@ void TemperatureSensor::set_current_temp_like_air_temp() {
   TemperatureSensor::current_temp = (uint8_t)TemperatureSensor::current_temp_air;
 }
 
-//TODO: убрать указатель
 float TemperatureSensor::get_radio_temp() {
   return TemperatureSensor::radio_sensor.get_radio_temp();
 }
