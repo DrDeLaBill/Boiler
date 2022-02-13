@@ -137,11 +137,11 @@ void ExternalServer::check_settings() {
       doc["target_temp"] = BoilerProfile::get_target_temp();
       uint8_t num_preset = BoilerProfile::get_profile_for_week_day();
       doc["current_profile"] = InternalServer::get_preset(num_preset);
-      if (BoilerProfile::is_mode_air())
+      if (BoilerProfile::is_set_session_boiler_mode(MODE_AIR))
         doc["current_mode"] = String(InternalServer::get_s_setpoint());
-      else if (BoilerProfile::is_mode_profile()) 
+      else if (BoilerProfile::is_set_session_boiler_mode(MODE_PROFILE))
         doc["current_mode"] = String(InternalServer::get_s_profile());
-      else if (BoilerProfile::is_mode_water()) 
+      else if (BoilerProfile::is_set_session_boiler_mode(MODE_WATER))
         doc["current_mode"] = String(InternalServer::get_s_setpointwater());
       String send_json = "";
       serializeJson(doc, send_json);

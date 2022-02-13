@@ -150,11 +150,11 @@ void EncoderManager::button_pressed_action() {
         case 1:
           // переходим в выбор текущего режима работы
           DisplayManager::set_page_name(pageSetMode);
-          if (BoilerProfile::is_mode_profile()) {
+          if (BoilerProfile::is_set_session_boiler_mode(MODE_PROFILE)) {
             DisplayManager::set_menu_item(1);
-          } else if (BoilerProfile::is_mode_water()) {
+          } else if (BoilerProfile::is_set_session_boiler_mode(MODE_WATER)) {
             DisplayManager::set_menu_item(2);
-          } else if (BoilerProfile::is_mode_air()) {
+          } else if (BoilerProfile::is_set_session_boiler_mode(MODE_AIR)) {
             DisplayManager::set_menu_item(3);
           }
           break;

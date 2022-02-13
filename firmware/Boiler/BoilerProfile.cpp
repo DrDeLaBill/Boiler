@@ -24,7 +24,7 @@ BoilerProfile::BoilerProfile() {
   BoilerProfile::session_target_temp_int = BoilerProfile::boiler_configuration.target_temp_int;
   BoilerProfile::session_boiler_mode = BoilerProfile::boiler_configuration.boiler_mode;
   
-  if (BoilerProfile::is_mode_air() || BoilerProfile::is_mode_profile()) {
+  if (BoilerProfile::is_set_session_boiler_mode(MODE_AIR) || BoilerProfile::is_set_session_boiler_mode(MODE_PROFILE)) {
     TemperatureSensor::set_radio_sensor(BoilerProfile::get_target_temp());
   }
 }
@@ -200,16 +200,12 @@ void BoilerProfile::set_wifi_settings(String ssid, String pass) {
   pass.toCharArray(BoilerProfile::boiler_configuration.password, MAX_SIZE_PASS);
 }
 
-bool BoilerProfile::is_mode_air() {
-    return BoilerProfile::session_boiler_mode == MODE_AIR;
+bool BoilerProfile::is_set_session_boiler_mode(ModeType search_mode) {
+  return search_mode == BoilerProfile::session_boiler_mode;
 }
 
-bool BoilerProfile::is_mode_water() {
-    return BoilerProfile::session_boiler_mode == MODE_WATER;
-}
-
-bool BoilerProfile::is_mode_profile() {
-    return BoilerProfile::session_boiler_mode == MODE_PROFILE;
+bool BoilerProfile::is_set_config_boiler_mode(ModeType search_mode) {
+  return search_mode == BoilerProfile::boiler_configuration.boiler_mode;
 }
 
 char *BoilerProfile::get_current_day(const char* fmt) {
@@ -225,7 +221,6 @@ BoilerConfiguration BoilerProfile::get_boiler_configuration() {
 }
 
 void BoilerProfile::set_session_boiler_mode(uint8_t new_mode) {
-  //TODO: исправить на for
   if (new_mode == MODE_AIR ||
       new_mode == MODE_PROFILE ||
       new_mode == MODE_WATER) {

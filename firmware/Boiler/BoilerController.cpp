@@ -59,10 +59,9 @@ void BoilerController::controller_run() {
     if (ErrorService::is_set_error(ERROR_NOERROR)) {
       TemperatureSensor::pid_off();
     } else {
-      TemperatureSensor::pid_regulating(BoilerProfile::is_mode_water(), BoilerProfile::get_target_temp());
+      TemperatureSensor::pid_regulating(BoilerProfile::is_set_session_boiler_mode(MODE_WATER), BoilerProfile::get_target_temp());
     }
     // нарисуем экран
-    //TODO: проверить правильность функции
     DisplayManager::fill_display_default_configuration();
     DisplayManager::paint();
     
@@ -98,18 +97,3 @@ void BoilerController::controller_run() {
   // Обработка ошибок
   ErrorService::init_error_actions();
 }
-
-//TODO: для чего и откуда
-//bool BoilerController::_button_holded_action() {
-//  uint8_t button_state = EncoderManager::check_encoder(BoilerController::work_mode);
-//  DisplayManager::rotary_encoder_action(
-//    EncoderManager::get_button_rotary_state(),
-//    BoilerProfile::get_session_boiler_mode()
-//  );
-//  if (button_state == BUTTON_HOLDED) {
-//    return true;
-//  } else if (button_state == BUTTON_PRESSED) {
-//    EncoderManager::button_pressed_action();
-//  }
-//  return false;
-//}

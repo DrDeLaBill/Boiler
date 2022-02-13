@@ -36,9 +36,8 @@ class BoilerProfile
     static void set_boiler_mode(uint8_t target_mode);
     static void set_target_temp(uint8_t temp);
     static void set_boiler_id(String boiler_id);
-    static bool is_mode_air();
-    static bool is_mode_water();
-    static bool is_mode_profile();
+    static bool is_set_session_boiler_mode(ModeType search_mode);
+    static bool is_set_config_boiler_mode(ModeType search_mode);
     static void clear_eeprom();
     static void start_eeprom();
     static void set_default_settings();

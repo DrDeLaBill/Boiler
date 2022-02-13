@@ -383,8 +383,8 @@ void DisplayManager::fill_display_default_configuration() {
   DisplayManager::display_data_config.is_wifi_connect = NetworkManager::is_wifi_connected();
   DisplayManager::display_data_config.is_heating_on = RelayTemperature::is_heating_on();
   DisplayManager::display_data_config.is_connected_to_server = ExternalServer::get_connected_to_server();
-  DisplayManager::display_data_config.is_external_sensor = BoilerProfile::is_mode_air() || BoilerProfile::is_mode_profile();
-  DisplayManager::display_data_config.is_internal_sensor = BoilerProfile::is_mode_air();
+  DisplayManager::display_data_config.is_external_sensor = BoilerProfile::is_set_session_boiler_mode(MODE_AIR) || BoilerProfile::is_set_session_boiler_mode(MODE_PROFILE);
+  DisplayManager::display_data_config.is_internal_sensor = BoilerProfile::is_set_session_boiler_mode(MODE_AIR);
   DisplayManager::display_data_config.is_radio_connected = TemperatureSensor::is_radio_connected();
   DisplayManager::display_data_config.is_overheat = ErrorService::is_set_error(ERROR_OVERHEAT) || ErrorService::is_set_error(ERROR_WATEROVERHEAT);
   DisplayManager::display_data_config.is_pumpbroken = ErrorService::is_set_error(ERROR_PUMPBROKEN);

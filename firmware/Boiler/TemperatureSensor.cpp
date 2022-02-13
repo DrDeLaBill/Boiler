@@ -71,13 +71,13 @@ void TemperatureSensor::check_temperature() {
       // если датчик отваливался, а теперь появился
       // проверим, надо ли нам переключить режим обратно
       //TODO: заменить проверку мода на функцию
-      if (BoilerProfile::boiler_configuration.boiler_mode == MODE_AIR || BoilerProfile::boiler_configuration.boiler_mode == MODE_PROFILE){
+      if (BoilerProfile::is_set_config_boiler_mode(MODE_AIR) || BoilerProfile::is_set_config_boiler_mode(MODE_PROFILE)){
         BoilerProfile::session_boiler_mode = BoilerProfile::boiler_configuration.boiler_mode;
       }
     }
     TemperatureSensor::set_radio_on();
     
-    if (BoilerProfile::is_mode_air() || BoilerProfile::is_mode_profile()){ //##############################################
+    if (BoilerProfile::is_set_session_boiler_mode(MODE_AIR) || BoilerProfile::is_set_session_boiler_mode(MODE_PROFILE)){ //##############################################
       TemperatureSensor::set_current_temp_like_air_temp();
     }
   } else if (sens_status == RADIO_ERROR){
@@ -87,7 +87,7 @@ void TemperatureSensor::check_temperature() {
       // а до этого был или должен был быть
       // то переключаем режим работы на уставку по воде
       Serial.println("validate true");
-      if (BoilerProfile::boiler_configuration.boiler_mode == MODE_AIR || BoilerProfile::boiler_configuration.boiler_mode == MODE_PROFILE){
+      if (BoilerProfile::is_set_config_boiler_mode(MODE_AIR) || BoilerProfile::is_set_config_boiler_mode(MODE_PROFILE)){
         Serial.println("set boiler mode water");
         BoilerProfile::session_boiler_mode = MODE_WATER;
         BoilerProfile::session_target_temp_int = (uint8_t)TemperatureSensor::get_current_temp_water();
