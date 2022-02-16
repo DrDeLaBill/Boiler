@@ -27,11 +27,11 @@ BoilerController::BoilerController() {
   // проверяем, надо ли включаться или нет.
   if (BoilerProfile::boiler_configuration.standby_flag == MODE_STANDBY) {
     BoilerController::work_mode = MODE_WORK;
-    Serial.println("WORK MODE");
+    Serial.println(F("WORK MODE"));
     PumpManager::pump_on();
   } else {
     BoilerController::work_mode = MODE_STANDBY;
-    Serial.println("STANDBY MODE");
+    Serial.println(F("STANDBY MODE"));
     DisplayManager::display_off();
   }
 }

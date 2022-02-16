@@ -13,7 +13,7 @@ ErrorService::ErrorService() {
   digitalWrite(SSR1_OUT_PIN, LOW);
   digitalWrite(SSR2_OUT_PIN, LOW);
   digitalWrite(SSR3_OUT_PIN, LOW);
-  delay(SSR_DELAY);
+  delay(19);
   Serial.print(F("SSR input pin: "));
   Serial.println(analogRead(SSR_IN_PIN));
 }
