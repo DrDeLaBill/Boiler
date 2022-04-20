@@ -32,6 +32,7 @@ class ErrorService
     static void get_all_errors();
     static void enable_crash_out_pin();
     static void init_error_actions();
+    static void disable_crash_out_pin();
 };
 
 #endif

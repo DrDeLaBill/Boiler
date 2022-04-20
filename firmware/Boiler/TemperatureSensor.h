@@ -41,7 +41,7 @@ class TemperatureSensor
      */
     static GyverPID regulator_AIR;
     static GyverPID regulator_WATER;
-    static OneWire oneWire;
+    //static OneWire oneWire;
     static DallasTemperature sensors;
     // текущая температура теплоносителя                         
     static float current_temp_water;     
@@ -55,8 +55,6 @@ class TemperatureSensor
     static uint32_t check_ssr_last_time;                   
     // для оценки нагрева теплоносителя
     static uint8_t check_ssr_last_temp;
-    // Беспроводной сенсор температуры воздуха
-    static RadioSensor radio_sensor;
     // текущая температура для отображения и ПИД
     static uint8_t current_temp;
     // статус подключения внешнего датчика           

@@ -24,7 +24,7 @@ DisplayManager::DisplayManager() {
   pinMode(LED_PIN, OUTPUT);
   digitalWrite(LED_PIN, HIGH);
   DisplayManager::t_newPage = millis();
-  Serial.println(F("Display init"));
+  Serial.println(F("Display manager init"));
 }
 
 void DisplayManager::display_on() {
@@ -34,12 +34,14 @@ void DisplayManager::display_on() {
   DisplayManager::u8g2.setPowerSave(false);
   digitalWrite(LED_PIN, HIGH);
   DisplayManager::t_newPage = millis();
+  Serial.println(F("Display on"));
 }
 
 void DisplayManager::display_off() {
   // выключаем дисплей и подсветку
   DisplayManager::u8g2.setPowerSave(true);
   digitalWrite(LED_PIN, LOW);
+  Serial.println(F("Display off"));
 }
 
 void DisplayManager::display_lightning() {
@@ -379,7 +381,7 @@ void DisplayManager::rotary_left() {
   }
 }
 
-void DisplayManager::fill_display_default_configuration() {
+void DisplayManager::fill_display_configuration() {
   DisplayManager::display_data_config.is_wifi_connect = NetworkManager::is_wifi_connected();
   DisplayManager::display_data_config.is_heating_on = RelayTemperature::is_heating_on();
   DisplayManager::display_data_config.is_connected_to_server = ExternalServer::get_connected_to_server();

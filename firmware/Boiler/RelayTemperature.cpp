@@ -13,6 +13,7 @@ RelayTemperature::RelayTemperature() {
     RelayTemperature::ssr_temp_summ += analog_value;
     delay(1);
 	}
+  Serial.println(F("Relay temperature service start"));
 }
 
 

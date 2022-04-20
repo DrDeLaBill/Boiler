@@ -2,23 +2,22 @@
 
 String NetworkManager::current_ssid = "";
 String NetworkManager::current_pass = "";
-const char* NetworkManager::soft_ap_ssid = "BoilerAP";
-const char* NetworkManager::soft_ap_password = "12345678";
+const String NetworkManager::soft_ap_ssid = "BoilerAP";
+const String NetworkManager::soft_ap_password = "12345678";
 
 NetworkManager::NetworkManager() {
   WiFi.mode(WIFI_MODE_STA);
-  WiFi.softAP(soft_ap_ssid, soft_ap_password);
+  WiFi.softAP(soft_ap_ssid.c_str(), soft_ap_password.c_str());
 
   NetworkManager::connect_to_wifi();
 
   if(!MDNS.begin("boiler")) {
    Serial.println(F("Error starting mDNS"));
    return;
+  } else {
+    MDNS.addService("http", "tcp", 80);
+    Serial.println(F("Network manager start"));
   }
-
-  MDNS.addService("http", "tcp", 80);
-
-  NetworkManager::server_init();
 }
 
 void NetworkManager::connect_to_wifi(){
@@ -76,5 +75,4 @@ uint8_t NetworkManager::get_wifi_status() {
   return WiFi.status();
 }
 
-void NetworkManager::server_init(){}
 void NetworkManager::send_settings_to_server(){}

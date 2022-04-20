@@ -6,7 +6,6 @@ ErrorService::ErrorService() {
   pinMode(FLOW_IN_PIN, INPUT_PULLUP);
   pinMode(CRASH_OUT_PIN, OUTPUT);
   digitalWrite(CRASH_OUT_PIN, LOW);
-
   pinMode(SSR1_OUT_PIN, OUTPUT);
   pinMode(SSR2_OUT_PIN, OUTPUT);
   pinMode(SSR3_OUT_PIN, OUTPUT);
@@ -16,6 +15,7 @@ ErrorService::ErrorService() {
   delay(SSR_DELAY);
   Serial.print(F("SSR input pin: "));
   Serial.println(analogRead(SSR_IN_PIN));
+  Serial.println(F("Error service start"));
 }
 
 void ErrorService::check_failure(){
@@ -47,6 +47,9 @@ void ErrorService::add_error(uint8_t new_error) {
   } else if (ErrorService::type_error_validate(new_error)) {
     Serial.print(F("ERROR: code-"));
     Serial.print(new_error);
+//    Serial.print(" (");
+//    Serial.print(ErrorNames(new_error));
+//    Serial.print(") ");
     Serial.println(F(" added to errors list"));
     ErrorService::errors_list.push_back(new_error);
   }
@@ -89,8 +92,15 @@ void ErrorService::init_error_actions() {
         break;
     }
   }
+  if (ErrorService::errors_list.size() == 0) {
+    ErrorService::disable_crash_out_pin();
+  }
 }
 
 void ErrorService::enable_crash_out_pin() {
   digitalWrite(CRASH_OUT_PIN, HIGH);
+}
+
+void ErrorService::disable_crash_out_pin() {
+  digitalWrite(CRASH_OUT_PIN, LOW);
 }

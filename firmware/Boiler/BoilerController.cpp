@@ -1,19 +1,9 @@
 #include "BoilerController.h"
 
-ErrorService BoilerController::error_service;
-NetworkManager BoilerController::network_manager;
-DisplayManager BoilerController::display_manager;
-TemperatureSensor BoilerController::temperature_sensor;
-BoilerProfile BoilerController::boiler_profile;
-EncoderManager BoilerController::encoder_manager;
-RelayTemperature BoilerController::relay_manager;
-PumpManager BoilerController::pump_manager;
-CommandManager BoilerController::command_manager;
 bool BoilerController::work_mode;
 
 BoilerController::BoilerController() {
-  Serial.println(F("\n######################################################"));
-  Serial.println(F("Initialization boiler started."));
+  Serial.println(F("Boiler controller settings:"));
   if(!SPIFFS.begin(true)){
     // "При монтировании SPIFFS произошла ошибка"
     Serial.println(F("An Error has occurred while mounting SPIFFS"));
@@ -34,6 +24,7 @@ BoilerController::BoilerController() {
     Serial.println(F("STANDBY MODE"));
     DisplayManager::display_off();
   }
+  Serial.println(F("Boiler controller start"));
 }
 
 void BoilerController::controller_run() {
@@ -53,8 +44,6 @@ void BoilerController::controller_run() {
   if (BoilerController::work_mode == MODE_WORK) {
     // Проверка наличия ошибок
     ErrorService::check_failure();
-    uint8_t errors[ERRORS_COUNT] = {};
-    ErrorService::get_errors_list(errors);
     // проверим нагрев
     if (ErrorService::is_set_error(ERROR_NOERROR)) {
       TemperatureSensor::pid_off();
@@ -62,25 +51,25 @@ void BoilerController::controller_run() {
       TemperatureSensor::pid_regulating(BoilerProfile::is_set_session_boiler_mode(MODE_WATER), BoilerProfile::get_target_temp());
     }
     // нарисуем экран
-    DisplayManager::fill_display_default_configuration();
+    DisplayManager::fill_display_configuration();
     DisplayManager::paint();
     
     // измерим температуру
     TemperatureSensor::check_temperature();
-
-    // проверим температуру ТТ реле.
-    RelayTemperature::check_ssr_temp();
-    // проверим энкодер
-    if (EncoderManager::is_button_holded(BoilerController::work_mode)) {
-      // если было долгое нажатие кнопки - переходим в режим ожидания
-      Serial.println(F("STANDBY MODE"));
-      DisplayManager::display_off();
-      BoilerProfile::set_settings_standby(MODE_STANDBY);
-      BoilerController::work_mode = MODE_STANDBY;
-    }
-    ExternalServer::check_settings();
-    // Поменялись ли ssid и password сети wifi
-    NetworkManager::check_new_settings();
+//
+//    // проверим температуру ТТ реле.
+//    RelayTemperature::check_ssr_temp();
+//    // проверим энкодер
+//    if (EncoderManager::is_button_holded(BoilerController::work_mode)) {
+//      // если было долгое нажатие кнопки - переходим в режим ожидания
+//      Serial.println(F("STANDBY MODE"));
+//      DisplayManager::display_off();
+//      BoilerProfile::set_settings_standby(MODE_STANDBY);
+//      BoilerController::work_mode = MODE_STANDBY;
+//    }
+//    ExternalServer::check_settings();
+//    // Поменялись ли ssid и password сети wifi
+//    NetworkManager::check_new_settings();
   } else if (BoilerController::work_mode == MODE_STANDBY) {
     // режим ожидания
     if (EncoderManager::is_button_holded(BoilerController::work_mode)) {

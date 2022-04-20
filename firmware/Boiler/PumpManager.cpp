@@ -6,6 +6,7 @@ uint32_t PumpManager::pump_off_delay = 0;
 PumpManager::PumpManager() {
   pinMode(PUMP_OUT_PIN, OUTPUT);
   PumpManager::pump_off();
+  Serial.println(F("Pump manager start"));
 }
 
 void PumpManager::pump_on(){

@@ -36,6 +36,7 @@ void CommandManager::_execute_command() {
     Serial.println(boiler_id);
   } else if (command.equals("set_default_settings")){
     BoilerProfile::set_default_settings();
+    ErrorService::clear_errors();
   } else {
     Serial.println(F("ERROR: command syntax error"));
     Serial.print(F("No such command: '"));

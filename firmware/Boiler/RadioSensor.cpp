@@ -6,20 +6,19 @@ RF24 RadioSensor::radio(PIN_CE, PIN_CSN);
 
 RadioSensor::RadioSensor() {
   // Инициализация модуля NRF24L01
-  if (!RadioSensor::radio.begin()) {
-    Serial.println("Radio module init error"); 
-  }
-  else {
-    Serial.println("Radio module init ok");
-  }
-  
+  bool radio_init_state = RadioSensor::radio.begin();
   RadioSensor::radio.setChannel(0x6f);
   RadioSensor::radio.setDataRate(RF24_1MBPS); // Скорость обмена данными 1 Мбит/сек
   RadioSensor::radio.setPALevel(RF24_PA_HIGH);           //
   RadioSensor::radio.openReadingPipe(1, 0x7878787878LL); // Открываем трубу ID передатчика
   RadioSensor::radio.startListening(); // Начинаем прослушивать открываемую трубу
-  
   RadioSensor::clear_timeout_radio_sens();
+  if (radio_init_state) {
+    Serial.println("Radio module init ok");
+  }
+  else {
+    Serial.println("Radio module init error"); 
+  }
 }
 
 uint8_t RadioSensor::update_radio_temp(){

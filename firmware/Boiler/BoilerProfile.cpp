@@ -6,6 +6,7 @@ uint8_t BoilerProfile::session_boiler_mode = MODE_WATER;
 BoilerConfiguration BoilerProfile::boiler_configuration;
 
 BoilerProfile::BoilerProfile() {
+  Serial.println(F("Boiler profile settings:"));
   BoilerProfile::start_eeprom();
 
   BoilerProfile::_serial_print_boiler_configuration();
@@ -16,7 +17,7 @@ BoilerProfile::BoilerProfile() {
     // EEPROM is empty
     BoilerProfile::set_default_settings();
   }
-  Serial.print(F("\nboiler_name: "));
+  Serial.print(F("boiler_name: "));
   Serial.println(BoilerProfile::boiler_configuration.boiler_name);
   Serial.print(F("boiler_id: "));
   Serial.println(String(BoilerProfile::boiler_configuration.boiler_id));
@@ -27,6 +28,8 @@ BoilerProfile::BoilerProfile() {
   if (BoilerProfile::is_set_session_boiler_mode(MODE_AIR) || BoilerProfile::is_set_session_boiler_mode(MODE_PROFILE)) {
     TemperatureSensor::set_radio_sensor(BoilerProfile::get_target_temp());
   }
+  
+  Serial.println(F("Boiler profile has been initialized."));
 }
 
 // Стирание eeprom
