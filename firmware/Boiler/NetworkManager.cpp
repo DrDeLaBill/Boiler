@@ -56,6 +56,10 @@ void NetworkManager::check_new_settings() {
 }
 
 void NetworkManager::set_wifi_settings(String ssid, String pass) {
+  Serial.print(F("Set wifi settings: ssid-"));
+  Serial.print(ssid);
+  Serial.print(F(" pass-"));
+  Serial.println(pass);
   NetworkManager::current_ssid = ssid;
   NetworkManager::current_pass = pass;
 }

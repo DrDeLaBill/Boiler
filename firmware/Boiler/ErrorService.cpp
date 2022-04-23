@@ -20,10 +20,13 @@ ErrorService::ErrorService() {
 
 void ErrorService::check_failure(){
   // проверяем систему на появление аварийных ситуаций
+  Serial.print(F("Check failure: "));
   if (ErrorService::is_set_error(ERROR_SSRBROKEN)){ // check_pump()
+    Serial.println();
     ErrorService::add_error(ERROR_PUMPBROKEN);
   } else {
     // сбрасываем текущие ошибки
+    Serial.println(F("errors clear"));
     ErrorService::clear_errors();
   }
 }

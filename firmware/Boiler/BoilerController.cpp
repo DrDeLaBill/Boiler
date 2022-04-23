@@ -3,6 +3,7 @@
 ErrorService BoilerController::error_service;
 NetworkManager BoilerController::network_manager;
 DisplayManager BoilerController::display_manager;
+RadioSensor BoilerController::radio_sensor;
 TemperatureSensor BoilerController::temperature_sensor;
 BoilerProfile BoilerController::boiler_profile;
 EncoderManager BoilerController::encoder_manager;
@@ -66,6 +67,7 @@ void BoilerController::controller_run() {
     DisplayManager::paint();
     
     // измерим температуру
+    BoilerController::radio_sensor.check_temperature();
     TemperatureSensor::check_temperature();
 
     // проверим температуру ТТ реле.

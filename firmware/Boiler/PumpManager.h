@@ -11,7 +11,7 @@
 
 #define PUMP_BROKEN           1         // насос неисправен
 
-#define PUMP_OFF_TIMEOUT       60000    // длительность работы насоса после выключения котла
+#define PUMP_OFF_TIMEOUT      60000    // длительность работы насоса после выключения котла
 
 class PumpManager
 {

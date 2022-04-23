@@ -5,8 +5,8 @@
 #include <nRF24L01.h> 
 #include <RF24.h> 
 
-#define PIN_CE 				        15 			      // Номер пина Arduino, к которому подключен вывод CE радиомодуля
-#define PIN_CSN 			        2 			      // Номер пина Arduino, к которому подключен вывод CSN радиомодуля
+#define RADIO_CE_PIN 	        7 			      // Номер пина Arduino, к которому подключен вывод CE радиомодуля
+#define RADIO_CSN_PIN         10			      // Номер пина Arduino, к которому подключен вывод CSN радиомодуля
 
 #define RECEIVE_TIMEOUT		    120000		    // таймаут приема данных в мс
 
@@ -18,13 +18,15 @@ class RadioSensor
 {
   public:
     // объект radio с указанием выводов CE и CSN
-    static RF24 radio;
+    RF24 *radio;
     // время последнего приема данных
     static uint32_t last_time_online;
+    static uint8_t current_temperature;
     static float radio_sens_temp;
     
     RadioSensor();
-    static uint8_t update_radio_temp();
+    uint8_t update_radio_temp();
+    void check_temperature();
     static float get_radio_temp();
     static void clear_timeout_radio_sens();
 };

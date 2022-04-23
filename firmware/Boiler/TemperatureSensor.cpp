@@ -4,7 +4,6 @@ uint8_t TemperatureSensor::current_temp = 0;
 uint8_t TemperatureSensor::radio_connected = 0;
 uint8_t TemperatureSensor::sens_temp_tries = 5;
 uint32_t TemperatureSensor::ds18b20_last_time = millis();
-RadioSensor TemperatureSensor::radio_sensor;
 GyverPID TemperatureSensor::regulator_AIR(kP_air, kI_air, kD_air, dT);
 GyverPID TemperatureSensor::regulator_WATER(kP_water, kI_water, kD_water, dT);
 OneWire TemperatureSensor::oneWire(ONE_WIRE_BUS);
@@ -98,7 +97,7 @@ void TemperatureSensor::check_temperature() {
 }
 
 void TemperatureSensor::set_radio_sensor(uint8_t target_temperature){
-  TemperatureSensor::radio_sensor.clear_timeout_radio_sens();
+  RadioSensor::clear_timeout_radio_sens();
   if (TemperatureSensor::is_radio_connected() != RADIO_ON) {
     TemperatureSensor::radio_connected = RADIO_WAIT;
   }
@@ -236,13 +235,13 @@ void TemperatureSensor::set_current_temp_like_air_temp() {
 }
 
 float TemperatureSensor::get_radio_temp() {
-  return TemperatureSensor::radio_sensor.get_radio_temp();
+  return RadioSensor::get_radio_temp();
 }
 
 uint8_t TemperatureSensor::update_radio_temp() {
-  uint8_t radio_sensor_status = TemperatureSensor::radio_sensor.update_radio_temp();
+  uint8_t radio_sensor_status = RadioSensor::current_temperature;
   if (radio_sensor_status == GOT_EXT_TEMP) {
-    TemperatureSensor::current_temp_air = TemperatureSensor::radio_sensor.get_radio_temp();
+    TemperatureSensor::current_temp_air = RadioSensor::get_radio_temp();
   }
   return radio_sensor_status;
 }
