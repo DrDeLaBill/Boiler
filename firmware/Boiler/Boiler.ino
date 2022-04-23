@@ -19,12 +19,12 @@ NetworkManager* network_manager;
 EncoderManager* encoder_manager;
 RelayTemperature* relay_manager;
 PumpManager* pump_manager;
-RadioSensor* radio_sensor;
 TemperatureSensor* temperature_sensor;
 BoilerProfile* boiler_profile;
 BoilerController* boiler_controller;
 InternalServer* internal_server;
 DisplayManager* display_manager;
+RadioSensor* radio_sensor;
 
 void setup(){
   Serial.begin(115200);
@@ -35,14 +35,15 @@ void setup(){
   encoder_manager = new EncoderManager();
   relay_manager = new RelayTemperature();
   pump_manager = new PumpManager();
-  radio_sensor = new RadioSensor();
   temperature_sensor = new TemperatureSensor();
   boiler_profile = new BoilerProfile();
   boiler_controller = new BoilerController();
   internal_server = new InternalServer();
   display_manager = new DisplayManager();
+  radio_sensor = new RadioSensor();
   Serial.println(F("Initialization boiler end."));
 }
+
 
 void loop(){
   BoilerController::controller_run();

@@ -18,15 +18,15 @@ class RadioSensor
 {
   public:
     // объект radio с указанием выводов CE и CSN
-    RF24 *radio;
+    static RF24 radio;
     // время последнего приема данных
     static uint32_t last_time_online;
     static uint8_t current_temperature;
     static float radio_sens_temp;
     
     RadioSensor();
-    uint8_t update_radio_temp();
-    void check_temperature();
+    static uint8_t update_radio_temp();
+    static void check_temperature();
     static float get_radio_temp();
     static void clear_timeout_radio_sens();
 };

@@ -16,15 +16,18 @@ DisplayDataConfig DisplayManager::display_data_config;
 U8G2_PCD8544_84X48_F_4W_HW_SPI DisplayManager::u8g2(U8G2_R0, /* cs=*/ 25, /* dc=*/ 26, /* reset=*/ U8X8_PIN_NONE);
 
 DisplayManager::DisplayManager() {
-  DisplayManager::u8g2.begin();
-  DisplayManager::u8g2.setContrast(70);
-  DisplayManager::u8g2.enableUTF8Print();
-  DisplayManager::u8g2.setFontDirection(0);
-  
   pinMode(LED_PIN, OUTPUT);
   digitalWrite(LED_PIN, HIGH);
   DisplayManager::t_newPage = millis();
-  Serial.println(F("Display manager init"));
+  
+  if (DisplayManager::u8g2.begin()) {
+    Serial.println(F("Display manager begin ok"));
+  } else {
+    Serial.println(F("Display manager begin error"));
+  }
+  DisplayManager::u8g2.setContrast(70);
+  DisplayManager::u8g2.enableUTF8Print();
+  DisplayManager::u8g2.setFontDirection(0);
 }
 
 void DisplayManager::display_on() {

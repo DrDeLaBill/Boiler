@@ -16,13 +16,10 @@ BoilerController::BoilerController() {
   );
   // проверяем, надо ли включаться или нет.
   if (BoilerProfile::boiler_configuration.standby_flag == MODE_STANDBY) {
-    BoilerController::work_mode = MODE_WORK;
     Serial.println(F("WORK MODE"));
     PumpManager::pump_on();
   } else {
-    BoilerController::work_mode = MODE_STANDBY;
     Serial.println(F("STANDBY MODE"));
-    DisplayManager::display_off();
   }
   Serial.println(F("Boiler controller start"));
 }
@@ -55,22 +52,22 @@ void BoilerController::controller_run() {
     DisplayManager::paint();
     
     // измерим температуру
-    BoilerController::radio_sensor.check_temperature();
+    RadioSensor::check_temperature();
     TemperatureSensor::check_temperature();
-//
-//    // проверим температуру ТТ реле.
-//    RelayTemperature::check_ssr_temp();
-//    // проверим энкодер
-//    if (EncoderManager::is_button_holded(BoilerController::work_mode)) {
-//      // если было долгое нажатие кнопки - переходим в режим ожидания
-//      Serial.println(F("STANDBY MODE"));
-//      DisplayManager::display_off();
-//      BoilerProfile::set_settings_standby(MODE_STANDBY);
-//      BoilerController::work_mode = MODE_STANDBY;
-//    }
-//    ExternalServer::check_settings();
-//    // Поменялись ли ssid и password сети wifi
-//    NetworkManager::check_new_settings();
+
+    // проверим температуру ТТ реле.
+    RelayTemperature::check_ssr_temp();
+    // проверим энкодер
+    if (EncoderManager::is_button_holded(BoilerController::work_mode)) {
+      // если было долгое нажатие кнопки - переходим в режим ожидания
+      Serial.println(F("STANDBY MODE"));
+      DisplayManager::display_off();
+      BoilerProfile::set_settings_standby(MODE_STANDBY);
+      BoilerController::work_mode = MODE_STANDBY;
+    }
+    ExternalServer::check_settings();
+    // Поменялись ли ssid и password сети wifi
+    NetworkManager::check_new_settings();
   } else if (BoilerController::work_mode == MODE_STANDBY) {
     // режим ожидания
     if (EncoderManager::is_button_holded(BoilerController::work_mode)) {

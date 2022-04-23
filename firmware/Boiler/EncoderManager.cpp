@@ -22,8 +22,9 @@ EncoderManager::EncoderManager() {
 }
 
 void EncoderManager::buttonISR() {
-  if (EncoderManager::last_time_debounce == 0)
+  if (EncoderManager::last_time_debounce == 0) {
     EncoderManager::last_time_debounce = millis();
+  }
 }
 
 int32_t EncoderManager::encoder_get_ticks() {
