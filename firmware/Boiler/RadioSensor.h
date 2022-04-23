@@ -5,8 +5,8 @@
 #include <nRF24L01.h> 
 #include <RF24.h> 
 
-#define RADIO_CE_PIN 	        7 			      // Номер пина Arduino, к которому подключен вывод CE радиомодуля
-#define RADIO_CSN_PIN         10			      // Номер пина Arduino, к которому подключен вывод CSN радиомодуля
+#define RADIO_CE_PIN 	        15 			      // Номер пина Arduino, к которому подключен вывод CE радиомодуля
+#define RADIO_CSN_PIN         2 			      // Номер пина Arduino, к которому подключен вывод CSN радиомодуля
 
 #define RECEIVE_TIMEOUT		    120000		    // таймаут приема данных в мс
 

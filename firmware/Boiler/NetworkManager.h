@@ -24,8 +24,8 @@ class NetworkManager
 {
   public:
     // ssid и pass точки доступа котла
-    static const char *soft_ap_ssid;
-    static const char *soft_ap_password;
+    static const String soft_ap_ssid;
+    static const String soft_ap_password;
 
     NetworkManager();
     static String current_ssid;
@@ -37,7 +37,6 @@ class NetworkManager
     static void send_settings_to_server();
     static uint8_t get_wifi_status();
     static bool is_wifi_connected();
-    static void server_init();
     static void set_wifi_settings(String ssid, String pass);
 };
 

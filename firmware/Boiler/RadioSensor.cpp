@@ -6,21 +6,19 @@ uint32_t RadioSensor::last_time_online = 0;
 
 RadioSensor::RadioSensor() {
   // Инициализация модуля NRF24L01
-  this->radio = new RF24(RADIO_CE_PIN, RADIO_CSN_PIN);
-  if (!this->radio->begin()) {
-    Serial.println("Radio module init error"); 
-  }
-  else {
+  bool radio_init_state = RadioSensor::radio.begin();
+  RadioSensor::radio.setChannel(0x6f);
+  RadioSensor::radio.setDataRate(RF24_1MBPS); // Скорость обмена данными 1 Мбит/сек
+  RadioSensor::radio.setPALevel(RF24_PA_HIGH);           //
+  RadioSensor::radio.openReadingPipe(1, 0x7878787878LL); // Открываем трубу ID передатчика
+  RadioSensor::radio.startListening(); // Начинаем прослушивать открываемую трубу
+  RadioSensor::clear_timeout_radio_sens();
+  if (radio_init_state) {
     Serial.println("Radio module init ok");
   }
-  
-  this->radio->setChannel(0x6f);
-  this->radio->setDataRate(RF24_1MBPS); // Скорость обмена данными 1 Мбит/сек
-  this->radio->setPALevel(RF24_PA_HIGH);           //
-  this->radio->openReadingPipe(1, 0x7878787878LL); // Открываем трубу ID передатчика
-  this->radio->startListening(); // Начинаем прослушивать открываемую трубу
-  
-  RadioSensor::clear_timeout_radio_sens();
+  else {
+    Serial.println("Radio module init error");
+  }
 }
 
 void RadioSensor::check_temperature(){

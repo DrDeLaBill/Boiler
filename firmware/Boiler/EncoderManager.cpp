@@ -18,6 +18,7 @@ EncoderManager::EncoderManager() {
   EncoderManager::count = EncoderManager::count_default;
   gpio_set_pull_mode((gpio_num_t)PIN_ENC_BUTTON, GPIO_PULLUP_ONLY);
   attachInterrupt(PIN_ENC_BUTTON, EncoderManager::buttonISR, FALLING);
+  Serial.println(F("Encoder manager start"));
 }
 
 void EncoderManager::buttonISR() {

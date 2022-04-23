@@ -76,7 +76,7 @@ class DisplayManager
     static void display_lightning();
     static void rotary_encoder_action(uint8_t rotary_state);
     static void check_page();
-    static void fill_display_default_configuration();
+    static void fill_display_configuration();
     static void set_temp_page();
 };
 

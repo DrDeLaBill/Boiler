@@ -6,8 +6,8 @@ uint8_t TemperatureSensor::sens_temp_tries = 5;
 uint32_t TemperatureSensor::ds18b20_last_time = millis();
 GyverPID TemperatureSensor::regulator_AIR(kP_air, kI_air, kD_air, dT);
 GyverPID TemperatureSensor::regulator_WATER(kP_water, kI_water, kD_water, dT);
-OneWire TemperatureSensor::oneWire(ONE_WIRE_BUS);
-DallasTemperature TemperatureSensor::sensors(&oneWire);
+//OneWire TemperatureSensor::oneWire(ONE_WIRE_BUS);
+DallasTemperature TemperatureSensor::sensors((new OneWire(ONE_WIRE_BUS)));
 float TemperatureSensor::current_temp_water = 0;                   
 float TemperatureSensor::current_temp_air = 0;                    
 uint32_t TemperatureSensor::pid_last_time = 0;              
@@ -26,6 +26,8 @@ const uint32_t TemperatureSensor::period_msec = 1000;
 TemperatureSensor::TemperatureSensor() {
   TemperatureSensor::temp_init();
   TemperatureSensor::pid_init();
+  Serial.print(F("Current temp water: "));
+  Serial.println(TemperatureSensor::current_temp_water);
   Serial.println(F("Temperature sensor init"));
 }
 
@@ -42,6 +44,9 @@ void TemperatureSensor::check_temperature() {
     if (TemperatureSensor::current_temp_water >= WATER_TEMP_LIM){
       // если температура теплоносителя стала аварийно высокой
       // здесь надо отключать силовое питание!
+      Serial.print(F("Water overheat: "));
+      Serial.print(TemperatureSensor::current_temp_water);
+      Serial.println(F(" *C"));
       ErrorService::add_error(ERROR_WATEROVERHEAT);
     } else {
       // если температура понизилась, то может и не стоит возвращаться в обычный режим?

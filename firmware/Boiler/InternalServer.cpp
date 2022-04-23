@@ -62,7 +62,8 @@ void InternalServer::handleUpload(AsyncWebServerRequest *request, String filenam
     }
 }
 
-void InternalServer::internal_server_init() {
+InternalServer::InternalServer() {
+  Serial.println(F("Internal server settings start"));
   AsyncCallbackJsonWebHandler* handler;
   AsyncWebServer server(80);
   // страница для загрузки новой прошивки
@@ -506,4 +507,5 @@ void InternalServer::internal_server_init() {
   server.addHandler(handler);
    
   server.begin();
+  Serial.println(F("Internal server settings end"));
 }
