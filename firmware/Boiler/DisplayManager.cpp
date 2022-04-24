@@ -17,7 +17,7 @@ U8G2_PCD8544_84X48_F_4W_HW_SPI DisplayManager::u8g2(U8G2_R0, /* cs=*/ 25, /* dc=
 
 DisplayManager::DisplayManager() {
   pinMode(LED_PIN, OUTPUT);
-  digitalWrite(LED_PIN, HIGH);
+  digitalWrite(LED_PIN, LOW);
   DisplayManager::t_newPage = millis();
   
   if (DisplayManager::u8g2.begin()) {
@@ -25,9 +25,6 @@ DisplayManager::DisplayManager() {
   } else {
     Serial.println(F("Display manager begin error"));
   }
-  DisplayManager::u8g2.setContrast(70);
-  DisplayManager::u8g2.enableUTF8Print();
-  DisplayManager::u8g2.setFontDirection(0);
 }
 
 void DisplayManager::display_on() {
@@ -88,15 +85,15 @@ void DisplayManager::set_temp_page() {
 }
 
 void DisplayManager::paint() {
-  DisplayManager::check_page();
-  //display_lightning();
+   DisplayManager::check_page();
+  // display_lightning();
 
   DisplayManager::u8g2.clearBuffer();
 
   switch (DisplayManager::page_name) {
     case pageTemp:
       // основной экран. Отображение текущей и уставной температуры.
-
+      
       // если котел подключен к WiFi, то показываем значок вайфай
       if (DisplayManager::display_data_config.is_wifi_connect){
         DisplayManager::u8g2.drawXBM(0, 0, 12, 9, wifi);

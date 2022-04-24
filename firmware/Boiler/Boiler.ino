@@ -41,7 +41,7 @@ void setup(){
   internal_server = new InternalServer();
   display_manager = new DisplayManager();
   radio_sensor = new RadioSensor();
-  Serial.println(F("Initialization boiler end."));
+  Serial.println(F("Initialization boiler ended."));
 }
 
 

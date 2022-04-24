@@ -2,8 +2,9 @@
 #define _DISPLAY_H_
 
 #include <Arduino.h>
+#include <SPI.h>
 //модифицированная версия для больших шрифтов
-#include <U8g2lib.h> 
+#include <U8g2lib.h>
 
 #include "BoilerConstants.h"
 #include "BoilerProfile.h"

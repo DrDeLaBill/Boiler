@@ -40,7 +40,7 @@ uint8_t RadioSensor::update_radio_temp(){
 	} else {
 		// time over
 		RadioSensor::last_time_online = millis() - (RECEIVE_TIMEOUT / 2);
-    Serial.println("radio sensor doesn't answer");
+        Serial.println("radio sensor doesn't answer");
 		return RADIO_ERROR;
 	}
 }
