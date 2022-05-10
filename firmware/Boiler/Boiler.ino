@@ -22,7 +22,6 @@ PumpManager* pump_manager;
 TemperatureSensor* temperature_sensor;
 BoilerProfile* boiler_profile;
 BoilerController* boiler_controller;
-InternalServer* internal_server;
 DisplayManager* display_manager;
 RadioSensor* radio_sensor;
 
@@ -38,9 +37,9 @@ void setup(){
   temperature_sensor = new TemperatureSensor();
   boiler_profile = new BoilerProfile();
   boiler_controller = new BoilerController();
-  internal_server = new InternalServer();
   display_manager = new DisplayManager();
   radio_sensor = new RadioSensor();
+  start_internal_server();
   Serial.println(F("Initialization boiler ended."));
 }
 

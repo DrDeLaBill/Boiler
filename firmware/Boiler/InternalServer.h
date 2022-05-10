@@ -14,11 +14,7 @@
 #include "ClockRTC.h"
 #include "DisplayManager.h"
 
-class InternalServer
-{
-  public:    
-    InternalServer();
-    static void handleUpload(AsyncWebServerRequest *request, String filename, size_t index, uint8_t *data, size_t len, bool final);
-};
+void start_internal_server();
+void handleUpload(AsyncWebServerRequest *request, String filename, size_t index, uint8_t *data, size_t len, bool final);
 
 #endif

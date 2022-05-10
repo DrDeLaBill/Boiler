@@ -1,5 +1,8 @@
 #include "InternalServer.h"
 
+AsyncWebServer server(80);
+AsyncCallbackJsonWebHandler* handler;
+  
 class OneParamRewrite : public AsyncWebRewrite {
   protected:
     String _urlPrefix;
@@ -38,7 +41,7 @@ class OneParamRewrite : public AsyncWebRewrite {
 };
 
 // handle the upload of the firmware
-void InternalServer::handleUpload(AsyncWebServerRequest *request, String filename, size_t index, uint8_t *data, size_t len, bool final) {
+void handleUpload(AsyncWebServerRequest *request, String filename, size_t index, uint8_t *data, size_t len, bool final) {
     // handle upload and update
     if (!index) {
         Serial.printf("Update: %s\n", filename.c_str());
@@ -62,14 +65,13 @@ void InternalServer::handleUpload(AsyncWebServerRequest *request, String filenam
     }
 }
 
-InternalServer::InternalServer() {
+void start_internal_server() {
   Serial.println(F("Internal server settings start"));
-  AsyncCallbackJsonWebHandler* handler;
-  AsyncWebServer server(80);
+  
   // страница для загрузки новой прошивки
   server.on("/firmware_upload", HTTP_GET, [](AsyncWebServerRequest *request) {
+    Serial.println("[HTTP_GET] /firmware_upload.html");
     request->send(SPIFFS, "/firmware_update.html", "text/html");
-    Serial.println("[HTTP_GET] firmware_upload.html");
   });
 
   //подключение библиотеки jQuery
@@ -98,7 +100,7 @@ InternalServer::InternalServer() {
       request->send(response);
       Serial.println("[HTTP_POST] update firmware");
     } 
-  }, InternalServer::handleUpload);
+  }, handleUpload);
 
 //  server.on("/id", HTTP_POST, [](AsyncWebServerRequest *request) {
 //    String message;
