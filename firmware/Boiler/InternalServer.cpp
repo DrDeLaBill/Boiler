@@ -70,20 +70,20 @@ void start_internal_server() {
   
   // страница для загрузки новой прошивки
   server.on("/firmware_upload", HTTP_GET, [](AsyncWebServerRequest *request) {
-    Serial.println("[HTTP_GET] /firmware_upload.html");
+    Serial.println(F("[HTTP_GET] /firmware_upload.html"));
     request->send(SPIFFS, "/firmware_update.html", "text/html");
   });
 
   //подключение библиотеки jQuery
   server.on("/jquery-3.6.0.min.js", HTTP_GET, [](AsyncWebServerRequest *request) {
     request->send(SPIFFS, "/jquery-3.6.0.min.js", "text/javascript");
-    Serial.println("[HTTP_GET] jquery-3.6.0.min.js");
+    Serial.println(F("[HTTP_GET] jquery-3.6.0.min.js"));
   });
 
   //подключение библиотеки JS скрипта 
   server.on("/ajax_firmware_upload.js", HTTP_GET, [](AsyncWebServerRequest *request) {
     request->send(SPIFFS, "/ajax_firmware_upload.js", "text/javascript");
-    Serial.println("[HTTP_GET] ajax_firmware_upload.js");
+    Serial.println(F("[HTTP_GET] ajax_firmware_upload.js"));
   });
     
   /*handling uploading firmware file */
@@ -92,13 +92,13 @@ void start_internal_server() {
       AsyncWebServerResponse *response = request->beginResponse(200, "text/plain", "OK");
       response->addHeader("Connection", "close");
       request->send(response);
-      Serial.println("[HTTP_POST] ERROR update firmware (request error, wrong form)");
+      Serial.println(F("[HTTP_POST] ERROR update firmware (request error, wrong form)"));
       ESP.restart();
     } else {
       AsyncWebServerResponse *response = request->beginResponse(500, "text/plain", "ERROR");
       response->addHeader("Connection", "close");
       request->send(response);
-      Serial.println("[HTTP_POST] update firmware");
+      Serial.println(F("[HTTP_POST] update firmware"));
     } 
   }, handleUpload);
 
@@ -108,20 +108,20 @@ void start_internal_server() {
 //        message = request->getParam("ID", true)->value();
 //        message.toCharArray(BoilerProfile::boiler_configuration.boiler_id, ID_MAX_SIZE);
 //        BoilerProfile::save_configuration();
-//        Serial.println("Got new ID: ");
+//        Serial.println(F("Got new ID: "));
 //        Serial.println(String(BoilerProfile::boiler_configuration.boiler_id));
 //    } else {
 //        message = "No message sent";
 //    }
 //    request->send(200, "text/plain", "Hello, POST: " + message);
-//    Serial.println("[HTTP_POST] get id");
+//    Serial.println(F("[HTTP_POST] get id"));
 //  });
   
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
 //    if(!request->authenticate(http_login, http_pass))
 //        return request->requestAuthentication();
     request->send(200, "text/plain", "Boiler server");
-    Serial.println("[HTTP_GET] boiler server");
+    Serial.println(F("[HTTP_GET] boiler server"));
   });
 
 
@@ -132,7 +132,7 @@ void start_internal_server() {
 //        return request->requestAuthentication();
 
     int array_size = json.size();
-//    Serial.print("array_size: ");
+//    Serial.print(F("array_size: "));
 //    Serial.println(array_size);
 
     String message = "{\"\":\"\"}";
@@ -154,7 +154,7 @@ void start_internal_server() {
 //    if(!request->authenticate(http_login, http_pass))
 //        return request->requestAuthentication();
 
-    Serial.print("got new boiler name: ");
+    Serial.print(F("got new boiler name: "));
     Serial.println(String(BoilerProfile::boiler_configuration.boiler_name));
     
     if (String(BoilerProfile::boiler_configuration.boiler_name) != json.as<String>()) {
@@ -173,6 +173,7 @@ void start_internal_server() {
 //    if(!request->authenticate(http_login, http_pass))
 //        return request->requestAuthentication();
     request->send(200, "text/plain", "{\"ssid\": \"" + NetworkManager::current_ssid + "\", \"password\": \"" + NetworkManager::current_pass + "\"}");
+    Serial.println(F("[HTTP_GET] get ssid and pass"));
   });
 
   handler = new AsyncCallbackJsonWebHandler(url_path.c_str(), [](AsyncWebServerRequest *request, JsonVariant &json) {
@@ -184,10 +185,10 @@ void start_internal_server() {
     if (NetworkManager::current_ssid != json["ssid"].as<String>() || NetworkManager::current_pass != json["password"].as<String>()) {
       NetworkManager::current_ssid = json["ssid"].as<String>();
       NetworkManager::current_pass = json["password"].as<String>();
-      Serial.println("got new settings: SSID & PSWD");
-      Serial.print("ssid: ");
+      Serial.println(F("got new settings: SSID & PSWD"));
+      Serial.print(F("ssid: "));
       Serial.println(NetworkManager::current_ssid);
-      Serial.print("pswd: ");
+      Serial.print(F("pswd: "));
       Serial.println(NetworkManager::current_pass);
       BoilerProfile::save_configuration();
       ExternalServer::got_new_wifi_settings = true;
@@ -207,7 +208,8 @@ void start_internal_server() {
     
 //    if(!request->authenticate(http_login, http_pass))
 //        return request->requestAuthentication();
-        
+    Serial.print(F("[HTTP_GET] "));
+    Serial.println(request->url());
     if (request->hasParam(S_NAME)) {
       String preset_name = request->getParam(S_NAME)->value();
       String message = "{\n";
@@ -233,7 +235,6 @@ void start_internal_server() {
       }
       
       request->send(200, "text/plain", message);
-
     }
   });
   
@@ -272,10 +273,12 @@ void start_internal_server() {
   url_path = "/client/" + String(BoilerProfile::boiler_configuration.boiler_id) + "/status";
   server.on(url_path.c_str(), HTTP_GET, [] (AsyncWebServerRequest *request) {
     // возвращаем текущее состояние котла
+    Serial.print(F("[HTTP_GET] "));
+    Serial.println(request->url());
     
 //    if(!request->authenticate(http_login, http_pass))
 //        return request->requestAuthentication();
-      
+    
     String message = "";
       
     message = "{\n\"router_connection\": ";
@@ -339,6 +342,8 @@ void start_internal_server() {
   url_path = "/client/" + String(BoilerProfile::boiler_configuration.boiler_id) + "/mode";
   server.on(url_path.c_str(), HTTP_GET, [] (AsyncWebServerRequest *request) {
     // запрос текущего режима работы - по воздуху, теплоносителю, или термопрофиль
+    Serial.print(F("[HTTP_GET] "));
+    Serial.println(request->url());
     
 //    if(!request->authenticate(http_login, http_pass))
 //        return request->requestAuthentication();
@@ -371,7 +376,7 @@ void start_internal_server() {
         
     request->send(200, "text/plain", "");
     String target_mode = json.as<String>();
-//    Serial.print("target_mode: ");
+//    Serial.print(F("target_mode: "));
 //    Serial.println(target_mode);
     if (target_mode == S_SETPOINT) {
       // работаем по воздуху
@@ -390,6 +395,8 @@ void start_internal_server() {
   url_path = "/client/" + String(BoilerProfile::boiler_configuration.boiler_id) + "/target_temp";
   server.on(url_path.c_str(), HTTP_GET, [] (AsyncWebServerRequest *request) {
     // запрос текущей установленной температуры
+    Serial.print(F("[HTTP_GET] "));
+    Serial.println(request->url());
     
 //    if(!request->authenticate(http_login, http_pass))
 //        return request->requestAuthentication();
@@ -402,13 +409,15 @@ void start_internal_server() {
       [] (AsyncWebServerRequest *request, const String& filename, size_t index, uint8_t *data, size_t len, bool final) {},
       [] (AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total) {
     // установка текущей температуры
+    Serial.print(F("[HTTP_PUT] "));
+    Serial.println(request->url());
     
 //    if(!request->authenticate(http_login, http_pass))
 //        return request->requestAuthentication();
 
     String str = String((char*)data);
     uint8_t need_temp = str.substring(0, len).toInt();
-//    Serial.print("need_temp: ");
+//    Serial.print(F("need_temp: "));
 //    Serial.println(need_temp);
     if (need_temp >= WATER_TEMP_MIN && need_temp <= WATER_TEMP_MAX) {
       BoilerProfile::set_target_temp(need_temp);
@@ -426,9 +435,9 @@ void start_internal_server() {
     
     uint64_t datetime = json.as<unsigned long long>();
     uint8_t timezone = 0; // default = utc. Решили, что клиент сам будет определять локаль и отправлять соответствующее время.
-    Serial.print("datetime: ");
+    Serial.print(F("datetime: "));
     Serial.println((uint32_t)datetime);
-    Serial.print("timezone: ");
+    Serial.print(F("timezone: "));
     Serial.println(timezone);
     
     ClockRTC::clock_set_time(&datetime, &timezone);  
@@ -439,6 +448,8 @@ void start_internal_server() {
   url_path = "/client/" + String(BoilerProfile::boiler_configuration.boiler_id) + "/week";
   server.on(url_path.c_str(), HTTP_GET, [] (AsyncWebServerRequest *request) {
     // возвращаем недельный набор пресетов
+    Serial.print(F("[HTTP_GET] "));
+    Serial.println(request->url());
     
 //    if(!request->authenticate(http_login, http_pass))
 //        return request->requestAuthentication();
