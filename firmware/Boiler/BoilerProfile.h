@@ -53,6 +53,7 @@ class BoilerProfile
     static char *get_current_day(const char* fmt);
     static char *get_current_time(const char* fmt);
     static BoilerConfiguration get_boiler_configuration();
+    static void print_configuration_symbol(byte symbol);
 };
 
 #endif

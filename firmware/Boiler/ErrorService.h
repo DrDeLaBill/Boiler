@@ -9,6 +9,7 @@
 #include <Vector.h>
 
 #include "BoilerConstants.h"
+#include "PumpManager.h"
 
 // выход на расцепитель
 #define CRASH_OUT_PIN   33

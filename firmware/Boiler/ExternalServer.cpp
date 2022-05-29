@@ -6,7 +6,7 @@ bool ExternalServer::connected_to_server = DISCONNECTED;
 HTTPClient ExternalServer::http;
 const char* ExternalServer::HEADER_TYPE = "Content-Type";
 const char* ExternalServer::JSON_HEADER = "application/json";
-const char* ExternalServer::WebServerAddr = "http://192.168.10.199";
+const char* ExternalServer::WebServerAddr = "http://192.168.0.108";
 const char* ExternalServer::boiler_id = "abcdabcd12";
 
 void ExternalServer::send_settings_to_server() {

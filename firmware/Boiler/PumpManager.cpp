@@ -26,7 +26,7 @@ void PumpManager::pump_off(){
   }
 }
 
-uint8_t PumpManager::check_pump(){
+bool PumpManager::is_pump_broken(){
   if (PumpManager::pump_state == PUMP_ON){
     // если датчик протока не работает, то ошибка.
     if (digitalRead(FLOW_IN_PIN) == HIGH){
@@ -34,9 +34,9 @@ uint8_t PumpManager::check_pump(){
       if (digitalRead(FLOW_IN_PIN) == HIGH){
         // если уровень высокий, то протока нет.
         Serial.println(F("ERROR: PUMP is BROKEN"));
-        return ERROR_PUMPBROKEN;
+        return true;
       }
     }
   }
-  return ERROR_NOERROR;
+  return false;
 }

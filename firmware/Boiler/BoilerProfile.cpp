@@ -34,13 +34,9 @@ BoilerProfile::BoilerProfile() {
 
 // Стирание eeprom
 void BoilerProfile::clear_eeprom() {
-  BoilerProfile::start_eeprom();
-
   for (uint8_t i = 0; i < sizeof(BoilerProfile::boiler_configuration); i++) {
-    EEPROM.write(i, 0xFF);
+    EEPROM.put(i, 0xFF);
   }
-  EEPROM.commit();
-  
   BoilerProfile::set_default_settings();
 }
 
@@ -73,7 +69,7 @@ void BoilerProfile::set_default_settings(){
 
   memset(BoilerProfile::boiler_configuration.boiler_id, 0, ID_MAX_SIZE);
   
-  String boiler_name_temp = "My boiler 2";
+  String boiler_name_temp = "4d7920626f696c65722032"; //"My boiler 2"; "4d7920626f696c657220323333";
   boiler_name_temp.toCharArray(BoilerProfile::boiler_configuration.boiler_name, NAME_MAX_SIZE);
   Serial.print(F("boiler_name: "));
   Serial.println(boiler_name_temp);
@@ -87,22 +83,15 @@ void BoilerProfile::set_default_settings(){
 }
 
 void BoilerProfile::save_configuration() {
+  Serial.println(F("SAVE NEW CONFIGURATION TO EEPROM:"));
+  EEPROM.put(0, BoilerProfile::boiler_configuration);
   uint8_t *ptr = (uint8_t *)&BoilerProfile::boiler_configuration;
-  bool all_correct = true;
-  for (uint8_t i = 0; i < sizeof(BoilerProfile::boiler_configuration) && all_correct; i++) {
-    if (ptr[i] != EEPROM.read(i)) {
-      all_correct = false;
-    }
+  for (uint8_t i = 0; i < sizeof(BoilerProfile::boiler_configuration); i++) {
+    BoilerProfile::print_configuration_symbol(EEPROM.read(i));
+//    EEPROM.put(i, ptr[i]);
   }
-
-  if (all_correct == false) {
-    ptr = (uint8_t *)&BoilerProfile::boiler_configuration;
-    for (uint8_t i = 0; i < sizeof(BoilerProfile::boiler_configuration); i++) {
-      EEPROM.write(i, ptr[i]);
-    }
-    EEPROM.commit();
-    BoilerProfile::session_boiler_mode = BoilerProfile::boiler_configuration.boiler_mode;
-  }
+  Serial.println();
+  BoilerProfile::session_boiler_mode = BoilerProfile::boiler_configuration.boiler_mode;
 }
 
 uint8_t BoilerProfile::get_target_temp(){
@@ -166,10 +155,9 @@ void BoilerProfile::start_eeprom() {
 void BoilerProfile::_serial_print_boiler_configuration() {
   // Read configuration from EEPROM
   uint8_t *ptr = (uint8_t *)&BoilerProfile::boiler_configuration;
+  Serial.println(F("EEPROM settings:"));
   for (uint8_t i = 0; i < sizeof(BoilerProfile::boiler_configuration); i++) {
-    ptr[i] = EEPROM.read(i);
-    Serial.print(ptr[i]);
-    Serial.print(F(" "));
+    BoilerProfile::print_configuration_symbol(EEPROM.read(i));
   }
   Serial.println();
 }
@@ -243,6 +231,16 @@ uint8_t BoilerProfile::get_session_boiler_mode() {
 
 void BoilerProfile::set_day_preset(uint8_t day_number, uint8_t day_period, uint8_t value) {
     BoilerProfile::boiler_configuration.presets[day_number][day_period] = value;
+}
+
+void BoilerProfile::print_configuration_symbol(byte symbol) {
+  if (0 <= symbol && symbol <= 31) {
+    Serial.print(F("["));
+    Serial.print(symbol);
+    Serial.print(F("] "));
+  } else {
+    Serial.print(char(symbol));
+  }
 }
 
 /*

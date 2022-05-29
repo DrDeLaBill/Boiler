@@ -20,7 +20,7 @@ ErrorService::ErrorService() {
 
 void ErrorService::check_failure(){
   // проверяем систему на появление аварийных ситуаций
-  if (ErrorService::is_set_error(ERROR_SSRBROKEN)){ // check_pump()
+  if (PumpManager::is_pump_broken()){
     Serial.println(F("Check failure: "));
     ErrorService::add_error(ERROR_PUMPBROKEN);
   } else {

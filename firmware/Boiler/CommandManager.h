@@ -6,6 +6,7 @@
 #define _COMMAND_MANAGER_H_
 
 #include <Arduino.h>
+#include "EEPROM.h"
 
 #include "BoilerProfile.h"
 

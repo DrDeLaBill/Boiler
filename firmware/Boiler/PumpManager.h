@@ -23,7 +23,7 @@ class PumpManager
     static void pump_init();
     static void pump_on();
     static void pump_off();
-    static uint8_t check_pump();
+    static bool is_pump_broken();
 };
 
 #endif

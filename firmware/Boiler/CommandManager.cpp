@@ -35,8 +35,12 @@ void CommandManager::_execute_command() {
     Serial.print(F("Get boiler ID: "));
     Serial.println(boiler_id);
   } else if (command.equals("set_default_settings")){
+    Serial.println(F("SET DEFAULT SETTINGS"));
     BoilerProfile::set_default_settings();
     ErrorService::clear_errors();
+  } else if (command.equals("clear_eeprom")){
+    Serial.println(F("CLEAR EEPROM"));
+    BoilerProfile::clear_eeprom();
   } else {
     Serial.println(F("ERROR: command syntax error"));
     Serial.print(F("No such command: '"));

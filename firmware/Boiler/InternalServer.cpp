@@ -127,6 +127,8 @@ void start_internal_server() {
 
   handler = new AsyncCallbackJsonWebHandler("/client/names", [](AsyncWebServerRequest *request, JsonVariant &json) {
     // сохранение нового имени котла
+    Serial.print(F("[HTTP_GET] "));
+    Serial.println(request->url());
 
 //    if(!request->authenticate(http_login, http_pass))
 //        return request->requestAuthentication();
@@ -150,6 +152,8 @@ void start_internal_server() {
   String url_path = "/client/" + String(BoilerProfile::boiler_configuration.boiler_id) + "/name";
   handler = new AsyncCallbackJsonWebHandler(url_path.c_str(), [](AsyncWebServerRequest *request, JsonVariant &json) {
     // сохранение нового имени котла
+    Serial.print(F("[HTTP_GET] "));
+    Serial.println(request->url());
 
 //    if(!request->authenticate(http_login, http_pass))
 //        return request->requestAuthentication();
@@ -169,6 +173,8 @@ void start_internal_server() {
   url_path = "/client/" + String(BoilerProfile::boiler_configuration.boiler_id) + "/router_connection";
   server.on(url_path.c_str(), HTTP_GET, [] (AsyncWebServerRequest *request) {
     // получение ssid и пароля для подключения к роутеру
+    Serial.print(F("[HTTP_GET] "));
+    Serial.println(request->url());
     
 //    if(!request->authenticate(http_login, http_pass))
 //        return request->requestAuthentication();
@@ -178,6 +184,8 @@ void start_internal_server() {
 
   handler = new AsyncCallbackJsonWebHandler(url_path.c_str(), [](AsyncWebServerRequest *request, JsonVariant &json) {
     // сохранение SSID & PSWD локальной сети
+    Serial.print(F("[HTTP_GET] "));
+    Serial.println(request->url());
 
 //    if(!request->authenticate(http_login, http_pass))
 //        return request->requestAuthentication();
@@ -205,11 +213,11 @@ void start_internal_server() {
   url_path = "/client/" + String(BoilerProfile::boiler_configuration.boiler_id) + "/profile";
   server.on(url_path.c_str(), HTTP_GET, [] (AsyncWebServerRequest *request) {
     // возвращаем пресет термопрофиля в зависимости от имени
+    Serial.print(F("[HTTP_GET] "));
+    Serial.println(request->url());
     
 //    if(!request->authenticate(http_login, http_pass))
 //        return request->requestAuthentication();
-    Serial.print(F("[HTTP_GET] "));
-    Serial.println(request->url());
     if (request->hasParam(S_NAME)) {
       String preset_name = request->getParam(S_NAME)->value();
       String message = "{\n";
@@ -240,6 +248,8 @@ void start_internal_server() {
   
   handler = new AsyncCallbackJsonWebHandler(url_path.c_str(), [](AsyncWebServerRequest *request, JsonVariant &json) {
     // сохранение пресета термопрофиля
+    Serial.print(F("[HTTP_GET] "));
+    Serial.println(request->url());
 
 //    if(!request->authenticate(http_login, http_pass))
 //        return request->requestAuthentication();
@@ -275,6 +285,8 @@ void start_internal_server() {
     // возвращаем текущее состояние котла
     Serial.print(F("[HTTP_GET] "));
     Serial.println(request->url());
+    Serial.print(F(" | boiler ID:"));
+    Serial.println(request->pathArg(2));
     
 //    if(!request->authenticate(http_login, http_pass))
 //        return request->requestAuthentication();
@@ -370,6 +382,8 @@ void start_internal_server() {
 
   handler = new AsyncCallbackJsonWebHandler(url_path.c_str(), [](AsyncWebServerRequest *request, JsonVariant &json) {
     // установка режима работы - по воздуху, по теплоносителю или термопрофиль
+    Serial.print(F("[HTTP_GET] "));
+    Serial.println(request->url());
     
 //    if(!request->authenticate(http_login, http_pass))
 //        return request->requestAuthentication();
@@ -429,6 +443,8 @@ void start_internal_server() {
   url_path = "/client/" + String(BoilerProfile::boiler_configuration.boiler_id) + "/datetime";
   handler = new AsyncCallbackJsonWebHandler(url_path.c_str(), [](AsyncWebServerRequest *request, JsonVariant &json) {
     // сохранение даты/времени и часового пояса
+    Serial.print(F("[HTTP_GET] "));
+    Serial.println(request->url());
 
 //    if(!request->authenticate(http_login, http_pass))
 //        return request->requestAuthentication();
@@ -496,6 +512,8 @@ void start_internal_server() {
 
   handler = new AsyncCallbackJsonWebHandler(url_path.c_str(), [](AsyncWebServerRequest *request, JsonVariant &json) {
     // сохранение профиля пресетов на неделю
+    Serial.print(F("[HTTP_GET] "));
+    Serial.println(request->url());
 
 //    if(!request->authenticate(http_login, http_pass))
 //        return request->requestAuthentication();
