@@ -6,7 +6,7 @@ bool ExternalServer::connected_to_server = DISCONNECTED;
 HTTPClient ExternalServer::http;
 const char* ExternalServer::HEADER_TYPE = "Content-Type";
 const char* ExternalServer::JSON_HEADER = "application/json";
-const char* ExternalServer::WebServerAddr = "http://192.168.0.108";
+const char* ExternalServer::WebServerAddr = "http://192.168.0.161";
 const char* ExternalServer::boiler_id = "abcdabcd12";
 
 void ExternalServer::send_settings_to_server() {
@@ -23,7 +23,7 @@ void ExternalServer::send_settings_to_server() {
     int response_code;
     
     String url_to_server = path_to_server + "/settings";
-    ExternalServer::profile_settings_init(url_to_server);
+    ExternalServer::start_http(url_to_server);
     ExternalServer::http.setConnectTimeout(100);
     ExternalServer::http.addHeader(ExternalServer::HEADER_TYPE, ExternalServer::JSON_HEADER);
 
@@ -56,7 +56,7 @@ void ExternalServer::send_settings_to_server() {
 
     for (uint8_t j = 0; j < NUM_PRESETS; j++){
       String url_profile = url_to_server + DisplayManager::presets[j];
-      ExternalServer::profile_settings_init(url_profile);
+      ExternalServer::start_http(url_profile);
       ExternalServer::http.setConnectTimeout(100);
       ExternalServer::http.addHeader(ExternalServer::HEADER_TYPE, ExternalServer::JSON_HEADER);
       for (uint8_t i = 0; i < NUM_PERIODS; i++){
@@ -82,7 +82,7 @@ void ExternalServer::send_settings_to_server() {
 
     // отправляем профиль на неделю
     url_to_server = path_to_server + "/week";
-    ExternalServer::profile_settings_init(url_to_server);
+    ExternalServer::start_http(url_to_server);
     ExternalServer::http.setConnectTimeout(100);
     ExternalServer::http.addHeader(ExternalServer::HEADER_TYPE, ExternalServer::JSON_HEADER);
     for (uint8_t i = 0; i < NUM_DAYS; i++){
@@ -254,7 +254,7 @@ void ExternalServer::check_settings() {
 }
 
 void ExternalServer::profile_settings_init(String url) {
-  ExternalServer::profile_settings_init(url);
+  ExternalServer::start_http(url);
   int response_code = ExternalServer::http_get();
   if (response_code > 0) {
     DynamicJsonDocument sets(150);
@@ -284,6 +284,8 @@ void ExternalServer::serial_error_report(String target_url, int response_code) {
 }
 
 void ExternalServer::start_http(String url_to_server) {
+  Serial.print(F("Start http to server: "));
+  Serial.println(url_to_server);
   ExternalServer::http.begin(url_to_server);
   ExternalServer::http.addHeader(ExternalServer::HEADER_TYPE, ExternalServer::JSON_HEADER);
 }
