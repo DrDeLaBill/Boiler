@@ -25,11 +25,11 @@ void CommandManager::_execute_command() {
     Serial.print(F("Old boiler ID: "));
     Serial.println(BoilerProfile::get_boiler_id());
     BoilerProfile::set_boiler_id(new_boiler_id);
-    Serial.println(F("Boiler ID from command: "));
-    Serial.print(new_boiler_id);
-    Serial.println(F("New Boiler ID: "));
-    Serial.print(BoilerProfile::get_boiler_id());
-    Serial.println();
+    Serial.print(F("Boiler ID from command: "));
+    Serial.println(new_boiler_id);
+    Serial.print(F("New Boiler ID: "));
+    Serial.println(BoilerProfile::get_boiler_id());
+    BoilerProfile::save_configuration();
   } else if (command.equals("get_boiler_id")) {
     String boiler_id = BoilerProfile::get_boiler_id();
     Serial.print(F("Get boiler ID: "));

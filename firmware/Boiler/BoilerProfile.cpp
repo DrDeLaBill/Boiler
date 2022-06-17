@@ -6,10 +6,11 @@ uint8_t BoilerProfile::session_boiler_mode = MODE_WATER;
 BoilerConfiguration BoilerProfile::boiler_configuration;
 
 BoilerProfile::BoilerProfile() {
-  Serial.println(F("Boiler profile settings:"));
+  Serial.println(F("__________________Boiler profile settings__________________"));
   BoilerProfile::start_eeprom();
 
-  BoilerProfile::_serial_print_boiler_configuration();
+  BoilerProfile::serial_print_boiler_configuration();
+  BoilerProfile::load_configuration();
 
   Serial.print(F("Boiler mode: "));
   Serial.println(String(BoilerProfile::boiler_configuration.boiler_mode));
@@ -29,7 +30,7 @@ BoilerProfile::BoilerProfile() {
     TemperatureSensor::set_radio_sensor(BoilerProfile::get_target_temp());
   }
   
-  Serial.println(F("Boiler profile has been initialized."));
+  Serial.println(F("Boiler profile has initialized."));
 }
 
 // Стирание eeprom
@@ -83,15 +84,21 @@ void BoilerProfile::set_default_settings(){
 }
 
 void BoilerProfile::save_configuration() {
-  Serial.println(F("SAVE NEW CONFIGURATION TO EEPROM:"));
-  EEPROM.put(0, BoilerProfile::boiler_configuration);
+  Serial.println(F("SAVE CONFIGURATION TO EEPROM:"));
   uint8_t *ptr = (uint8_t *)&BoilerProfile::boiler_configuration;
   for (uint8_t i = 0; i < sizeof(BoilerProfile::boiler_configuration); i++) {
-    BoilerProfile::print_configuration_symbol(EEPROM.read(i));
-//    EEPROM.put(i, ptr[i]);
+    EEPROM.put(i, ptr[i]);
   }
-  Serial.println();
+  EEPROM.commit();
+  BoilerProfile::serial_print_boiler_configuration();
   BoilerProfile::session_boiler_mode = BoilerProfile::boiler_configuration.boiler_mode;
+}
+
+void BoilerProfile::load_configuration() {
+  uint8_t *ptr = (uint8_t *)&BoilerProfile::boiler_configuration;
+  for (uint8_t i = 0; i < sizeof(BoilerProfile::boiler_configuration); i++) {
+    ptr[i] = EEPROM.read(i);
+  }
 }
 
 uint8_t BoilerProfile::get_target_temp(){
@@ -152,9 +159,8 @@ void BoilerProfile::start_eeprom() {
   }
 }
 
-void BoilerProfile::_serial_print_boiler_configuration() {
+void BoilerProfile::serial_print_boiler_configuration() {
   // Read configuration from EEPROM
-  uint8_t *ptr = (uint8_t *)&BoilerProfile::boiler_configuration;
   Serial.println(F("EEPROM settings:"));
   for (uint8_t i = 0; i < sizeof(BoilerProfile::boiler_configuration); i++) {
     BoilerProfile::print_configuration_symbol(EEPROM.read(i));

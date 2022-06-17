@@ -6,7 +6,7 @@ bool ExternalServer::connected_to_server = DISCONNECTED;
 HTTPClient ExternalServer::http;
 const char* ExternalServer::HEADER_TYPE = "Content-Type";
 const char* ExternalServer::JSON_HEADER = "application/json";
-const char* ExternalServer::WebServerAddr = "http://192.168.0.161";
+const char* ExternalServer::WebServerAddr = "http://192.168.0.111";
 const char* ExternalServer::boiler_id = "abcdabcd12";
 
 void ExternalServer::send_settings_to_server() {
@@ -23,6 +23,8 @@ void ExternalServer::send_settings_to_server() {
     int response_code;
     
     String url_to_server = path_to_server + "/settings";
+    Serial.print(F("Send setttings to server. Server URL: "));
+    Serial.println(url_to_server);
     ExternalServer::start_http(url_to_server);
     ExternalServer::http.setConnectTimeout(100);
     ExternalServer::http.addHeader(ExternalServer::HEADER_TYPE, ExternalServer::JSON_HEADER);
@@ -143,6 +145,13 @@ void ExternalServer::check_settings() {
         doc["current_mode"] = String(S_PROFILE);
       else if (BoilerProfile::is_set_session_boiler_mode(MODE_WATER))
         doc["current_mode"] = String(S_SETPOINTWATER);
+      if (ErrorService::errors_list.size() == 0) {
+        doc["errors"][0] = String(ERROR_NOERROR);
+      }
+      for(int i = 0; i < ErrorService::errors_list.size(); i++) 
+      {
+        doc["errors"][i] = String(ErrorService::errors_list[i]);
+      }
       String send_json = "";
       serializeJson(doc, send_json);
       ExternalServer::http_send_json(send_json);
@@ -284,7 +293,7 @@ void ExternalServer::serial_error_report(String target_url, int response_code) {
 }
 
 void ExternalServer::start_http(String url_to_server) {
-  Serial.print(F("Start http to server: "));
+  Serial.print(F("Request to: "));
   Serial.println(url_to_server);
   ExternalServer::http.begin(url_to_server);
   ExternalServer::http.addHeader(ExternalServer::HEADER_TYPE, ExternalServer::JSON_HEADER);
@@ -306,6 +315,7 @@ String ExternalServer::get_web_server_address() {
   return ExternalServer::WebServerAddr;
 }
 
+//TODO: добавить лог ответа, ошибок
 void ExternalServer::http_send_json(String json_string) {
   ExternalServer::http.PUT(json_string);
 }

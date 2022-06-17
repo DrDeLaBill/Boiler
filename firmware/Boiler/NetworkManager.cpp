@@ -1,7 +1,7 @@
 #include "NetworkManager.h"
 
-String NetworkManager::current_ssid = "";
-String NetworkManager::current_pass = "";
+String NetworkManager::current_ssid = "ER-home";
+String NetworkManager::current_pass = "egoromegoromegorom";
 const String NetworkManager::soft_ap_ssid = "BoilerAP";
 const String NetworkManager::soft_ap_password = "12345678";
 

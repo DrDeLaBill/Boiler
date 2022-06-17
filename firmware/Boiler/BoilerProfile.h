@@ -17,8 +17,6 @@
 
 class BoilerProfile
 {
-  private:
-    void _serial_print_boiler_configuration();
   public:
     static ClockRTC clock_rtc;
     // требуемая температура теплоносителя (в данной сессии)
@@ -29,6 +27,7 @@ class BoilerProfile
 
     BoilerProfile();
     static void save_configuration();
+    static void load_configuration();
     static uint8_t get_target_temp();
     static String get_boiler_id();
     static uint8_t period_of_day();
@@ -40,6 +39,7 @@ class BoilerProfile
     static void clear_eeprom();
     static void start_eeprom();
     static void set_default_settings();
+    static void serial_print_boiler_configuration();
     static uint8_t get_session_boiler_mode();
     static String get_ssid();
     static String get_pass();

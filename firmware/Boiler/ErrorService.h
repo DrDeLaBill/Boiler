@@ -7,6 +7,7 @@
 
 #include <Arduino.h>
 #include <Vector.h>
+#include <ArduinoJson.h>
 
 #include "BoilerConstants.h"
 #include "PumpManager.h"
