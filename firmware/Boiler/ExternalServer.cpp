@@ -134,7 +134,8 @@ void ExternalServer::check_settings() {
       
       // отправляем текущий статус котла
       String url_to_server = path_to_server + "/status";
-      ExternalServer::profile_settings_init(url_to_server);
+      ExternalServer::start_http(url_to_server);
+      // ExternalServer::profile_settings_init(url_to_server);
       doc["temp"] = TemperatureSensor::get_current_temperature();
       doc["target_temp"] = BoilerProfile::get_target_temp();
       uint8_t num_preset = BoilerProfile::get_profile_for_week_day();
