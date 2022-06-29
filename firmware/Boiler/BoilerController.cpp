@@ -9,17 +9,17 @@ BoilerController::BoilerController() {
     Serial.println(F("An Error has occurred while mounting SPIFFS"));
     ESP.restart();
   }
-  BoilerController::work_mode = MODE_STANDBY;
+  BoilerController::work_mode = BoilerProfile::boiler_configuration.standby_flag;
   NetworkManager::set_wifi_settings(
     BoilerProfile::get_ssid(),
     BoilerProfile::get_pass()
   );
   // проверяем, надо ли включаться или нет.
   if (BoilerProfile::boiler_configuration.standby_flag == MODE_STANDBY) {
+    Serial.println(F("STANDBY MODE"));
+  } else {
     Serial.println(F("WORK MODE"));
     PumpManager::pump_on();
-  } else {
-    Serial.println(F("STANDBY MODE"));
   }
   Serial.println(F("Boiler controller start"));
 }

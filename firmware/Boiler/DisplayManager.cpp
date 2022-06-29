@@ -17,13 +17,19 @@ U8G2_PCD8544_84X48_F_4W_HW_SPI DisplayManager::u8g2(U8G2_R0, /* cs=*/ 25, /* dc=
 
 DisplayManager::DisplayManager() {
   pinMode(LED_PIN, OUTPUT);
-  digitalWrite(LED_PIN, LOW);
   DisplayManager::t_newPage = millis();
   
   if (DisplayManager::u8g2.begin()) {
     Serial.println(F("Display manager begin ok"));
   } else {
     Serial.println(F("Display manager begin error"));
+  }
+  DisplayManager::u8g2.enableUTF8Print();
+
+  if (BoilerProfile::boiler_configuration.standby_flag == MODE_STANDBY) {
+    DisplayManager::display_off();
+  } else {
+    DisplayManager::display_on();
   }
 }
 
@@ -34,6 +40,8 @@ void DisplayManager::display_on() {
   DisplayManager::u8g2.setPowerSave(false);
   digitalWrite(LED_PIN, HIGH);
   DisplayManager::t_newPage = millis();
+  BoilerProfile::boiler_configuration.standby_flag = MODE_WORK;
+  BoilerProfile::save_configuration();
   Serial.println(F("Display on"));
 }
 
@@ -41,6 +49,8 @@ void DisplayManager::display_off() {
   // выключаем дисплей и подсветку
   DisplayManager::u8g2.setPowerSave(true);
   digitalWrite(LED_PIN, LOW);
+  BoilerProfile::boiler_configuration.standby_flag = MODE_STANDBY;
+  BoilerProfile::save_configuration();
   Serial.println(F("Display off"));
 }
 
@@ -153,10 +163,10 @@ void DisplayManager::paint() {
 
     case pageTempSet:
       // страница настройки установленной температуры
-
+      
       DisplayManager::u8g2.setFont(u8g2_font_5x8_t_cyrillic);
       DisplayManager::u8g2.setCursor(0, 6);
-      DisplayManager::u8g2.print(F("Требуемая"));
+      DisplayManager::u8g2.print(F("Необходимая"));
       DisplayManager::u8g2.setCursor(0, 13);
       DisplayManager::u8g2.print(F("температура:"));
 
@@ -170,6 +180,7 @@ void DisplayManager::paint() {
       DisplayManager::u8g2.setFont(u8g2_font_luBS12_tr);
       DisplayManager::u8g2.setCursor(29, 38);
       DisplayManager::u8g2.print(DisplayManager::temporary_target_temp);
+      
       break;
 
     case pageSaveSettings:
@@ -196,8 +207,7 @@ void DisplayManager::paint() {
       break;
 
     case pageSettings:
-      // страница настроек котла.
-      
+//       страница настроек котла.
       DisplayManager::u8g2.setFont(u8g2_font_5x8_t_cyrillic);
       DisplayManager::u8g2.setCursor(5, 8);
       DisplayManager::u8g2.print(F("Режим работы"));

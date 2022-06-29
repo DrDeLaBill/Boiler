@@ -58,8 +58,8 @@ enum ConnectStatus {
 
 // Настройки профиля бойлера (BoilerPRofile)
 // Режимы работы
-#define MODE_STANDBY          true
-#define MODE_WORK             false
+#define MODE_WORK                   0
+#define MODE_STANDBY                1
 
 #define TARGET_TEMP_EXT_DEFAULT     20      // установленная температура воздуха по умолчанию
 #define TARGET_TEMP_INT_DEFAULT     10      // установленная температура теплоносителя по умолчанию
