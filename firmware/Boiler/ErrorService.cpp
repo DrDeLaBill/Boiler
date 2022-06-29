@@ -48,9 +48,6 @@ void ErrorService::add_error(uint8_t new_error) {
   } else if (ErrorService::type_error_validate(new_error)) {
     Serial.print(F("ERROR: code-"));
     Serial.print(new_error);
-//    Serial.print(" (");
-//    Serial.print(ErrorNames(new_error));
-//    Serial.print(") ");
     Serial.println(F(" added to errors list"));
     ErrorService::errors_list.push_back(new_error);
   }
@@ -67,6 +64,12 @@ bool ErrorService::is_set_error(uint8_t error_name) {
     }
   }
   return false;
+}
+
+bool ErrorService::is_no_errors() {
+  if (ErrorService::errors_list.size() == 1 && ErrorService::errors_list.at(0) == ERROR_NOERROR)
+    return true;
+  return !ErrorService::errors_list.size();
 }
 
 //TODO: переделать в перечисление enum

@@ -29,10 +29,11 @@ void RadioSensor::check_temperature(){
 uint8_t RadioSensor::update_radio_temp(){
 	if (millis() - RadioSensor::last_time_online < RECEIVE_TIMEOUT){
 		if (RadioSensor::radio.available()){
-			// TODO: написать проверку приходящих данных. !! валидация
-			// Возможно, добавится отправка других данных с датчика.
-			RadioSensor::last_time_online = millis();
-			RadioSensor::radio.read(&RadioSensor::radio_sens_temp, sizeof(float));
+          // TODO: написать проверку приходящих данных. !! валидация
+          // Возможно, добавится отправка других данных с датчика.
+          RadioSensor::last_time_online = millis();
+          RadioSensor::radio.read(&RadioSensor::radio_sens_temp, sizeof(float));
+          ErrorService::clear_errors();
 		  return GOT_EXT_TEMP;
 		} else {
 		  return NO_EXT_TEMP;
@@ -41,6 +42,7 @@ uint8_t RadioSensor::update_radio_temp(){
 		// time over
 		RadioSensor::last_time_online = millis() - (RECEIVE_TIMEOUT / 2);
         Serial.println("radio sensor doesn't answer");
+        ErrorService::add_error(ERROR_TEMPSENSBROKEN);
 		return RADIO_ERROR;
 	}
 }

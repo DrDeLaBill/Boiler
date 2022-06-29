@@ -3,7 +3,8 @@
 
 #include <SPI.h> 
 #include <nRF24L01.h> 
-#include <RF24.h> 
+#include <RF24.h>
+#include "ErrorService.h"
 
 #define RADIO_CE_PIN 	        15 			      // Номер пина Arduino, к которому подключен вывод CE радиомодуля
 #define RADIO_CSN_PIN         2 			      // Номер пина Arduino, к которому подключен вывод CSN радиомодуля

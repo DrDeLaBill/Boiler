@@ -24,6 +24,7 @@ class ErrorService
     
     ErrorService();
     static bool is_set_error(uint8_t error_name);
+    static bool is_no_errors();
     static void add_error(uint8_t new_error);
     static bool type_error_validate(uint8_t error_type);
     static void clear_errors();

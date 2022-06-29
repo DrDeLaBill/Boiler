@@ -14,6 +14,8 @@
 //TODO: перевести почти всё в статик
 //TODO: найти все static в .cpp
 
+#define DEBUG true
+
 ErrorService* error_service;
 NetworkManager* network_manager;
 EncoderManager* encoder_manager;
@@ -26,7 +28,9 @@ DisplayManager* display_manager;
 RadioSensor* radio_sensor;
 
 void setup(){
-  Serial.begin(115200);
+  #if (DEBUG)
+    Serial.begin(115200);
+  #endif
   Serial.println(F("\n######################################################"));
   Serial.println(F("Initialization boiler started."));
   error_service = new ErrorService();

@@ -131,7 +131,7 @@ void TemperatureSensor::pid_regulating(bool is_mode_water, uint8_t target_temper
       if (abs(target_temperature - TemperatureSensor::current_temp) > SCATTER_TEMP){               // если текущая температура не достигла диапазона регулирования, недопускаем накопление интегральной ошибки
         TemperatureSensor::TemperatureSensor::regulator_WATER.integral = 0;
       }
-    } else {
+    } else if (!ErrorService::is_set_error(ERROR_TEMPSENSBROKEN)) {
       // если сейчас работаем по воздуху или термопрофилю
 
       TemperatureSensor::TemperatureSensor::regulator_AIR.setpoint = target_temperature;                             // Сообщаем регулятору температуру к которой следует стремиться
@@ -143,11 +143,14 @@ void TemperatureSensor::pid_regulating(bool is_mode_water, uint8_t target_temper
       if (abs(target_temperature - TemperatureSensor::current_temp) > SCATTER_TEMP){               // если текущая температура не достигла диапазона регулирования, недопускаем накопление интегральной ошибки
         TemperatureSensor::TemperatureSensor::regulator_AIR.integral = 0;                                           //интегральная составляющая для воздуха не должна рости
       }
+    } else {
+      Serial.println(F("Ошибка датчика температуры"));
+      TemperatureSensor::pid_off();
     }
   }
 }
 
-void TemperatureSensor::pid_off(void){
+void TemperatureSensor::pid_off(){
   digitalWrite(SSR1_OUT_PIN, HEATER_OFF);
   digitalWrite(HEAT_LED_PIN, HIGH);
 }
