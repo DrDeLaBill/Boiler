@@ -61,5 +61,5 @@ uint8_t RelayTemperature::check_ssr_temp(){
 }
 
 bool RelayTemperature::is_heating_on() {
-  return digitalRead(SSR1_OUT_PIN);
+  return TemperatureSensor::is_heating_on;
 }

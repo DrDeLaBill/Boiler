@@ -63,6 +63,8 @@ class TemperatureSensor
     static uint8_t sens_temp_tries;
     // хранение времени для периода датчика
     static uint32_t ds18b20_last_time;
+    // включен ли нагрев
+    static bool is_heating_on;
     
     TemperatureSensor();
     static void set_radio_sensor(uint8_t target_temperature);

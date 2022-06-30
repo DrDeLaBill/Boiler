@@ -186,7 +186,7 @@ void EncoderManager::button_pressed_action() {
         // если выбран внешний датчик
         BoilerProfile::set_boiler_mode(MODE_AIR);
       }
-      DisplayManager::set_page_name(pageResetSettings);
+      DisplayManager::set_page_name(pageSaveSettings);
       DisplayManager::set_t_page_save_settings(millis());
       break;
 

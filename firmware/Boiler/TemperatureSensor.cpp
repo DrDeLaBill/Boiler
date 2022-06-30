@@ -1,7 +1,7 @@
 #include "TemperatureSensor.h"
 
 uint8_t TemperatureSensor::current_temp = 0;
-uint8_t TemperatureSensor::radio_connected = 0;
+uint8_t TemperatureSensor::radio_connected = RADIO_WAIT;
 uint8_t TemperatureSensor::sens_temp_tries = 5;
 uint32_t TemperatureSensor::ds18b20_last_time = millis();
 GyverPID TemperatureSensor::regulator_AIR(kP_air, kI_air, kD_air, dT);
@@ -22,6 +22,7 @@ float TemperatureSensor::kI_water = 0.5;
 float TemperatureSensor::kD_water = 0.3;
 float TemperatureSensor::dT = 1000;
 const uint32_t TemperatureSensor::period_msec = 1000;
+bool TemperatureSensor::is_heating_on = false;
 
 TemperatureSensor::TemperatureSensor() {
   TemperatureSensor::temp_init();
@@ -103,7 +104,7 @@ void TemperatureSensor::check_temperature() {
 
 void TemperatureSensor::set_radio_sensor(uint8_t target_temperature){
   RadioSensor::clear_timeout_radio_sens();
-  if (TemperatureSensor::is_radio_connected() != RADIO_ON) {
+  if (TemperatureSensor::radio_connected != RADIO_ON) {
     TemperatureSensor::radio_connected = RADIO_WAIT;
   }
   TemperatureSensor::current_temp = target_temperature;          // пока датчик не отправил данные, загружаем это значение
@@ -151,6 +152,7 @@ void TemperatureSensor::pid_regulating(bool is_mode_water, uint8_t target_temper
 }
 
 void TemperatureSensor::pid_off(){
+  TemperatureSensor::is_heating_on = false;
   digitalWrite(SSR1_OUT_PIN, HEATER_OFF);
   digitalWrite(HEAT_LED_PIN, HIGH);
 }
@@ -160,6 +162,7 @@ void TemperatureSensor::pwm(uint32_t on_time){
 
   TemperatureSensor::pwm_set_0_time = millis() + time_msec;
   if (time_msec > 0){
+    TemperatureSensor::is_heating_on = true;
     digitalWrite(SSR1_OUT_PIN, HEATER_ON);
     digitalWrite(HEAT_LED_PIN, LOW);
 
@@ -223,10 +226,13 @@ uint8_t TemperatureSensor::update_current_temp_water() {
 }
 
 bool TemperatureSensor::is_radio_connected() {
-  return TemperatureSensor::radio_connected;
+  return TemperatureSensor::radio_connected == RADIO_ON || TemperatureSensor::radio_connected == RADIO_WAIT;
 }
 
 uint8_t TemperatureSensor::get_current_temperature() {
+  if (ErrorService::is_set_error(ERROR_TEMPSENSBROKEN) && RadioSensor::radio_sens_temp == 0) {
+    return 0;
+  }
   return TemperatureSensor::current_temp;
 }
 
