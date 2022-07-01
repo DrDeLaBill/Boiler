@@ -88,7 +88,7 @@ enum ProfilePreset {
 
 #define WATER_TEMP_MIN          10          // минимальная температура теплоносителя
 #define WATER_TEMP_MAX          60          // максимальная температура теплоносителя
-#define WATER_TEMP_LIM          85.0f       // аварийная температура теплоносителя - 85*
+#define WATER_TEMP_LIM          85.0        // аварийная температура теплоносителя - 85*
 
 enum TempSensState {
   GOT_TEMP,
@@ -120,7 +120,7 @@ enum ModeType {
 // Базовые настройки бойлера
 struct BoilerConfiguration {
   uint8_t boiler_mode;
-  uint8_t target_temp_int;
+  uint8_t target_temp_int; 
   uint8_t target_temp_ext;
   bool standby_flag;
   char ssid[MAX_SIZE_SSID];

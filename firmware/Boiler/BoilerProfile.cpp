@@ -38,6 +38,7 @@ void BoilerProfile::clear_eeprom() {
   for (uint8_t i = 0; i < sizeof(BoilerProfile::boiler_configuration); i++) {
     EEPROM.put(i, 0xFF);
   }
+  EEPROM.commit();
   BoilerProfile::set_default_settings();
 }
 
@@ -114,6 +115,7 @@ uint8_t BoilerProfile::get_target_temp(){
     // работаем по уставке по воде
     return BoilerProfile::session_target_temp_int;
   }
+  return 0;
 }
 
 void BoilerProfile::set_target_temp(uint8_t temp) {

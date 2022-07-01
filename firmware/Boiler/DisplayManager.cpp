@@ -95,7 +95,7 @@ void DisplayManager::set_temp_page() {
 }
 
 void DisplayManager::paint() {
-   DisplayManager::check_page();
+  DisplayManager::check_page();
   // display_lightning();
 
   DisplayManager::u8g2.clearBuffer();
@@ -143,7 +143,7 @@ void DisplayManager::paint() {
       // установленная температура
       DisplayManager::u8g2.setFont(u8g2_font_luBS12_tr);
       DisplayManager::u8g2.setCursor(43, 12);
-      DisplayManager::u8g2.print(DisplayManager::display_data_config.target_temperature); // get_target_temp()
+      DisplayManager::u8g2.print(DisplayManager::display_data_config.target_temperature);
       DisplayManager::u8g2.setFont(u8g_font_5x8);
       DisplayManager::u8g2.setCursor(67, 5);
       DisplayManager::u8g2.print(F("o"));

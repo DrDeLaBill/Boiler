@@ -390,8 +390,8 @@ void start_internal_server() {
         
     request->send(200, "text/plain", "");
     String target_mode = json.as<String>();
-//    Serial.print(F("target_mode: "));
-//    Serial.println(target_mode);
+    Serial.print(F("target_mode: "));
+    Serial.println(target_mode);
     if (target_mode == S_SETPOINT) {
       // работаем по воздуху
       BoilerProfile::set_boiler_mode(MODE_AIR);
@@ -431,8 +431,8 @@ void start_internal_server() {
 
     String str = String((char*)data);
     uint8_t need_temp = str.substring(0, len).toInt();
-//    Serial.print(F("need_temp: "));
-//    Serial.println(need_temp);
+    Serial.print(F("need_temp: "));
+    Serial.println(need_temp);
     if (need_temp >= WATER_TEMP_MIN && need_temp <= WATER_TEMP_MAX) {
       BoilerProfile::set_target_temp(need_temp);
     }
