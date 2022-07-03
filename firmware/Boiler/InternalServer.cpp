@@ -536,6 +536,12 @@ void start_internal_server() {
     request->send(200, "text/plain", "");
   });
   server.addHandler(handler);
+  
+  server.onNotFound([](AsyncWebServerRequest *request){
+    Serial.print(F("[404_NOT_FOUND] "));
+    Serial.println(request->url());
+    request->send(404, "text/plain", "The content you are looking for was not found.");
+  });
    
   server.begin();
   Serial.println(F("Internal server settings end"));
