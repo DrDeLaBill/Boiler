@@ -382,7 +382,7 @@ void start_internal_server() {
 
   handler = new AsyncCallbackJsonWebHandler(url_path.c_str(), [](AsyncWebServerRequest *request, JsonVariant &json) {
     // установка режима работы - по воздуху, по теплоносителю или термопрофиль
-    Serial.print(F("[HTTP_GET] "));
+    Serial.print(F("[HTTP_PUT] "));
     Serial.println(request->url());
     
 //    if(!request->authenticate(http_login, http_pass))
@@ -534,6 +534,55 @@ void start_internal_server() {
     }
     BoilerProfile::save_configuration();
     request->send(200, "text/plain", "");
+  });
+  server.addHandler(handler);
+
+  url_path = "/client/" + String(BoilerProfile::boiler_configuration.boiler_id) + "/settings";
+  server.on(url_path.c_str(), HTTP_GET, [] (AsyncWebServerRequest *request) {
+    // Запрос текущего режима работы - по воздуху, теплоносителю, или термопрофилю и текущей установленной температуры
+    Serial.print(F("[HTTP_GET] "));
+    Serial.println(request->url());
+
+    String message = "{\"mode\":\"";
+
+    if (BoilerProfile::session_boiler_mode == MODE_WATER) {
+      // режим работы по теплоносителю
+      message += S_SETPOINTWATER;
+    } else if (BoilerProfile::session_boiler_mode == MODE_PROFILE) {
+      // режим работы по термопрофилю
+      message += S_PROFILE;
+    } else if (BoilerProfile::session_boiler_mode == MODE_AIR) {
+      // режим работы уставка по воздуху
+      message += S_SETPOINT;
+    }
+    
+    message += "\", \"target_temp\":\"" + String(BoilerProfile::get_target_temp()) + "\"}";
+    request->send(200, "application/json", message);
+  });
+
+  handler = new AsyncCallbackJsonWebHandler(url_path.c_str(), [](AsyncWebServerRequest *request, JsonVariant &json) {
+    // Установка режима работы - по воздуху, по теплоносителю или термопрофилю и текущей установленной температуры
+    Serial.print(F("[HTTP_PUT] "));
+    Serial.println(request->url());
+
+    request->send(200, "text/plain", "");
+    String target_mode = json["mode"].as<String>();
+    uint8_t target_temp = json["target_temp"].as<uint8_t>();;
+    Serial.print(F("Target mode: "));
+    Serial.println(target_mode);
+    Serial.print(F("Target temperature: "));
+    Serial.println(target_temp);
+    if (target_mode == S_SETPOINT) {
+      // работаем по воздуху
+      BoilerProfile::set_boiler_mode(MODE_AIR);
+    } else if (target_mode == S_SETPOINTWATER) {
+      // работаем по теплоносителю
+      BoilerProfile::set_boiler_mode(MODE_WATER);
+    } else if (target_mode == S_PROFILE) {
+      // работает по термопрофилю
+      BoilerProfile::set_boiler_mode(MODE_PROFILE);
+    }
+    BoilerProfile::set_target_temp(target_temp);
   });
   server.addHandler(handler);
   
