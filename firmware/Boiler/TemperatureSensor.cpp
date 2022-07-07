@@ -121,7 +121,7 @@ void TemperatureSensor::pid_regulating(bool is_mode_water, uint8_t target_temper
     TemperatureSensor::pid_last_time = millis();
 
     // разные пиды для режимов работы по воздуху и теплоносителю
-    if (is_mode_water) {                                                                  // работать по воде
+    if (is_mode_water && !ErrorService::is_set_error(ERROR_TEMPSENSBROKEN)) {                                                                  // работать по воде
       TemperatureSensor::TemperatureSensor::regulator_WATER.setpoint = target_temperature;                           // Сообщаем регулятору температуру к которой следует стремиться
       TemperatureSensor::TemperatureSensor::regulator_WATER.input = TemperatureSensor::current_temp;                                   // Сообщаем регулятору текущую температуру к которой будем стремиться
       
@@ -152,6 +152,7 @@ void TemperatureSensor::pid_regulating(bool is_mode_water, uint8_t target_temper
 }
 
 void TemperatureSensor::pid_off(){
+  Serial.println(F("Pid off"));
   TemperatureSensor::is_heating_on = false;
   digitalWrite(SSR1_OUT_PIN, HEATER_OFF);
   digitalWrite(HEAT_LED_PIN, HIGH);
@@ -215,6 +216,7 @@ uint8_t TemperatureSensor::update_current_temp_water() {
       }
     } else if (TemperatureSensor::sens_temp_tries == 0) {
       Serial.println("Error: Could not read temperature data");
+      ErrorService::add_error(ERROR_TEMPSENSBROKEN);
       TemperatureSensor::sens_temp_tries = 5;
       return TEMP_SENS_ERROR;
     } else {

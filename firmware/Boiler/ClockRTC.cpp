@@ -11,7 +11,7 @@ uint8_t ClockRTC::clock_get_hours() {
 }
 
 uint8_t ClockRTC::clock_get_day_of_week(){
-  return ((ClockRTC::watch.gettimeUnix() / 86400) + 3) % 7;
+  return uint8_t(((ClockRTC::watch.gettimeUnix() / 86400) + 3) % 7);
 }
 
 char* ClockRTC::clock_get_time(const char* fmt) {
@@ -19,5 +19,11 @@ char* ClockRTC::clock_get_time(const char* fmt) {
 }
 
 void ClockRTC::clock_set_time(uint64_t* datetime, uint8_t* timezone){
-  ClockRTC::watch.settimeUnix(*datetime + (*timezone * 3600));
+  Serial.println(F("Setting clock:"));
+  Serial.print(*datetime);
+  Serial.print(F(" + "));
+  Serial.print(*timezone);
+  Serial.print(F(" * 3600 = "));
+  Serial.println((*datetime) + (*timezone * 3600));
+  ClockRTC::watch.settimeUnix(uint32_t((*datetime) + (*timezone * 3600)));
 }

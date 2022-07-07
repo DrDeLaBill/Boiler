@@ -285,8 +285,6 @@ void start_internal_server() {
     // возвращаем текущее состояние котла
     Serial.print(F("[HTTP_GET] "));
     Serial.println(request->url());
-    Serial.print(F(" | boiler ID:"));
-    Serial.println(request->pathArg(2));
     
 //    if(!request->authenticate(http_login, http_pass))
 //        return request->requestAuthentication();
@@ -333,17 +331,6 @@ void start_internal_server() {
       // внешний датчик отвалился
       message += "\"no_sensor\"";
     }
-
-//    if (BoilerProfile::session_boiler_mode == MODE_WATER) {
-//      // котел работает по теплоносителю
-//      message += S_SETPOINTWATER;
-//    } else if (BoilerProfile::session_boiler_mode == MODE_PROFILE) {
-//      // котел работает по термопрофилю
-//      message += S_PROFILE;
-//    } else if (BoilerProfile::session_boiler_mode == MODE_AIR) {
-//      // котел работает по воздуху
-//      message += S_SETPOINT;
-//    }
 
     message += "]\n}";
         
@@ -449,13 +436,14 @@ void start_internal_server() {
 //    if(!request->authenticate(http_login, http_pass))
 //        return request->requestAuthentication();
     
-    uint64_t datetime = json.as<unsigned long long>();
+    uint64_t datetime = json.as<uint64_t>();
     uint8_t timezone = 0; // default = utc. Решили, что клиент сам будет определять локаль и отправлять соответствующее время.
     Serial.print(F("datetime: "));
     Serial.println((uint32_t)datetime);
     Serial.print(F("timezone: "));
     Serial.println(timezone);
-    
+
+    Serial.println(F("Set clock time"));
     ClockRTC::clock_set_time(&datetime, &timezone);  
     request->send(200, "text/plain", "");
   });
@@ -572,13 +560,17 @@ void start_internal_server() {
     Serial.println(target_mode);
     Serial.print(F("Target temperature: "));
     Serial.println(target_temp);
-    if (target_mode == S_SETPOINT) {
-      // работаем по воздуху
-      BoilerProfile::set_boiler_mode(MODE_AIR);
-    } else if (target_mode == S_SETPOINTWATER) {
+    if (target_mode == S_SETPOINTWATER) {
       // работаем по теплоносителю
       BoilerProfile::set_boiler_mode(MODE_WATER);
-    } else if (target_mode == S_PROFILE) {
+    } else if (ErrorService::is_set_error(ERROR_TEMPSENSBROKEN)) {
+      // Если отвален датчик работаем по теплоносителю
+      BoilerProfile::set_boiler_mode(MODE_WATER);
+      return;
+    } else if (target_mode == S_SETPOINT) {
+      // работаем по воздуху
+      BoilerProfile::set_boiler_mode(MODE_AIR);
+    }  else if (target_mode == S_PROFILE) {
       // работает по термопрофилю
       BoilerProfile::set_boiler_mode(MODE_PROFILE);
     }

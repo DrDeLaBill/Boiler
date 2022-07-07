@@ -25,7 +25,7 @@ void ErrorService::check_failure(){
     ErrorService::add_error(ERROR_PUMPBROKEN);
   } else {
     // сбрасываем текущие ошибки
-    ErrorService::clear_errors();
+    // ErrorService::clear_errors();
   }
 }
 
@@ -44,6 +44,7 @@ void ErrorService::get_errors_list(uint8_t result_errors_list[]) {
 
 void ErrorService::add_error(uint8_t new_error) {
   if (ErrorService::is_set_error(new_error)) {
+    Serial.println(F("Error already set"));
     return;
   } else if (ErrorService::type_error_validate(new_error)) {
     Serial.print(F("ERROR: code-"));
@@ -54,6 +55,7 @@ void ErrorService::add_error(uint8_t new_error) {
 }
 
 void ErrorService::clear_errors() {
+  Serial.println(F("Clear errors"));
   ErrorService::errors_list.clear();
 }
 
