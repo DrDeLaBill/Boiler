@@ -563,9 +563,13 @@ void start_internal_server() {
     if (target_mode == S_SETPOINTWATER) {
       // работаем по теплоносителю
       BoilerProfile::set_boiler_mode(MODE_WATER);
-    } else if (ErrorService::is_set_error(ERROR_TEMPSENSBROKEN)) {
+    } else if (ErrorService::is_set_error(ERROR_RADIOSENSOR)) {
       // Если отвален датчик работаем по теплоносителю
-      BoilerProfile::set_boiler_mode(MODE_WATER);
+      if (BoilerProfile::session_boiler_mode != MODE_WATER) {
+        BoilerProfile::session_boiler_mode = MODE_WATER;
+        BoilerProfile::session_target_temp_int = (uint8_t)TemperatureSensor::get_current_temp_water();
+        TemperatureSensor::set_current_temp_like_water_temp();
+      }
       return;
     } else if (target_mode == S_SETPOINT) {
       // работаем по воздуху

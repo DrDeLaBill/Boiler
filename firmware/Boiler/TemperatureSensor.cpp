@@ -3,7 +3,7 @@
 uint8_t TemperatureSensor::current_temp = 0;
 uint8_t TemperatureSensor::radio_connected = RADIO_WAIT;
 uint8_t TemperatureSensor::sens_temp_tries = 5;
-uint32_t TemperatureSensor::ds18b20_last_time = millis();
+uint32_t TemperatureSensor::ds18b20_last_time = 0;
 GyverPID TemperatureSensor::regulator_AIR(kP_air, kI_air, kD_air, dT);
 GyverPID TemperatureSensor::regulator_WATER(kP_water, kI_water, kD_water, dT);
 //OneWire TemperatureSensor::oneWire(ONE_WIRE_BUS);
@@ -39,7 +39,12 @@ void TemperatureSensor::temp_init() {
 }
 
 void TemperatureSensor::check_temperature() {
-  uint8_t sens_status = TemperatureSensor::update_current_temp_water();
+  uint8_t sens_status = NO_TEMP;
+  // считывание данных с датчика температуры с некоторой периодичностью
+  if (millis() - TemperatureSensor::ds18b20_last_time >= DS18B20_MEAS_PERIOD){
+    TemperatureSensor::ds18b20_last_time = millis();
+    sens_status = TemperatureSensor::update_current_temp_water();
+  }
 
   if (sens_status == GOT_TEMP){
     if (TemperatureSensor::current_temp_water >= WATER_TEMP_LIM){
@@ -51,7 +56,7 @@ void TemperatureSensor::check_temperature() {
       ErrorService::add_error(ERROR_WATEROVERHEAT);
     } else {
       // если температура понизилась, то может и не стоит возвращаться в обычный режим?
-      ErrorService::clear_errors();
+//      ErrorService::clear_errors();
     }
       
     if (ErrorService::is_set_error(ERROR_TEMPSENSBROKEN)){
@@ -77,6 +82,7 @@ void TemperatureSensor::check_temperature() {
       // проверим, надо ли нам переключить режим обратно
       if (BoilerProfile::is_set_config_boiler_mode(MODE_AIR) || BoilerProfile::is_set_config_boiler_mode(MODE_PROFILE)){
         BoilerProfile::session_boiler_mode = BoilerProfile::boiler_configuration.boiler_mode;
+        ErrorService::clear_errors();
       }
     }
     TemperatureSensor::set_radio_on();
@@ -112,8 +118,7 @@ void TemperatureSensor::set_radio_sensor(uint8_t target_temperature){
 
 void TemperatureSensor::pid_regulating(bool is_mode_water, uint8_t target_temperature){
   if ((millis() > pwm_set_0_time) && digitalRead(SSR1_OUT_PIN)){
-    digitalWrite(SSR1_OUT_PIN, HEATER_OFF);
-    digitalWrite(HEAT_LED_PIN, HIGH);
+    TemperatureSensor::pid_off();
   }
 
   // отправка показаний с датчиков на пид регулятор с определенной периодичностью
@@ -121,28 +126,27 @@ void TemperatureSensor::pid_regulating(bool is_mode_water, uint8_t target_temper
     TemperatureSensor::pid_last_time = millis();
 
     // разные пиды для режимов работы по воздуху и теплоносителю
-    if (is_mode_water && !ErrorService::is_set_error(ERROR_TEMPSENSBROKEN)) {                                                                  // работать по воде
+    if (is_mode_water && !ErrorService::is_set_error(ERROR_TEMPSENSBROKEN)) {                                                                                             // работать по воде
       TemperatureSensor::TemperatureSensor::regulator_WATER.setpoint = target_temperature;                           // Сообщаем регулятору температуру к которой следует стремиться
-      TemperatureSensor::TemperatureSensor::regulator_WATER.input = TemperatureSensor::current_temp;                                   // Сообщаем регулятору текущую температуру к которой будем стремиться
+      TemperatureSensor::TemperatureSensor::regulator_WATER.input = TemperatureSensor::current_temp;                 // Сообщаем регулятору текущую температуру к которой будем стремиться
       
-      TemperatureSensor::pwm(TemperatureSensor::TemperatureSensor::regulator_WATER.getResultTimer());                                  // включаем ТТР, опираясь на температуру воды
+      TemperatureSensor::pwm(TemperatureSensor::TemperatureSensor::regulator_WATER.getResultTimer());                // включаем ТТР, опираясь на температуру воды
 
-      TemperatureSensor::TemperatureSensor::regulator_AIR.integral = 0;                                             //интегральная составляющая для воздуха не должна рости
+      TemperatureSensor::TemperatureSensor::regulator_AIR.integral = 0;                                              //интегральная составляющая для воздуха не должна рости
 
-      if (abs(target_temperature - TemperatureSensor::current_temp) > SCATTER_TEMP){               // если текущая температура не достигла диапазона регулирования, недопускаем накопление интегральной ошибки
+      if (abs(target_temperature - TemperatureSensor::current_temp) > SCATTER_TEMP){                                 // если текущая температура не достигла диапазона регулирования, недопускаем накопление интегральной ошибки
         TemperatureSensor::TemperatureSensor::regulator_WATER.integral = 0;
       }
-    } else if (!ErrorService::is_set_error(ERROR_TEMPSENSBROKEN)) {
+    } else if (!ErrorService::is_set_error(ERROR_RADIOSENSOR)) {
       // если сейчас работаем по воздуху или термопрофилю
-
       TemperatureSensor::TemperatureSensor::regulator_AIR.setpoint = target_temperature;                             // Сообщаем регулятору температуру к которой следует стремиться
-      TemperatureSensor::TemperatureSensor::regulator_AIR.input = TemperatureSensor::current_temp;                                     // Сообщаем регулятору текущую температуру к которой будем стремиться
+      TemperatureSensor::TemperatureSensor::regulator_AIR.input = TemperatureSensor::current_temp;                   // Сообщаем регулятору текущую температуру к которой будем стремиться
 
-      TemperatureSensor::pwm(TemperatureSensor::TemperatureSensor::regulator_AIR.getResultTimer());                                    // включаем ТТР, опираясь на температуру воздуха
+      TemperatureSensor::pwm(TemperatureSensor::TemperatureSensor::regulator_AIR.getResultTimer());                  // включаем ТТР, опираясь на температуру воздуха
       TemperatureSensor::TemperatureSensor::regulator_WATER.integral = 0;
-
-      if (abs(target_temperature - TemperatureSensor::current_temp) > SCATTER_TEMP){               // если текущая температура не достигла диапазона регулирования, недопускаем накопление интегральной ошибки
-        TemperatureSensor::TemperatureSensor::regulator_AIR.integral = 0;                                           //интегральная составляющая для воздуха не должна рости
+  
+      if (abs(target_temperature - TemperatureSensor::current_temp) > SCATTER_TEMP){                                 // если текущая температура не достигла диапазона регулирования, недопускаем накопление интегральной ошибки
+        TemperatureSensor::TemperatureSensor::regulator_AIR.integral = 0;                                            //интегральная составляющая для воздуха не должна рости
       }
     } else {
       Serial.println(F("Ошибка датчика температуры"));
@@ -152,7 +156,6 @@ void TemperatureSensor::pid_regulating(bool is_mode_water, uint8_t target_temper
 }
 
 void TemperatureSensor::pid_off(){
-  Serial.println(F("Pid off"));
   TemperatureSensor::is_heating_on = false;
   digitalWrite(SSR1_OUT_PIN, HEATER_OFF);
   digitalWrite(HEAT_LED_PIN, HIGH);
@@ -171,7 +174,7 @@ void TemperatureSensor::pwm(uint32_t on_time){
       if (TemperatureSensor::check_ssr_last_time == 0){
         TemperatureSensor::check_ssr_last_time = millis();
         TemperatureSensor::check_ssr_last_temp = (uint8_t)TemperatureSensor::current_temp_water;
-      } else if (millis() - TemperatureSensor::check_ssr_last_time >= HEATER_1DEGREE_TIMEOUT){
+      } else if (millis() - TemperatureSensor::check_ssr_last_time >= HEATER_DEGREE_TIMEOUT){
         // если за 15мин интенсивного нагрева температура теплоносителя не изменилась, то ошибка.
         if ((uint8_t)TemperatureSensor::current_temp_water == TemperatureSensor::check_ssr_last_temp){
           // error: don't heat
@@ -193,37 +196,32 @@ void TemperatureSensor::pid_init(){
   TemperatureSensor::TemperatureSensor::regulator_AIR.setDirection(NORMAL); // (NORMAL/REVERSE)
   TemperatureSensor::TemperatureSensor::regulator_AIR.setLimits(0, 255);    //
 
+
   digitalWrite(SSR1_OUT_PIN, HEATER_OFF);
   pinMode(HEAT_LED_PIN, OUTPUT);
   digitalWrite(HEAT_LED_PIN, HIGH);
 }
 
-uint8_t TemperatureSensor::update_current_temp_water() {
-  // считывание данных с датчика температуры с некоторой периодичностью
-  if (millis() - TemperatureSensor::ds18b20_last_time >= DS18B20_MEAS_PERIOD){
-    TemperatureSensor::ds18b20_last_time = millis();
-    
-    float tempC = TemperatureSensor::sensors.getTempCByIndex(0);
-    // Check if reading was successful
-    if (tempC != DEVICE_DISCONNECTED_C) {
-      TemperatureSensor::current_temp_water = tempC;
-      if (TemperatureSensor::sensors.isConversionComplete()){
-        TemperatureSensor::sensors.requestTemperaturesByIndex(0);
-        TemperatureSensor::sens_temp_tries = 5;
-        return GOT_TEMP;
-      } else {
-        return NO_TEMP;
-      }
-    } else if (TemperatureSensor::sens_temp_tries == 0) {
-      Serial.println("Error: Could not read temperature data");
-      ErrorService::add_error(ERROR_TEMPSENSBROKEN);
+uint8_t TemperatureSensor::update_current_temp_water() {  
+  float tempC = TemperatureSensor::sensors.getTempCByIndex(0);
+  // Check if reading was successful
+  if (tempC != DEVICE_DISCONNECTED_C) {
+    TemperatureSensor::current_temp_water = tempC;
+    if (TemperatureSensor::sensors.isConversionComplete()){
+      TemperatureSensor::sensors.requestTemperaturesByIndex(0);
       TemperatureSensor::sens_temp_tries = 5;
-      return TEMP_SENS_ERROR;
+      return GOT_TEMP;
     } else {
-      sens_temp_tries--;
       return NO_TEMP;
     }
+  } else if (TemperatureSensor::sens_temp_tries == 0) {
+    Serial.println("Error: Could not read temperature data");
+    ErrorService::add_error(ERROR_TEMPSENSBROKEN);
+    TemperatureSensor::sens_temp_tries = 5;
+    return TEMP_SENS_ERROR;
   }
+  
+  sens_temp_tries--;
   return NO_TEMP;
 }
 
@@ -232,9 +230,6 @@ bool TemperatureSensor::is_radio_connected() {
 }
 
 uint8_t TemperatureSensor::get_current_temperature() {
-  if (ErrorService::is_set_error(ERROR_TEMPSENSBROKEN) && RadioSensor::radio_sens_temp == 0) {
-    return 0;
-  }
   return TemperatureSensor::current_temp;
 }
 
@@ -243,6 +238,7 @@ float TemperatureSensor::get_current_temp_water() {
 }
 
 void TemperatureSensor::set_current_temp_like_water_temp() {
+  TemperatureSensor::update_current_temp_water();
   TemperatureSensor::current_temp = (uint8_t)TemperatureSensor::current_temp_water;
 }
 

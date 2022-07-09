@@ -176,6 +176,11 @@ void EncoderManager::button_pressed_action() {
     case pageSetMode:
       // страница выбора режима работы
 
+      if (ErrorService::is_set_error(ERROR_RADIOSENSOR)){
+        DisplayManager::set_page_name(pageError);
+        DisplayManager::set_t_newPage(millis());
+        return;
+      }
       if (DisplayManager::get_menu_item() == 1) {
         // если выбран термопрофиль
         BoilerProfile::set_boiler_mode(MODE_PROFILE);
@@ -188,6 +193,7 @@ void EncoderManager::button_pressed_action() {
       }
       DisplayManager::set_page_name(pageSaveSettings);
       DisplayManager::set_t_page_save_settings(millis());
+      
       break;
 
     default:

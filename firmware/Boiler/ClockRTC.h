@@ -13,8 +13,6 @@ class ClockRTC
     static uint8_t clock_get_day_of_week();
     static char* clock_get_time(const char* fmt);
     static void clock_set_time(uint64_t* datetime, uint8_t* timezone);
-    
-    ClockRTC();
 };
 
 #endif

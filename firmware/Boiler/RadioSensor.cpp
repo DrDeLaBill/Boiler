@@ -33,7 +33,8 @@ uint8_t RadioSensor::update_radio_temp(){
       // Возможно, добавится отправка других данных с датчика.
       RadioSensor::last_time_online = millis();
       RadioSensor::radio.read(&RadioSensor::radio_sens_temp, sizeof(float));
-      ErrorService::clear_errors();
+      Serial.print(F("External sensor: "));
+      Serial.println(RadioSensor::radio_sens_temp);
 		  return GOT_EXT_TEMP;
 		} else {
 		  return NO_EXT_TEMP;
@@ -42,7 +43,7 @@ uint8_t RadioSensor::update_radio_temp(){
 		// time over
 		RadioSensor::last_time_online = millis() - (RECEIVE_TIMEOUT / 2);
     Serial.println("radio sensor doesn't answer");
-    ErrorService::add_error(ERROR_TEMPSENSBROKEN);
+    ErrorService::add_error(ERROR_RADIOSENSOR);
 		return RADIO_ERROR;
 	}
 }

@@ -27,8 +27,24 @@ void CommandManager::_execute_command() {
     BoilerProfile::set_boiler_id(new_boiler_id);
     Serial.print(F("Boiler ID from command: "));
     Serial.println(new_boiler_id);
-    Serial.print(F("New Boiler ID: "));
-    Serial.println(BoilerProfile::get_boiler_id());
+    BoilerProfile::save_configuration();
+  } else if (command.equals("set_ssid")) {
+    String ssid = CommandManager::_split_string(CommandManager::message_from_port, ' ', 1);
+    Serial.println(F("Setting SSID"));
+    Serial.print(F("Old SSID: "));
+    Serial.println(BoilerProfile::boiler_configuration.ssid);
+    ssid.toCharArray(BoilerProfile::boiler_configuration.ssid, MAX_SIZE_SSID);
+    Serial.print(F("Boiler SSID: "));
+    Serial.println(ssid);
+    BoilerProfile::save_configuration();
+  } else if (command.equals("set_ssid_pass")) {
+    String ssid_pass = CommandManager::_split_string(CommandManager::message_from_port, ' ', 1);
+    Serial.println(F("Setting SSID PASS"));
+    Serial.print(F("Old SSID PASS: "));
+    Serial.println(BoilerProfile::boiler_configuration.password);
+    ssid_pass.toCharArray(BoilerProfile::boiler_configuration.password, MAX_SIZE_PASS);
+    Serial.print(F("Boiler SSID PASS: "));
+    Serial.println(ssid_pass);
     BoilerProfile::save_configuration();
   } else if (command.equals("get_boiler_id")) {
     String boiler_id = BoilerProfile::get_boiler_id();

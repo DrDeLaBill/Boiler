@@ -1,12 +1,12 @@
 #include "BoilerProfile.h"
 
-ClockRTC BoilerProfile::clock_rtc;
 uint8_t BoilerProfile::session_target_temp_int = 0;
 uint8_t BoilerProfile::session_boiler_mode = MODE_WATER;
 BoilerConfiguration BoilerProfile::boiler_configuration;
 
 BoilerProfile::BoilerProfile() {
   Serial.println(F("__________________Boiler profile settings__________________"));
+  ClockRTC::watch.begin();
   BoilerProfile::start_eeprom();
 
   BoilerProfile::serial_print_boiler_configuration();
@@ -92,7 +92,6 @@ void BoilerProfile::save_configuration() {
   }
   EEPROM.commit();
   BoilerProfile::serial_print_boiler_configuration();
-  BoilerProfile::session_boiler_mode = BoilerProfile::boiler_configuration.boiler_mode;
 }
 
 void BoilerProfile::load_configuration() {
@@ -100,6 +99,7 @@ void BoilerProfile::load_configuration() {
   for (uint8_t i = 0; i < sizeof(BoilerProfile::boiler_configuration); i++) {
     ptr[i] = EEPROM.read(i);
   }
+  BoilerProfile::session_boiler_mode = BoilerProfile::boiler_configuration.boiler_mode;
 }
 
 uint8_t BoilerProfile::get_target_temp(){
@@ -165,9 +165,18 @@ void BoilerProfile::serial_print_boiler_configuration() {
   // Read configuration from EEPROM
   Serial.println(F("EEPROM settings:"));
   for (uint8_t i = 0; i < sizeof(BoilerProfile::boiler_configuration); i++) {
-    BoilerProfile::print_configuration_symbol(EEPROM.read(i));
+    if (4 < i && i < 4 + MAX_SIZE_SSID + MAX_SIZE_PASS || 
+      i >= 4 + MAX_SIZE_SSID + MAX_SIZE_PASS + NUM_DAYS + NUM_PRESETS * NUM_PERIODS) {
+      Serial.print(char(EEPROM.read(i)));
+    } else {
+      Serial.print(F("["));
+      Serial.print(EEPROM.read(i));
+      Serial.print(F("] "));
+    }
   }
   Serial.println();
+  Serial.print(F("Session boiler mode: "));
+  Serial.println(BoilerProfile::session_boiler_mode);
 }
 
 void BoilerProfile::set_boiler_id(String boiler_id) {
@@ -207,10 +216,6 @@ bool BoilerProfile::is_set_config_boiler_mode(ModeType search_mode) {
   return search_mode == BoilerProfile::boiler_configuration.boiler_mode;
 }
 
-char *BoilerProfile::get_current_day(const char* fmt) {
-  return ClockRTC::clock_get_time(fmt);
-}
-
 char *BoilerProfile::get_current_time(const char* fmt){
   return ClockRTC::clock_get_time(fmt);
 }
@@ -239,16 +244,6 @@ uint8_t BoilerProfile::get_session_boiler_mode() {
 
 void BoilerProfile::set_day_preset(uint8_t day_number, uint8_t day_period, uint8_t value) {
     BoilerProfile::boiler_configuration.presets[day_number][day_period] = value;
-}
-
-void BoilerProfile::print_configuration_symbol(byte symbol) {
-  if (0 <= symbol && symbol <= 31) {
-    Serial.print(F("["));
-    Serial.print(symbol);
-    Serial.print(F("] "));
-  } else {
-    Serial.print(char(symbol));
-  }
 }
 
 /*

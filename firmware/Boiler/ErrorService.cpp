@@ -1,6 +1,6 @@
 #include "ErrorService.h"
 
-Vector<uint8_t> ErrorService::errors_list;
+uint8_t ErrorService::errors_list[ERRORS_COUNT] = {};
 
 ErrorService::ErrorService() {
   pinMode(FLOW_IN_PIN, INPUT_PULLUP);
@@ -18,9 +18,9 @@ ErrorService::ErrorService() {
   Serial.println(F("Error service start"));
 }
 
-void ErrorService::check_failure(){
+void ErrorService::check_failure() {
   // проверяем систему на появление аварийных ситуаций
-  if (PumpManager::is_pump_broken()){
+  if (PumpManager::is_pump_broken()) {
     Serial.println(F("Check failure: "));
     ErrorService::add_error(ERROR_PUMPBROKEN);
   } else {
@@ -36,9 +36,9 @@ void ErrorService::get_errors_list(uint8_t result_errors_list[]) {
     Serial.println(F("ERROR: error display will not work"));
     return;
   }
-  for(int i = 0; i < ErrorService::errors_list.size(); i++) 
+  for (uint8_t i = 0; i < ERRORS_COUNT; i++)
   {
-     result_errors_list[i] = ErrorService::errors_list[i];
+    result_errors_list[i] = ErrorService::errors_list[i];
   }
 }
 
@@ -50,18 +50,26 @@ void ErrorService::add_error(uint8_t new_error) {
     Serial.print(F("ERROR: code-"));
     Serial.print(new_error);
     Serial.println(F(" added to errors list"));
-    ErrorService::errors_list.push_back(new_error);
+    for (uint8_t i = 0; i < ERRORS_COUNT; i++) {
+      if (errors_list[i] == 0) {
+        errors_list[i] = new_error;
+        return;
+      }
+    }
   }
 }
 
 void ErrorService::clear_errors() {
   Serial.println(F("Clear errors"));
-  ErrorService::errors_list.clear();
+  for (uint8_t i = 0; i < ERRORS_COUNT; i++) {
+    ErrorService::errors_list[i] = 0;
+  }
+  DisplayManager::set_page_name(pageTemp);
 }
 
 bool ErrorService::is_set_error(uint8_t error_name) {
-  for (int i = 0; i < ErrorService::errors_list.size(); i++) {
-    if (ErrorService::errors_list.at(i) == error_name) {
+  for (auto error : ErrorService::errors_list) {
+    if (error == error_name) {
       return true;
     }
   }
@@ -69,36 +77,20 @@ bool ErrorService::is_set_error(uint8_t error_name) {
 }
 
 bool ErrorService::is_no_errors() {
-  if (ErrorService::errors_list.size() == 1 && ErrorService::errors_list.at(0) == ERROR_NOERROR)
-    return true;
-  return !ErrorService::errors_list.size();
+  return ErrorService::errors_list[0] == ERROR_NOERROR;
 }
 
-//TODO: переделать в перечисление enum
 bool ErrorService::type_error_validate(uint8_t error_type) {
-  return (error_type == ERROR_OVERHEAT ||
-      error_type == ERROR_PUMPBROKEN ||
-      error_type == ERROR_SSRBROKEN ||
-      error_type == ERROR_TEMPSENSBROKEN ||
-      error_type == ERROR_WATEROVERHEAT ||
-      error_type == ERROR_NOPOWER
-  );
+  return 0 < error_type && error_type < ERRORS_COUNT;
 }
 
 void ErrorService::init_error_actions() {
-  for (uint8_t i=0; i < ErrorService::errors_list.size(); i++) {
-    switch(ErrorService::errors_list.at(i)) {
-      case ERROR_NOERROR:
-        break;
-      case ERROR_PUMPBROKEN:
-        ErrorService::enable_crash_out_pin();
-        break;
-      default:
-        ErrorService::enable_crash_out_pin();
-        break;
-    }
-  }
-  if (ErrorService::errors_list.size() == 0) {
+  if (ErrorService::is_set_error(ERROR_TEMPSENSBROKEN)){
+    DisplayManager::set_page_name(pageError);
+    ErrorService::enable_crash_out_pin();
+  } else if (ErrorService::is_set_error(ERROR_PUMPBROKEN)) {
+    ErrorService::enable_crash_out_pin();
+  } else if (ErrorService::is_no_errors()) {
     ErrorService::disable_crash_out_pin();
   }
 }
@@ -109,4 +101,11 @@ void ErrorService::enable_crash_out_pin() {
 
 void ErrorService::disable_crash_out_pin() {
   digitalWrite(CRASH_OUT_PIN, LOW);
+}
+
+bool ErrorService::if_single_error(uint8_t error_name) {
+  if (error_name == ERROR_NOERROR) {
+    return ErrorService::errors_list[1] == 0;
+  }
+  return ErrorService::errors_list[0] == error_name && ErrorService::errors_list[1] == 0;
 }

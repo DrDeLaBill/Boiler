@@ -75,15 +75,17 @@ void DisplayManager::display_lightning() {
 void DisplayManager::check_page() {
   // проверяем время неактивности. Если в течении 5с не было активности возвращаемся на начальный экран.
   // время экрана "сохранено" - 1с
-
   if (DisplayManager::page_name != pageTemp && DisplayManager::page_name != pageError) {
-
     if (DisplayManager::page_name == DisplayManager::t_page_save_settings) {
-      if (millis() - DisplayManager::t_page_save_settings >= SAVE_TIMEOUT) {
+      if (millis() - DisplayManager::t_page_save_settings >= PAGE_TIMEOUT) {
         DisplayManager::set_temp_page();
         return;
       }
     } else if (millis() - DisplayManager::t_newPage >= CANCEL_TIMEOUT) {
+      DisplayManager::set_temp_page();
+    }
+  } else if (DisplayManager::page_name == pageError && ErrorService::if_single_error(ERROR_RADIOSENSOR)) {
+    if (millis() - DisplayManager::t_newPage >= CANCEL_TIMEOUT) {
       DisplayManager::set_temp_page();
     }
   }
@@ -401,11 +403,11 @@ void DisplayManager::fill_display_configuration() {
   DisplayManager::display_data_config.is_overheat            = ErrorService::is_set_error(ERROR_OVERHEAT) || ErrorService::is_set_error(ERROR_WATEROVERHEAT);
   DisplayManager::display_data_config.is_pumpbroken          = ErrorService::is_set_error(ERROR_PUMPBROKEN);
   DisplayManager::display_data_config.is_ssrbroken           = ErrorService::is_set_error(ERROR_SSRBROKEN);
-  DisplayManager::display_data_config.is_tempsensbroken      = ErrorService::is_set_error(ERROR_TEMPSENSBROKEN);
+  DisplayManager::display_data_config.is_tempsensbroken      = ErrorService::is_set_error(ERROR_TEMPSENSBROKEN) || ErrorService::is_set_error(ERROR_RADIOSENSOR);
   DisplayManager::display_data_config.is_nopower             = ErrorService::is_set_error(ERROR_NOPOWER);
   DisplayManager::display_data_config.current_temperature    = TemperatureSensor::get_current_temperature();
   DisplayManager::display_data_config.target_temperature     = BoilerProfile::get_target_temp();
-  strncpy(DisplayManager::display_data_config.current_day, BoilerProfile::get_current_day("d/m/Y"), DISPLAY_CONF_STR_LENGTH);
+  strncpy(DisplayManager::display_data_config.current_day, BoilerProfile::get_current_time("d/m/Y"), DISPLAY_CONF_STR_LENGTH);
   strncpy(DisplayManager::display_data_config.current_time, BoilerProfile::get_current_time("H:i"), DISPLAY_CONF_STR_LENGTH);
 }
 

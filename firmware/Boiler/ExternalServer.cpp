@@ -146,12 +146,13 @@ void ExternalServer::check_settings() {
         doc["current_mode"] = String(S_PROFILE);
       else if (BoilerProfile::is_set_session_boiler_mode(MODE_WATER))
         doc["current_mode"] = String(S_SETPOINTWATER);
-      if (ErrorService::errors_list.size() == 0) {
+      if (ErrorService::errors_list[0] == 0) {
         doc["errors"][0] = String(ERROR_NOERROR);
-      }
-      for(int i = 0; i < ErrorService::errors_list.size(); i++) 
-      {
-        doc["errors"][i] = String(ErrorService::errors_list[i]);
+      } else {
+        for(int i = 0; i < ERRORS_COUNT; i++) 
+        {
+          doc["errors"][i] = String(ErrorService::errors_list[i]);
+        }
       }
       String send_json = "";
       serializeJson(doc, send_json);

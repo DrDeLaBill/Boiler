@@ -11,6 +11,7 @@
 
 #include "BoilerConstants.h"
 #include "PumpManager.h"
+#include "DisplayManager.h"
 
 // выход на расцепитель
 #define CRASH_OUT_PIN   33
@@ -20,10 +21,11 @@
 class ErrorService
 {
   public:
-    static Vector<uint8_t> errors_list;
+    static uint8_t errors_list[ERRORS_COUNT];
     
     ErrorService();
     static bool is_set_error(uint8_t error_name);
+    static bool if_single_error(uint8_t error_name = ERROR_NOERROR);
     static bool is_no_errors();
     static void add_error(uint8_t new_error);
     static bool type_error_validate(uint8_t error_type);

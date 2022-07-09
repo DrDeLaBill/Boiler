@@ -42,10 +42,10 @@ void BoilerController::controller_run() {
     // Проверка наличия ошибок
     ErrorService::check_failure();
     // проверим нагрев
-    if (!ErrorService::is_no_errors()) {
-      TemperatureSensor::pid_off();
-    } else {
+    if (ErrorService::is_no_errors() || ErrorService::if_single_error(ERROR_RADIOSENSOR)) {
       TemperatureSensor::pid_regulating(BoilerProfile::is_set_session_boiler_mode(MODE_WATER), BoilerProfile::get_target_temp());
+    } else {
+      TemperatureSensor::pid_off();
     }
     
     // нарисуем экран

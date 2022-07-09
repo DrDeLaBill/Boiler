@@ -2,16 +2,16 @@
 
 iarduino_RTC ClockRTC::watch(RTC_DS1307);
 
-ClockRTC::ClockRTC() {
-  ClockRTC::watch.begin();
-}
-
 uint8_t ClockRTC::clock_get_hours() {
-  return ClockRTC::watch.Hours;
+  Serial.println(F("Get Hours unix"));
+  Serial.println(ClockRTC::watch.Hours);
+  return uint8_t(ClockRTC::watch.Hours);
 }
 
 uint8_t ClockRTC::clock_get_day_of_week(){
-  return uint8_t(((ClockRTC::watch.gettimeUnix() / 86400) + 3) % 7);
+  Serial.println(F("Get day unix"));
+  Serial.println(ClockRTC::watch.weekday);
+  return uint8_t(ClockRTC::watch.weekday);
 }
 
 char* ClockRTC::clock_get_time(const char* fmt) {

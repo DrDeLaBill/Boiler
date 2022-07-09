@@ -31,7 +31,7 @@ void setup(){
   #if (DEBUG)
     Serial.begin(115200);
   #endif
-  Serial.println(F("\n######################################################"));
+  Serial.println(F("\n##########################################################"));
   Serial.println(F("Initialization boiler started."));
   error_service = new ErrorService();
   network_manager = new NetworkManager();
@@ -45,6 +45,7 @@ void setup(){
   radio_sensor = new RadioSensor();
   start_internal_server();
   Serial.println(F("Initialization boiler ended."));
+  Serial.println(F("______________________BOILER WORK LOG______________________"));
 }
 
 

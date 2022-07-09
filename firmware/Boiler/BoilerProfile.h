@@ -18,7 +18,6 @@
 class BoilerProfile
 {
   public:
-    static ClockRTC clock_rtc;
     // требуемая температура теплоносителя (в данной сессии)
     static uint8_t session_target_temp_int;
     // режим работы котла (в данной сессии)
@@ -50,10 +49,8 @@ class BoilerProfile
     static void set_session_boiler_mode(uint8_t target_mode);
     static void set_settings_standby(bool state);
     static void check_temperature();
-    static char *get_current_day(const char* fmt);
     static char *get_current_time(const char* fmt);
     static BoilerConfiguration get_boiler_configuration();
-    static void print_configuration_symbol(byte symbol);
 };
 
 #endif

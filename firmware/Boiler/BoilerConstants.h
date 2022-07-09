@@ -6,16 +6,15 @@
 
 #include <Arduino.h>
 
-// TODO: поменять пересичления на enum
 // Ошибки
-#define ERRORS_COUNT                  7           // Изменить, если количество поменяется
-
+#define ERRORS_COUNT                  8           // Изменить, если количество поменяется
 enum ErrorTypes {
   ERROR_NOERROR,                                  // нет ошибок
   ERROR_OVERHEAT,                                 // перегрев (аварийный датчик), которого нет
   ERROR_PUMPBROKEN,                               // насос неисправен
   ERROR_SSRBROKEN,                                // твердотельные реле не выключаются
   ERROR_TEMPSENSBROKEN,                           // датчик температуры теплоносителя не работает
+  ERROR_RADIOSENSOR,
   ERROR_WATEROVERHEAT,                            // перегрев теплоносителя (обычный датчик)
   ERROR_NOPOWER                                   // нет нагрева
 };
@@ -103,7 +102,7 @@ enum RadioSensState {
 };
 
 #define DS18B20_MEAS_PERIOD     1000        // период измерения с датчика DS18B20 в мс
-#define HEATER_1DEGREE_TIMEOUT  900000
+#define HEATER_DEGREE_TIMEOUT   900000
 
 #define SCATTER_TEMP            10          // Разброс температур между текущей температурой и температурой, к которой стремимся
 
