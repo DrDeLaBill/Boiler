@@ -1,5 +1,6 @@
 #include "RadioSensor.h"
 
+bool RadioSensor::radio_init_state = false;
 float RadioSensor::radio_sens_temp = 0.0;
 uint8_t RadioSensor::current_sensor_state = NO_EXT_TEMP;
 uint8_t RadioSensor::sensor_state = NO_EXT_TEMP;
@@ -8,17 +9,16 @@ RF24 RadioSensor::radio(RADIO_CE_PIN, RADIO_CSN_PIN);
 
 RadioSensor::RadioSensor() {
   // Инициализация модуля NRF24L01
-  bool radio_init_state = RadioSensor::radio.begin();
+  RadioSensor::radio_init_state = RadioSensor::radio.begin();
   RadioSensor::radio.setChannel(0x6f);
   RadioSensor::radio.setDataRate(RF24_1MBPS); // Скорость обмена данными 1 Мбит/сек
   RadioSensor::radio.setPALevel(RF24_PA_HIGH);           //
   RadioSensor::radio.openReadingPipe(1, 0x7878787878LL); // Открываем трубу ID передатчика
   RadioSensor::radio.startListening(); // Начинаем прослушивать открываемую трубу
   this->clear_timeout_radio_sens();
-  if (radio_init_state) {
+  if (RadioSensor::radio_init_state) {
     Serial.println("Radio module init ok");
-  }
-  else {
+  } else {
     Serial.println("Radio module init error");
   }
 }
@@ -29,7 +29,7 @@ void RadioSensor::check_temperature(){
 
 uint8_t RadioSensor::update_radio_temp(){
 	if (millis() - RadioSensor::last_time_online < RECEIVE_TIMEOUT){
-		if (RadioSensor::radio.available()){
+		if (RadioSensor::radio.available() && RadioSensor::radio_init_state){
       // TODO: написать проверку приходящих данных. !! валидация
       // Возможно, добавится отправка других данных с датчика.
       RadioSensor::last_time_online = millis();

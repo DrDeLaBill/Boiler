@@ -25,6 +25,7 @@ class RadioSensor
     static uint8_t current_sensor_state;
     static uint8_t sensor_state;
     static float radio_sens_temp;
+    static bool radio_init_state;
     
     RadioSensor();
     static uint8_t update_radio_temp();
