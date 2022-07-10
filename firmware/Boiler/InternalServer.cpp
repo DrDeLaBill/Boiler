@@ -300,8 +300,7 @@ void start_internal_server() {
     } else {
       message += "true";
     }
-    message += ",\n\"temp\": " +
-    String(TemperatureSensor::current_temp) + ",\n\"current_profile\": \"";
+    message += ",\n\"temp\": " + String(TemperatureSensor::current_temp) + ",\n\"current_profile\": \"";
 
     switch(BoilerProfile::boiler_configuration.profile[ClockRTC::clock_get_day_of_week()]) {
       case PRESET_WEEKDAY:
@@ -544,7 +543,8 @@ void start_internal_server() {
       message += S_SETPOINT;
     }
     
-    message += "\", \"target_temp\":\"" + String(BoilerProfile::get_target_temp()) + "\"}";
+    message += "\", \"target_temp\":" + String(BoilerProfile::get_target_temp()) + "}";
+    Serial.println(message);
     request->send(200, "application/json", message);
   });
 

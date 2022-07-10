@@ -149,7 +149,7 @@ void TemperatureSensor::pid_regulating(bool is_mode_water, uint8_t target_temper
         TemperatureSensor::TemperatureSensor::regulator_AIR.integral = 0;                                            //интегральная составляющая для воздуха не должна рости
       }
     } else {
-      Serial.println(F("Ошибка датчика температуры"));
+      Serial.println(F("External sensor failure"));
       TemperatureSensor::pid_off();
     }
   }

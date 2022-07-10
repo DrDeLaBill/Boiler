@@ -37,6 +37,7 @@ uint8_t RadioSensor::update_radio_temp(){
       Serial.println(RadioSensor::radio_sens_temp);
 		  return GOT_EXT_TEMP;
 		} else {
+      ErrorService::add_error(ERROR_RADIOSENSOR);
 		  return NO_EXT_TEMP;
 		}
 	} else {
