@@ -137,7 +137,7 @@ void TemperatureSensor::pid_regulating(bool is_mode_water, uint8_t target_temper
       if (abs(target_temperature - TemperatureSensor::current_temp) > SCATTER_TEMP){                                 // если текущая температура не достигла диапазона регулирования, недопускаем накопление интегральной ошибки
         TemperatureSensor::TemperatureSensor::regulator_WATER.integral = 0;
       }
-    } else if (!ErrorService::is_set_error(ERROR_RADIOSENSOR)) {
+    } else if (!ErrorService::is_set_error(ERROR_RADIOSENSOR) && RadioSensor::is_sensor_online()) {
       // если сейчас работаем по воздуху или термопрофилю
       TemperatureSensor::TemperatureSensor::regulator_AIR.setpoint = target_temperature;                             // Сообщаем регулятору температуру к которой следует стремиться
       TemperatureSensor::TemperatureSensor::regulator_AIR.input = TemperatureSensor::current_temp;                   // Сообщаем регулятору текущую температуру к которой будем стремиться

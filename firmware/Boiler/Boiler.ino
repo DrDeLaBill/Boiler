@@ -14,7 +14,7 @@
 //TODO: перевести почти всё в статик
 //TODO: найти все static в .cpp
 
-#define DEBUG true
+#define DEBUG false
 
 ErrorService* error_service;
 NetworkManager* network_manager;
