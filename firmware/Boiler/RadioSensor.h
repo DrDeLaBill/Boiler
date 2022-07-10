@@ -22,7 +22,8 @@ class RadioSensor
     static RF24 radio;
     // время последнего приема данных
     static uint32_t last_time_online;
-    static uint8_t current_temperature;
+    static uint8_t current_sensor_state;
+    static uint8_t sensor_state;
     static float radio_sens_temp;
     
     RadioSensor();
@@ -30,6 +31,8 @@ class RadioSensor
     static void check_temperature();
     static float get_radio_temp();
     static void clear_timeout_radio_sens();
+    static uint8_t get_current_sensor_state();
+    static bool is_sensor_online();
 };
 
 #endif

@@ -1,7 +1,8 @@
 #include "RadioSensor.h"
 
 float RadioSensor::radio_sens_temp = 0.0;
-uint8_t RadioSensor::current_temperature = 0;
+uint8_t RadioSensor::current_sensor_state = NO_EXT_TEMP;
+uint8_t RadioSensor::sensor_state = NO_EXT_TEMP;
 uint32_t RadioSensor::last_time_online = 0;
 RF24 RadioSensor::radio(RADIO_CE_PIN, RADIO_CSN_PIN);
 
@@ -23,7 +24,7 @@ RadioSensor::RadioSensor() {
 }
 
 void RadioSensor::check_temperature(){
-  RadioSensor::current_temperature = RadioSensor::update_radio_temp();
+  RadioSensor::current_sensor_state = RadioSensor::update_radio_temp();
 }
 
 uint8_t RadioSensor::update_radio_temp(){
@@ -35,16 +36,17 @@ uint8_t RadioSensor::update_radio_temp(){
       RadioSensor::radio.read(&RadioSensor::radio_sens_temp, sizeof(float));
       Serial.print(F("External sensor: "));
       Serial.println(RadioSensor::radio_sens_temp);
+      RadioSensor::sensor_state = GOT_EXT_TEMP;
 		  return GOT_EXT_TEMP;
 		} else {
-      ErrorService::add_error(ERROR_RADIOSENSOR);
 		  return NO_EXT_TEMP;
 		}
 	} else {
 		// time over
 		RadioSensor::last_time_online = millis() - (RECEIVE_TIMEOUT / 2);
-    Serial.println("radio sensor doesn't answer");
+    Serial.println("Radio sensor doesn't answer");
     ErrorService::add_error(ERROR_RADIOSENSOR);
+    RadioSensor::sensor_state = RADIO_ERROR;
 		return RADIO_ERROR;
 	}
 }
@@ -57,6 +59,10 @@ void RadioSensor::clear_timeout_radio_sens(){
   RadioSensor::last_time_online = millis();
 }
 
-uint8_t get_current_temperature() {
-  return RadioSensor::current_temperature;
+uint8_t RadioSensor::get_current_sensor_state() {
+  return RadioSensor::current_sensor_state;
+}
+
+bool RadioSensor::is_sensor_online() {
+  return RadioSensor::sensor_state == GOT_EXT_TEMP;
 }

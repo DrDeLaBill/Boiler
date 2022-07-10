@@ -251,7 +251,7 @@ float TemperatureSensor::get_radio_temp() {
 }
 
 uint8_t TemperatureSensor::update_radio_temp() {
-  uint8_t radio_sensor_status = RadioSensor::current_temperature;
+  uint8_t radio_sensor_status = RadioSensor::get_current_sensor_state();
   if (radio_sensor_status == GOT_EXT_TEMP) {
     TemperatureSensor::current_temp_air = RadioSensor::get_radio_temp();
   }
