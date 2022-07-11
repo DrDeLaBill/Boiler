@@ -28,6 +28,7 @@ class ErrorService
     static bool if_single_error(uint8_t error_name = ERROR_NOERROR);
     static bool is_no_errors();
     static void add_error(uint8_t new_error);
+    static void remove_error(uint8_t error);
     static bool type_error_validate(uint8_t error_type);
     static void clear_errors();
     static void check_failure();

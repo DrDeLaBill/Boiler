@@ -54,14 +54,15 @@ void TemperatureSensor::check_temperature() {
       Serial.print(TemperatureSensor::current_temp_water);
       Serial.println(F(" *C"));
       ErrorService::add_error(ERROR_WATEROVERHEAT);
+      DisplayManager::set_page_name(pageError);
     } else {
       // если температура понизилась, то может и не стоит возвращаться в обычный режим?
-//      ErrorService::clear_errors();
+      ErrorService::remove_error(ERROR_WATEROVERHEAT);
     }
       
     if (ErrorService::is_set_error(ERROR_TEMPSENSBROKEN)){
       // если датчик температуры был неисправен, а теперь починился
-      ErrorService::clear_errors();
+      ErrorService::remove_error(ERROR_TEMPSENSBROKEN);
     }
 
     if (BoilerProfile::session_boiler_mode == MODE_WATER){
@@ -82,7 +83,7 @@ void TemperatureSensor::check_temperature() {
       // проверим, надо ли нам переключить режим обратно
       if (BoilerProfile::is_set_config_boiler_mode(MODE_AIR) || BoilerProfile::is_set_config_boiler_mode(MODE_PROFILE)){
         BoilerProfile::session_boiler_mode = BoilerProfile::boiler_configuration.boiler_mode;
-        ErrorService::clear_errors();
+        ErrorService::remove_error(ERROR_RADIOSENSOR);
       }
     }
     TemperatureSensor::set_radio_on();
@@ -126,7 +127,7 @@ void TemperatureSensor::pid_regulating(bool is_mode_water, uint8_t target_temper
     TemperatureSensor::pid_last_time = millis();
 
     // разные пиды для режимов работы по воздуху и теплоносителю
-    if (is_mode_water && !ErrorService::is_set_error(ERROR_TEMPSENSBROKEN)) {                                                                                             // работать по воде
+    if (is_mode_water && (ErrorService::is_no_errors() || ErrorService::if_single_error(ERROR_RADIOSENSOR))) {       // работать по воде|
       TemperatureSensor::TemperatureSensor::regulator_WATER.setpoint = target_temperature;                           // Сообщаем регулятору температуру к которой следует стремиться
       TemperatureSensor::TemperatureSensor::regulator_WATER.input = TemperatureSensor::current_temp;                 // Сообщаем регулятору текущую температуру к которой будем стремиться
       
@@ -137,7 +138,7 @@ void TemperatureSensor::pid_regulating(bool is_mode_water, uint8_t target_temper
       if (abs(target_temperature - TemperatureSensor::current_temp) > SCATTER_TEMP){                                 // если текущая температура не достигла диапазона регулирования, недопускаем накопление интегральной ошибки
         TemperatureSensor::TemperatureSensor::regulator_WATER.integral = 0;
       }
-    } else if (!ErrorService::is_set_error(ERROR_RADIOSENSOR) && RadioSensor::is_sensor_online()) {
+    } else if (ErrorService::is_no_errors() && RadioSensor::is_sensor_online()) {
       // если сейчас работаем по воздуху или термопрофилю
       TemperatureSensor::TemperatureSensor::regulator_AIR.setpoint = target_temperature;                             // Сообщаем регулятору температуру к которой следует стремиться
       TemperatureSensor::TemperatureSensor::regulator_AIR.input = TemperatureSensor::current_temp;                   // Сообщаем регулятору текущую температуру к которой будем стремиться
@@ -179,6 +180,8 @@ void TemperatureSensor::pwm(uint32_t on_time){
         if ((uint8_t)TemperatureSensor::current_temp_water == TemperatureSensor::check_ssr_last_temp){
           // error: don't heat
           ErrorService::add_error(ERROR_NOPOWER);
+          DisplayManager::set_page_name(pageError);
+          return;
         }
       }
     } else  {
@@ -187,6 +190,7 @@ void TemperatureSensor::pwm(uint32_t on_time){
   } else {
     TemperatureSensor::check_ssr_last_time = 0;
   }
+  ErrorService::remove_error(ERROR_NOPOWER);
 }
 
 void TemperatureSensor::pid_init(){

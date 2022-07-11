@@ -17,7 +17,7 @@
 #define LED_PIN                     23      // пин подсветки дисплея
 
 #define CANCEL_TIMEOUT              5000    // время возврата на основной экран, если не было активности, мс
-#define PAGE_TIMEOUT                1300    // время показа экрана "сохранено", мс
+#define SAVE_TIMEOUT                1300    // время показа экрана "сохранено", мс
 
 #define TIMEOUT_LIGHTNING           20000   // время до автоматического выключения подсветки
 
@@ -66,7 +66,6 @@ class DisplayManager
     static void set_t_newPage(int value);
     static DisplayPage get_page_name();
     static void set_temporary_target_temp(uint8_t temporary_target_temp);
-    static void set_t_page_save_settings(int value);
     static uint8_t get_temporary_target_temp();
     static uint8_t get_menu_item();
     static void set_menu_item(uint8_t menu_item);

@@ -76,8 +76,8 @@ void DisplayManager::check_page() {
   // проверяем время неактивности. Если в течении 5с не было активности возвращаемся на начальный экран.
   // время экрана "сохранено" - 1с
   if (DisplayManager::page_name != pageTemp && DisplayManager::page_name != pageError) {
-    if (DisplayManager::page_name == DisplayManager::t_page_save_settings) {
-      if (millis() - DisplayManager::t_page_save_settings >= PAGE_TIMEOUT) {
+    if (DisplayManager::page_name == pageSaveSettings) {
+      if (millis() - DisplayManager::t_newPage >= SAVE_TIMEOUT) {
         DisplayManager::set_temp_page();
         return;
       }
@@ -435,10 +435,6 @@ void DisplayManager::set_menu_item(uint8_t menu_item) {
 
 void DisplayManager::set_temporary_target_temp(uint8_t temporary_target_temp) {
   DisplayManager::temporary_target_temp = temporary_target_temp;
-}
-
-void DisplayManager::set_t_page_save_settings(int value) {
-  DisplayManager::t_page_save_settings = value;
 }
 
 uint8_t DisplayManager::get_temporary_target_temp() {

@@ -33,10 +33,12 @@ bool PumpManager::is_pump_broken(){
       delay(5);
       if (digitalRead(FLOW_IN_PIN) == HIGH){
         // если уровень высокий, то протока нет.
-        Serial.println(F("ERROR: PUMP is BROKEN"));
+        ErrorService::add_error(ERROR_PUMPBROKEN);
+        DisplayManager::set_page_name(pageError);
         return true;
       }
     }
   }
+  ErrorService::remove_error(ERROR_PUMPBROKEN);
   return false;
 }

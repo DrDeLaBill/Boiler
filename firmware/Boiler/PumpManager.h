@@ -4,6 +4,8 @@
 #include <Arduino.h>
 
 #include "BoilerConstants.h"
+#include "ErrorService.h"
+#include "DisplayManager.h"
 
 #define PUMP_OFF              0
 #define PUMP_ON               1

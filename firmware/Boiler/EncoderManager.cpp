@@ -134,7 +134,6 @@ void EncoderManager::button_pressed_action() {
     case pageTempSet:
       // сохраняем установленную температуру
       DisplayManager::set_page_name(pageSaveSettings);
-      DisplayManager::set_t_page_save_settings(millis());
       BoilerProfile::set_target_temp(
         DisplayManager::get_temporary_target_temp()
       );
@@ -164,7 +163,6 @@ void EncoderManager::button_pressed_action() {
         case 2:
           // стираем ее_пром
           DisplayManager::set_page_name(pageResetSettings);
-          DisplayManager::set_t_page_save_settings(millis());
           BoilerProfile::clear_eeprom();
           break;
         default:
@@ -192,7 +190,6 @@ void EncoderManager::button_pressed_action() {
         BoilerProfile::set_boiler_mode(MODE_AIR);
       }
       DisplayManager::set_page_name(pageSaveSettings);
-      DisplayManager::set_t_page_save_settings(millis());
       
       break;
 

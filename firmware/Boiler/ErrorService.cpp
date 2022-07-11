@@ -16,17 +16,12 @@ ErrorService::ErrorService() {
   Serial.print(F("SSR input pin: "));
   Serial.println(analogRead(SSR_IN_PIN));
   Serial.println(F("Error service start"));
+  ErrorService::clear_errors(); 
 }
 
 void ErrorService::check_failure() {
   // проверяем систему на появление аварийных ситуаций
-  if (PumpManager::is_pump_broken()) {
-    Serial.println(F("Check failure: "));
-    ErrorService::add_error(ERROR_PUMPBROKEN);
-  } else {
-    // сбрасываем текущие ошибки
-    // ErrorService::clear_errors();
-  }
+  PumpManager::is_pump_broken();
 }
 
 void ErrorService::get_errors_list(uint8_t result_errors_list[]) {
@@ -58,6 +53,21 @@ void ErrorService::add_error(uint8_t new_error) {
   }
 }
 
+void ErrorService::remove_error(uint8_t error) {
+  for (uint8_t i = 0; i < ERRORS_COUNT; i++) {
+    if (errors_list[i] == error) {
+      errors_list[i] = 0;
+      if (i + 1 == ERRORS_COUNT) {
+        return;
+      }
+    }
+    if (errors_list[i] == 0 && errors_list[i+1] != 0) {
+      errors_list[i] = errors_list[i + 1];
+      errors_list[i + 1] = 0;
+    }
+  }
+}
+
 void ErrorService::clear_errors() {
   Serial.println(F("Clear errors"));
   for (uint8_t i = 0; i < ERRORS_COUNT; i++) {
@@ -76,7 +86,15 @@ bool ErrorService::is_set_error(uint8_t error_name) {
 }
 
 bool ErrorService::is_no_errors() {
-  return ErrorService::errors_list[0] == ERROR_NOERROR;
+  for (uint8_t i = 0; i < ERRORS_COUNT; i++) {
+    if (!ErrorService::type_error_validate(ErrorService::errors_list[i])) {
+      ErrorService::errors_list[i] = ERROR_NOERROR;
+    }
+    if (ErrorService::errors_list[i] != ERROR_NOERROR) {
+      return false;
+    }
+  }
+  return true;
 }
 
 bool ErrorService::type_error_validate(uint8_t error_type) {
@@ -91,6 +109,10 @@ void ErrorService::init_error_actions() {
     ErrorService::enable_crash_out_pin();
   } else if (ErrorService::is_no_errors()) {
     ErrorService::disable_crash_out_pin();
+  }
+
+  if (DisplayManager::page_name == pageError && ErrorService::is_no_errors()) {
+    DisplayManager::set_page_name(pageTemp);
   }
 }
 

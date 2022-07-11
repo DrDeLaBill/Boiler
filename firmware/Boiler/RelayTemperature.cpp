@@ -37,15 +37,14 @@ uint8_t RelayTemperature::check_ssr_temp(){
   if (ssr_temp_celc >= SSR_TEMP_UPPER_LIM && ErrorService::is_set_error(ERROR_SSRBROKEN)){
     Serial.println("SSR is dangerously hot.");
     RelayTemperature::ssr_broken_last_time = millis();
-    ErrorService::add_error(ERROR_SSRBROKEN);
   } else if (ssr_temp_celc <= SSR_TEMP_LOWER_LIM && ErrorService::is_set_error(ERROR_SSRBROKEN)){
-    ErrorService::add_error(ERROR_NOERROR);
-    DisplayManager::set_page_name(pageTemp);
+    ErrorService::remove_error(ERROR_SSRBROKEN);
   } else if (ssr_temp_celc >= SSR_TEMP_UPPER_LIM && ErrorService::is_set_error(ERROR_SSRBROKEN)){
     // если за некоторое время ТТР не остыли, то значит все плохо. Выключаем расцепитель. 
     if (millis() - RelayTemperature::ssr_broken_last_time >= SSR_BROKEN_TIMEOUT){
       Serial.println("Error! SSR overheated!");
       RelayTemperature::ssr_broken_last_time == millis();
+      ErrorService::add_error(ERROR_SSRBROKEN);
       DisplayManager::set_page_name(pageError);
       digitalWrite(CRASH_OUT_PIN, HIGH);
     }
