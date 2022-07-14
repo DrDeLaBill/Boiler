@@ -53,9 +53,9 @@ uint8_t RelayTemperature::check_ssr_temp(){
   static uint32_t last_time_ssr_temp = 0;
   if (millis() - last_time_ssr_temp >= 5000){
     last_time_ssr_temp = millis();
-//    Serial.print("ssr_temp: ");
-//    Serial.print(ssr_temp_celc);
-//    Serial.println("*C");
+    Serial.print("SSR temperature: ");
+    Serial.print(ssr_temp_celc);
+    Serial.println("*C");
   }
 }
 
