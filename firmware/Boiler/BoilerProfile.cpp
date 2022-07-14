@@ -11,6 +11,7 @@ BoilerProfile::BoilerProfile() {
 
   BoilerProfile::serial_print_boiler_configuration();
   BoilerProfile::load_configuration();
+  NetworkManager::connect_to_wifi();
 
   Serial.print(F("Boiler mode: "));
   Serial.println(String(BoilerProfile::boiler_configuration.boiler_mode));
@@ -99,6 +100,8 @@ void BoilerProfile::load_configuration() {
   for (uint8_t i = 0; i < sizeof(BoilerProfile::boiler_configuration); i++) {
     ptr[i] = EEPROM.read(i);
   }
+  NetworkManager::current_ssid = BoilerProfile::boiler_configuration.ssid;
+  NetworkManager::current_pass = BoilerProfile::boiler_configuration.password;
   BoilerProfile::session_boiler_mode = BoilerProfile::boiler_configuration.boiler_mode;
 }
 
@@ -165,9 +168,12 @@ void BoilerProfile::serial_print_boiler_configuration() {
   // Read configuration from EEPROM
   Serial.println(F("EEPROM settings:"));
   for (uint8_t i = 0; i < sizeof(BoilerProfile::boiler_configuration); i++) {
-    if (4 < i && i < 4 + MAX_SIZE_SSID + MAX_SIZE_PASS || 
+    if (3 < i && i < 4 + MAX_SIZE_SSID + MAX_SIZE_PASS || 
       i >= 4 + MAX_SIZE_SSID + MAX_SIZE_PASS + NUM_DAYS + NUM_PRESETS * NUM_PERIODS) {
-      Serial.print(char(EEPROM.read(i)));
+      char c = char(EEPROM.read(i));
+      if (c != '\n') {
+        Serial.print(c);
+      }
     } else {
       Serial.print(F("["));
       Serial.print(EEPROM.read(i));

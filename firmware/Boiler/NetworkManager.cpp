@@ -9,8 +9,6 @@ NetworkManager::NetworkManager() {
   WiFi.mode(WIFI_MODE_STA);
   WiFi.softAP(soft_ap_ssid.c_str(), soft_ap_password.c_str());
 
-  NetworkManager::connect_to_wifi();
-
   if(!MDNS.begin("boiler")) {
    Serial.println(F("Error starting mDNS"));
    return;
@@ -55,9 +53,10 @@ void NetworkManager::check_new_settings() {
 }
 
 void NetworkManager::set_wifi_settings(String ssid, String pass) {
-  Serial.print(F("Set wifi settings: ssid-"));
-  Serial.print(ssid);
-  Serial.print(F(" pass-"));
+  Serial.println(F("Set wifi settings:"));
+  Serial.print(F("ssid-"));
+  Serial.println(ssid);
+  Serial.print(F("pass-"));
   Serial.println(pass);
   NetworkManager::current_ssid = ssid;
   NetworkManager::current_pass = pass;

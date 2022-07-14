@@ -34,11 +34,11 @@ void setup(){
   Serial.println(F("\n##########################################################"));
   Serial.println(F("Initialization boiler started."));
   error_service = new ErrorService();
-  network_manager = new NetworkManager();
   encoder_manager = new EncoderManager();
   relay_manager = new RelayTemperature();
   pump_manager = new PumpManager();
   temperature_sensor = new TemperatureSensor();
+  network_manager = new NetworkManager();
   boiler_profile = new BoilerProfile();
   boiler_controller = new BoilerController();
   display_manager = new DisplayManager();

@@ -195,6 +195,7 @@ void ExternalServer::check_settings() {
                 need_temp = WATER_TEMP_MIN;
               }
               BoilerProfile::set_target_temp(need_temp);
+              BoilerProfile::save_configuration();
             } else {
               ExternalServer::serial_error_report(url_to_server, response_code);
             }
@@ -234,7 +235,6 @@ void ExternalServer::check_settings() {
             DynamicJsonDocument sets(150);
             deserializeJson(sets, ExternalServer::http_get_string());
             ExternalServer::close_http_session();
-  
             for (uint8_t i = 0; i < NUM_DAYS; i++){
               String num_of_day = "d";
               num_of_day += String(i);
@@ -248,13 +248,11 @@ void ExternalServer::check_settings() {
                 BoilerProfile::set_config_day_profile(i, PRESET_NOTFREEZE);
               }
             }
+            BoilerProfile::save_configuration();
           } else {
             ExternalServer::serial_error_report(url_to_server, response_code);
           }
-        }
-        
-        BoilerProfile::save_configuration();
-        
+        }        
       } else {
         ExternalServer::close_http_session();
         ExternalServer::serial_error_report(url_to_server, response_code);
@@ -288,7 +286,7 @@ void ExternalServer::profile_settings_init(String url) {
 }
 
 void ExternalServer::serial_error_report(String target_url, int response_code) {
-  Serial.print(F("path: "));
+  Serial.print(F("[HTTP_ERROR]: "));
   Serial.println(target_url);
   Serial.print(F("responseCode: "));
   Serial.println(ExternalServer::get_http_error(response_code));
@@ -319,6 +317,8 @@ String ExternalServer::get_web_server_address() {
 
 //TODO: добавить лог ответа, ошибок
 void ExternalServer::http_send_json(String json_string) {
+  Serial.print(F("[HTTP_PUT] "));
+  Serial.println(json_string);
   ExternalServer::http.PUT(json_string);
 }
 
@@ -327,6 +327,7 @@ void ExternalServer::close_http_session() {
 }
 
 int ExternalServer::http_get() {
+  Serial.println(F("[HTTP_GET]"));
   return ExternalServer::http.GET();
 }
 

@@ -200,6 +200,8 @@ void start_internal_server() {
       Serial.println(NetworkManager::current_pass);
       BoilerProfile::save_configuration();
       ExternalServer::got_new_wifi_settings = true;
+    } else {
+      Serial.println(F("SSID and password already set"));
     }
 
     request->send(200, "text/plain", "");
