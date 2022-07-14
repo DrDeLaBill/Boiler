@@ -170,10 +170,7 @@ void BoilerProfile::serial_print_boiler_configuration() {
   for (uint8_t i = 0; i < sizeof(BoilerProfile::boiler_configuration); i++) {
     if (3 < i && i < 4 + MAX_SIZE_SSID + MAX_SIZE_PASS || 
       i >= 4 + MAX_SIZE_SSID + MAX_SIZE_PASS + NUM_DAYS + NUM_PRESETS * NUM_PERIODS) {
-      char c = char(EEPROM.read(i));
-      if (c != '\n') {
-        Serial.print(c);
-      }
+      Serial.print(char(EEPROM.read(i)));
     } else {
       Serial.print(F("["));
       Serial.print(EEPROM.read(i));

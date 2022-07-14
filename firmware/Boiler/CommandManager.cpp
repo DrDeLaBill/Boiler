@@ -33,6 +33,7 @@ void CommandManager::_execute_command() {
     Serial.println(F("Setting SSID"));
     Serial.print(F("Old SSID: "));
     Serial.println(BoilerProfile::boiler_configuration.ssid);
+    ssid.trim();
     ssid.toCharArray(BoilerProfile::boiler_configuration.ssid, MAX_SIZE_SSID);
     Serial.print(F("Boiler SSID: "));
     Serial.println(ssid);
@@ -42,6 +43,7 @@ void CommandManager::_execute_command() {
     Serial.println(F("Setting SSID PASS"));
     Serial.print(F("Old SSID PASS: "));
     Serial.println(BoilerProfile::boiler_configuration.password);
+    ssid_pass.trim();
     ssid_pass.toCharArray(BoilerProfile::boiler_configuration.password, MAX_SIZE_PASS);
     Serial.print(F("Boiler SSID PASS: "));
     Serial.println(ssid_pass);
