@@ -51,6 +51,7 @@ class BoilerProfile
     static void check_temperature();
     static char *get_current_time(const char* fmt);
     static BoilerConfiguration get_boiler_configuration();
+    static bool is_same_boiler_mode(String string_boiler_mode);
 };
 
 #endif

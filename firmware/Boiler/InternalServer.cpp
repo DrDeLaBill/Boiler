@@ -562,7 +562,9 @@ void start_internal_server() {
     Serial.println(target_mode);
     Serial.print(F("Target temperature: "));
     Serial.println(target_temp);
-    if (target_mode == S_SETPOINTWATER) {
+    if (BoilerProfile::is_same_boiler_mode(target_mode)) {
+      BoilerProfile::set_target_temp(target_temp);
+    } else if (target_mode == S_SETPOINTWATER) {
       // работаем по теплоносителю
       BoilerProfile::set_boiler_mode(MODE_WATER);
     } else if (ErrorService::is_set_error(ERROR_RADIOSENSOR)) {
@@ -580,7 +582,6 @@ void start_internal_server() {
       // работает по термопрофилю
       BoilerProfile::set_boiler_mode(MODE_PROFILE);
     }
-    BoilerProfile::set_target_temp(target_temp);
   });
   server.addHandler(handler);
   

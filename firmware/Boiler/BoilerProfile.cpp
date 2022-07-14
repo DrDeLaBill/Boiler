@@ -237,6 +237,16 @@ void BoilerProfile::set_session_boiler_mode(uint8_t new_mode) {
   }
 }
 
+bool BoilerProfile::is_same_boiler_mode(String string_boiler_mode) {
+  if (BoilerProfile::session_boiler_mode == MODE_AIR && string_boiler_mode.equals(S_SETPOINT) ||
+      BoilerProfile::session_boiler_mode == MODE_WATER && string_boiler_mode.equals(S_SETPOINTWATER) ||
+      BoilerProfile::session_boiler_mode == MODE_PROFILE && string_boiler_mode.equals(S_PROFILE)
+  ) {
+    return true;
+  }
+  return false;
+}
+
 uint8_t BoilerProfile::get_profile_for_week_day() {
   return BoilerProfile::boiler_configuration.profile[ClockRTC::clock_get_day_of_week()];
 }
