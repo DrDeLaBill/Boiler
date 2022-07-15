@@ -130,37 +130,41 @@ void ExternalServer::check_settings() {
       String path_to_server = String(ExternalServer::get_web_server_address()) 
                             + "/boiler/" 
                             + String(BoilerProfile::get_boiler_id());
-      DynamicJsonDocument doc(150);
-      
       // отправляем текущий статус котла
       String url_to_server = path_to_server + "/status";
       ExternalServer::start_http(url_to_server);
-      // ExternalServer::profile_settings_init(url_to_server);
-      doc["temp"] = TemperatureSensor::get_current_temperature();
-      doc["target_temp"] = BoilerProfile::get_target_temp();
+      String message = "{\n";
       uint8_t num_preset = BoilerProfile::get_profile_for_week_day();
-      doc["current_profile"] = DisplayManager::presets[num_preset];
-      if (BoilerProfile::is_set_session_boiler_mode(MODE_AIR))
-        doc["current_mode"] = String(S_SETPOINT);
-      else if (BoilerProfile::is_set_session_boiler_mode(MODE_PROFILE))
-        doc["current_mode"] = String(S_PROFILE);
-      else if (BoilerProfile::is_set_session_boiler_mode(MODE_WATER))
-        doc["current_mode"] = String(S_SETPOINTWATER);
-      if (ErrorService::errors_list[0] == 0) {
-        doc["errors"][0] = String(ERROR_NOERROR);
-      } else {
-        for(int i = 0; i < ERRORS_COUNT; i++) 
-        {
-          doc["errors"][i] = String(ErrorService::errors_list[i]);
+      // ExternalServer::profile_settings_init(url_to_server);
+      message += " \"temp\": " + String(TemperatureSensor::get_current_temperature()) 
+              + ",\n \"target_temp\": " + String(BoilerProfile::get_target_temp())
+              + ",\n \"current_profile\": \"" + DisplayManager::presets[num_preset] + "\",\n";
+      message += " \"mode\": \"";
+      if (BoilerProfile::is_set_session_boiler_mode(MODE_AIR)) {
+        message += String(S_SETPOINT);
+      } else if (BoilerProfile::is_set_session_boiler_mode(MODE_PROFILE)) {
+        message += String(S_PROFILE);
+      } else if (BoilerProfile::is_set_session_boiler_mode(MODE_WATER)) {
+        message += String(S_SETPOINTWATER);
+      }
+      message += "\",\n \"errors\": [";
+      for(int i = 0; i < ERRORS_COUNT; i++) 
+      {
+        if (ErrorService::errors_list[i] == 0) {
+          break;
+        }
+        message = String(ErrorService::errors_list[i]);
+        if (i < ERRORS_COUNT - 1 && ErrorService::errors_list[i] != 0) {
+          message += ",";
         }
       }
-      String send_json = "";
-      serializeJson(doc, send_json);
-      ExternalServer::http_send_json(send_json);
+      message += "]\n}";
+      ExternalServer::http_send_json(message);
+      Serial.println(message);
       ExternalServer::close_http_session();
-      doc.clear();
   
       // проверяем есть ли новые настройки
+      DynamicJsonDocument doc(150);
       url_to_server = path_to_server + "/changed_by_client";
       ExternalServer::profile_settings_init(url_to_server);
       response_code = ExternalServer::http_get();
@@ -169,36 +173,57 @@ void ExternalServer::check_settings() {
         deserializeJson(doc, ExternalServer::http_get_string());
         ExternalServer::close_http_session();
         // проверяем обновления по всем настройкам
-        if (doc["settings"] == true){
+        if (doc["mode"]){
           // есть изменения в режиме работы
-          
-          url_to_server = path_to_server + "/settings";
+          url_to_server = path_to_server + "/mode";
           ExternalServer::profile_settings_init(url_to_server);
           int response_code = ExternalServer::http_get();
-            if (response_code > 0){
-              DynamicJsonDocument sets(100);
-              deserializeJson(sets,ExternalServer::http_get_string());
-              ExternalServer::close_http_session();
-              
-              if (sets["mode"] == S_SETPOINT){
-                // работаем по воздуху
-                BoilerProfile::set_boiler_mode(MODE_AIR);
-              } else if (sets["mode"] == S_SETPOINTWATER){
-                // работаем по теплоносителю
-                BoilerProfile::set_boiler_mode(MODE_WATER);
-              } else if (sets["mode"] == S_PROFILE){
-                // работаем по термопрофилю
-                BoilerProfile::set_boiler_mode(MODE_PROFILE);
+          if (response_code > 0){
+            DynamicJsonDocument set_mode(50);
+            deserializeJson(set_mode, ExternalServer::http_get_string());
+            ExternalServer::close_http_session();
+
+            String target_mode = set_mode.as<String>();
+            if (target_mode == S_SETPOINTWATER){
+              // работаем по теплоносителю
+              BoilerProfile::set_boiler_mode(MODE_WATER);
+            }  else if (ErrorService::is_set_error(ERROR_RADIOSENSOR)) {
+              // Если отвален датчик работаем по теплоносителю
+              if (BoilerProfile::session_boiler_mode != MODE_WATER) {
+                BoilerProfile::session_boiler_mode = MODE_WATER;
+                BoilerProfile::session_target_temp_int = (uint8_t)TemperatureSensor::get_current_temp_water();
+                TemperatureSensor::set_current_temp_like_water_temp();
               }
-              uint8_t need_temp = sets["target_temp"];
-              if (!(need_temp >= WATER_TEMP_MIN && need_temp <= WATER_TEMP_MAX)) {
-                need_temp = WATER_TEMP_MIN;
-              }
-              BoilerProfile::set_target_temp(need_temp);
-              BoilerProfile::save_configuration();
-            } else {
-              ExternalServer::serial_error_report(url_to_server, response_code);
+            } else if (target_mode == S_SETPOINT){
+              // работаем по воздуху
+              BoilerProfile::set_boiler_mode(MODE_AIR);
+            }  else if (target_mode == S_PROFILE){
+              // работаем по термопрофилю
+              BoilerProfile::set_boiler_mode(MODE_PROFILE);
             }
+            BoilerProfile::save_configuration();
+          } else {
+            ExternalServer::serial_error_report(url_to_server, response_code);
+          }
+        }
+        
+        if (doc["target_temp"]) {
+          url_to_server = path_to_server + "/target_temp";
+          ExternalServer::profile_settings_init(url_to_server);
+          int response_code = ExternalServer::http_get();
+          if (response_code > 0){
+            DynamicJsonDocument set_temp(100);
+            deserializeJson(set_temp, ExternalServer::http_get_string());
+            ExternalServer::close_http_session();
+            int target_temp = set_temp.as<int>();
+            if (!(target_temp >= WATER_TEMP_MIN && target_temp <= WATER_TEMP_MAX)) {
+              target_temp = WATER_TEMP_MIN;
+            }
+            BoilerProfile::set_target_temp(target_temp);
+            BoilerProfile::save_configuration();
+          } else {
+            ExternalServer::serial_error_report(url_to_server, response_code);
+          }
         }
   
         if (doc["profile_weekdays"] == true){

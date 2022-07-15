@@ -389,12 +389,19 @@ void start_internal_server() {
     String target_mode = json.as<String>();
     Serial.print(F("target_mode: "));
     Serial.println(target_mode);
-    if (target_mode == S_SETPOINT) {
-      // работаем по воздуху
-      BoilerProfile::set_boiler_mode(MODE_AIR);
-    } else if (target_mode == S_SETPOINTWATER) {
+    if (target_mode == S_SETPOINTWATER) {
       // работаем по теплоносителю
       BoilerProfile::set_boiler_mode(MODE_WATER);
+    } else if (ErrorService::is_set_error(ERROR_RADIOSENSOR)) {
+      // Если отвален датчик работаем по теплоносителю
+      if (BoilerProfile::session_boiler_mode != MODE_WATER) {
+        BoilerProfile::session_boiler_mode = MODE_WATER;
+        BoilerProfile::session_target_temp_int = (uint8_t)TemperatureSensor::get_current_temp_water();
+        TemperatureSensor::set_current_temp_like_water_temp();
+      }
+    } else if (target_mode == S_SETPOINT) {
+      // работаем по воздуху
+      BoilerProfile::set_boiler_mode(MODE_AIR);
     } else if (target_mode == S_PROFILE) {
       // работает по термопрофилю
       BoilerProfile::set_boiler_mode(MODE_PROFILE);
@@ -583,7 +590,6 @@ void start_internal_server() {
         BoilerProfile::session_target_temp_int = (uint8_t)TemperatureSensor::get_current_temp_water();
         TemperatureSensor::set_current_temp_like_water_temp();
       }
-      return;
     } else if (target_mode == S_SETPOINT) {
       // работаем по воздуху
       BoilerProfile::set_boiler_mode(MODE_AIR);
