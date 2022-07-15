@@ -302,7 +302,21 @@ void start_internal_server() {
     } else {
       message += "true";
     }
-    message += ",\n\"temp\": " + String(TemperatureSensor::current_temp) + ",\n\"current_profile\": \"";
+
+    message += ",\n \"mode\": \"";
+
+    if (BoilerProfile::session_boiler_mode == MODE_WATER) {
+      // режим работы по теплоносителю
+      message += S_SETPOINTWATER;
+    } else if (BoilerProfile::session_boiler_mode == MODE_PROFILE) {
+      // режим работы по термопрофилю
+      message += S_PROFILE;
+    } else if (BoilerProfile::session_boiler_mode == MODE_AIR) {
+      // режим работы уставка по воздуху
+      message += S_SETPOINT;
+    }
+    
+    message += "\",\n \"target_temp\":" + String(BoilerProfile::get_target_temp()) + ",\n \"temp\": " + String(TemperatureSensor::current_temp) + ",\n\"current_profile\": \"";
 
     switch(BoilerProfile::boiler_configuration.profile[ClockRTC::clock_get_day_of_week()]) {
       case PRESET_WEEKDAY:
@@ -334,9 +348,8 @@ void start_internal_server() {
     }
 
     message += "]\n}";
-        
-    request->send(200, "text/plain", message);
     
+    request->send(200, "text/plain", message);
   });
 
   url_path = "/client/" + String(BoilerProfile::boiler_configuration.boiler_id) + "/mode";
@@ -353,19 +366,15 @@ void start_internal_server() {
     if (BoilerProfile::session_boiler_mode == MODE_WATER) {
       // режим работы по теплоносителю
       message += S_SETPOINTWATER;
-      message += "\"";
-      request->send(200, "text/plain", message);
     } else if (BoilerProfile::session_boiler_mode == MODE_PROFILE) {
       // режим работы по термопрофилю
       message += S_PROFILE;
-      message += "\"";
-      request->send(200, "text/plain", message);
     } else if (BoilerProfile::session_boiler_mode == MODE_AIR) {
       // режим работы уставка по воздуху
       message += S_SETPOINT;
-      message += "\"";
-      request->send(200, "text/plain", message);
     }
+    message += "\"";
+    request->send(200, "text/plain", message);
   });
 
   handler = new AsyncCallbackJsonWebHandler(url_path.c_str(), [](AsyncWebServerRequest *request, JsonVariant &json) {
