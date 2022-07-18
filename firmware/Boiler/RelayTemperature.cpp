@@ -7,6 +7,7 @@ uint32_t RelayTemperature::ssr_broken_last_time = 0;
 RelayTemperature::RelayTemperature() {
 	pinMode(SSR_TEMP_PIN, INPUT);
 	// загружаем "дефолтные" значения в массив
+  RelayTemperature::ssr_broken_last_time = millis();
 	for (uint8_t i = 0; i < SSR_TEMP_BUF_SIZE; i++){
     uint16_t analog_value = analogRead(SSR_TEMP_PIN);
     RelayTemperature::ssr_temp_buf[i] = analog_value;
@@ -17,7 +18,7 @@ RelayTemperature::RelayTemperature() {
 }
 
 
-uint8_t RelayTemperature::check_ssr_temp(){
+void RelayTemperature::check_ssr_temp(){
 	// вычислим скользящее среднее по аналоговому значению напряжения.
 	RelayTemperature::ssr_temp_summ -= RelayTemperature::ssr_temp_buf[0];
 
@@ -33,29 +34,26 @@ uint8_t RelayTemperature::check_ssr_temp(){
 //  Serial.println(current_ssr_temp);
   int8_t ssr_temp_celc = (SSR_AN_VAL_0 - current_ssr_temp) / SSR_TEMP_KOEF;
 
-  // TODO: написать отключение нагревателя при превышении температуры ТТР
-  if (ssr_temp_celc >= SSR_TEMP_UPPER_LIM && ErrorService::is_set_error(ERROR_SSRBROKEN)){
-    Serial.println("SSR is dangerously hot.");
-    RelayTemperature::ssr_broken_last_time = millis();
-  } else if (ssr_temp_celc <= SSR_TEMP_LOWER_LIM && ErrorService::is_set_error(ERROR_SSRBROKEN)){
-    ErrorService::remove_error(ERROR_SSRBROKEN);
-  } else if (ssr_temp_celc >= SSR_TEMP_UPPER_LIM && ErrorService::is_set_error(ERROR_SSRBROKEN)){
-    // если за некоторое время ТТР не остыли, то значит все плохо. Выключаем расцепитель. 
-    if (millis() - RelayTemperature::ssr_broken_last_time >= SSR_BROKEN_TIMEOUT){
-      Serial.println("Error! SSR overheated!");
-      RelayTemperature::ssr_broken_last_time == millis();
-      ErrorService::add_error(ERROR_SSRBROKEN);
-      DisplayManager::set_page_name(pageError);
-      digitalWrite(CRASH_OUT_PIN, HIGH);
-    }
-  }
-
   static uint32_t last_time_ssr_temp = 0;
   if (millis() - last_time_ssr_temp >= 5000){
     last_time_ssr_temp = millis();
     Serial.print("SSR temperature: ");
     Serial.print(ssr_temp_celc);
     Serial.println("*C");
+    if (ssr_temp_celc >= SSR_TEMP_UPPER_LIM) {
+      Serial.println("Error! SSR overheated!");
+    }
+  }
+
+  // TODO: написать отключение нагревателя при превышении температуры ТТР
+  if (ssr_temp_celc <= SSR_TEMP_LOWER_LIM) {
+    ErrorService::remove_error(ERROR_SSRBROKEN);
+    RelayTemperature::ssr_broken_last_time = millis();
+  } else if (ssr_temp_celc >= SSR_TEMP_UPPER_LIM && millis() - RelayTemperature::ssr_broken_last_time >= SSR_BROKEN_TIMEOUT){
+    RelayTemperature::ssr_broken_last_time == millis();
+    ErrorService::add_error(ERROR_SSRBROKEN);
+    DisplayManager::set_page_name(pageError);
+    digitalWrite(CRASH_OUT_PIN, HIGH);
   }
 }
 

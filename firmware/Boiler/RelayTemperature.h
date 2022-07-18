@@ -27,7 +27,7 @@ class RelayTemperature
     static uint32_t ssr_broken_last_time;
     
     RelayTemperature();
-    static uint8_t check_ssr_temp();
+    static void check_ssr_temp();
     static bool is_heating_on();
 };
 
