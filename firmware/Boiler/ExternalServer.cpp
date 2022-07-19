@@ -120,10 +120,10 @@ void ExternalServer::check_settings() {
   }
   
   // Проверяем подключение к интернету.
-  if (!NetworkManager::is_wifi_connected()){
+  if (millis() - ExternalServer::last_time_http < WEB_REQUESTS_PERIOD){
     return;
   }
-  if (millis() - ExternalServer::last_time_http > WEB_REQUESTS_PERIOD){
+  if (!NetworkManager::is_wifi_connected()){
     return;
   }
   
@@ -134,6 +134,7 @@ void ExternalServer::check_settings() {
     ExternalServer::send_settings_to_server();
   }
   if (ExternalServer::connected_to_server != CONNECTED) {
+    NetworkManager::connect_to_wifi(600);
     return;
   }
   

@@ -18,13 +18,13 @@ NetworkManager::NetworkManager() {
   }
 }
 
-void NetworkManager::connect_to_wifi(){
+void NetworkManager::connect_to_wifi(uint16_t connect_timeout){
   if (NetworkManager::current_ssid.length() != 0){
     WiFi.begin(NetworkManager::current_ssid.c_str(), NetworkManager::current_pass.c_str());
 
     uint32_t last_time_wifi = millis();
      
-    while (WiFi.status() != WL_CONNECTED && millis() - last_time_wifi < WIFI_CONNECT_TIMEOUT){
+    while (WiFi.status() != WL_CONNECTED && millis() - last_time_wifi < connect_timeout){
       delay(1000);
       Serial.print(F("Connecting to WiFi.."));
       Serial.println(NetworkManager::current_ssid);

@@ -33,7 +33,7 @@ class NetworkManager
     static void check_new_settings();
     static String get_ssid();
     static String get_pass();
-    static void connect_to_wifi();
+    static void connect_to_wifi(uint16_t connect_timeout = WIFI_CONNECT_TIMEOUT);
     static void send_settings_to_server();
     static uint8_t get_wifi_status();
     static bool is_wifi_connected();
