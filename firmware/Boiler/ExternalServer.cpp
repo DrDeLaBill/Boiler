@@ -133,7 +133,7 @@ void ExternalServer::check_settings() {
   if (ExternalServer::get_new_wifi_settings() == SETS_NOT_SENDED){
     ExternalServer::send_settings_to_server();
   }
-  if (ExternalServer::connected_to_server != CONNECTED) {
+  if (!NetworkManager::is_wifi_connected()) {
     NetworkManager::connect_to_wifi(600);
     return;
   }
