@@ -38,7 +38,7 @@ class ExternalServer
     static int http_get();
     static String get_http_error(int response_code);
     static uint8_t get_connected_to_server();
-    static void http_send_json(String json_string);
+    static int http_send_json(String json_string);
 };
 
 #endif

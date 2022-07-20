@@ -35,7 +35,9 @@ void CommandManager::_execute_command() {
     Serial.println(BoilerProfile::boiler_configuration.ssid);
     ssid.trim();
     ssid.toCharArray(BoilerProfile::boiler_configuration.ssid, MAX_SIZE_SSID);
-    Serial.print(F("Boiler SSID: "));
+    NetworkManager::current_ssid = ssid;
+    ExternalServer::got_new_wifi_settings = true;
+    Serial.print(F("New SSID: "));
     Serial.println(ssid);
     BoilerProfile::save_configuration();
   } else if (command.equals("set_ssid_pass")) {
@@ -45,6 +47,8 @@ void CommandManager::_execute_command() {
     Serial.println(BoilerProfile::boiler_configuration.password);
     ssid_pass.trim();
     ssid_pass.toCharArray(BoilerProfile::boiler_configuration.password, MAX_SIZE_PASS);
+    NetworkManager::current_pass = ssid_pass;
+    ExternalServer::got_new_wifi_settings = true;
     Serial.print(F("Boiler SSID PASS: "));
     Serial.println(ssid_pass);
     BoilerProfile::save_configuration();

@@ -114,28 +114,24 @@ void ExternalServer::send_settings_to_server() {
 //TODO: сократить повторяющиеся части кода в функции (также для profile_settings_init())
 //TODO:  проверить, не перепутались ли функции при измении их на статические, к примеру при замене http_get_string() и http_get(), тк они очень похожи
 void ExternalServer::check_settings() {
-  if (ExternalServer::get_new_wifi_settings()) {
-    NetworkManager::connect_to_wifi();
-    ExternalServer::set_new_wifi_settings_flag(false);
-  }
-  
-  // Проверяем подключение к интернету.
+  // отправляем статус и запрашиваем настройки раз в минуту.
   if (millis() - ExternalServer::last_time_http < WEB_REQUESTS_PERIOD){
     return;
   }
-  if (!NetworkManager::is_wifi_connected()){
+  ExternalServer::last_time_http = millis();
+  // Проверяем подключение к интернету.
+  if (ExternalServer::got_new_wifi_settings){
+    NetworkManager::connect_to_wifi();
+    ExternalServer::got_new_wifi_settings = false;
     return;
   }
-  
-  // отправляем статус и запрашиваем настройки раз в минуту.
-  ExternalServer::last_time_http = millis();
+  if (!NetworkManager::is_wifi_connected()) {
+    Serial.println(F("No internet connection"));
+    return;
+  }
   int response_code;
   if (ExternalServer::get_new_wifi_settings() == SETS_NOT_SENDED){
     ExternalServer::send_settings_to_server();
-  }
-  if (!NetworkManager::is_wifi_connected()) {
-    NetworkManager::connect_to_wifi(600);
-    return;
   }
   
   String path_to_server = String(ExternalServer::get_web_server_address()) 
@@ -170,9 +166,20 @@ void ExternalServer::check_settings() {
     }
   }
   message += "]\n}";
-  ExternalServer::http_send_json(message);
+  response_code = ExternalServer::http_send_json(message);
   Serial.println(message);
   ExternalServer::close_http_session();
+  if (response_code > 0){
+      ExternalServer::connected_to_server = CONNECTED;
+  } else {
+    Serial.println(F("The server is unavailable"));
+    ExternalServer::connected_to_server = SETS_NOT_SENDED;
+    Serial.print(F("path: "));
+    Serial.println(url_to_server);
+    Serial.print(F("response_code: "));
+    Serial.println(ExternalServer::get_http_error(response_code));
+    return;
+  }
 
   // проверяем есть ли новые настройки
   DynamicJsonDocument doc(150);
@@ -352,10 +359,10 @@ String ExternalServer::get_web_server_address() {
 }
 
 //TODO: добавить лог ответа, ошибок
-void ExternalServer::http_send_json(String json_string) {
+int ExternalServer::http_send_json(String json_string) {
   Serial.print(F("[HTTP_PUT] "));
   Serial.println(json_string);
-  ExternalServer::http.PUT(json_string);
+  return ExternalServer::http.PUT(json_string);
 }
 
 void ExternalServer::close_http_session() {
